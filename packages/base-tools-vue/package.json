@@ -1,0 +1,59 @@
+{
+  "name": "@base-web-kits/base-tools-vue",
+  "version": "0.8.7",
+  "type": "module",
+  "sideEffects": false,
+  "description": "Independent Vue utilities package built from src/vue.",
+  "keywords": [
+    "base-tools",
+    "vue",
+    "utilities",
+    "thin-wrapper"
+  ],
+  "license": "MIT",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.ts",
+        "require": "./dist/index.d.ts",
+        "default": "./dist/index.d.ts"
+      },
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
+      },
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*"
+      ],
+      "index": [
+        "./dist/index.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "dependencies": {
+    "@vueuse/core": "^14.0.0"
+  },
+  "peerDependencies": {
+    "vue": ">=3.4"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  }
+}

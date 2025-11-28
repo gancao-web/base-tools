@@ -1,0 +1,59 @@
+{
+  "name": "@base-web-kits/base-tools-ts",
+  "version": "0.8.7",
+  "type": "module",
+  "sideEffects": false,
+  "description": "Independent TS utilities package built from src/ts.",
+  "keywords": [
+    "base-tools",
+    "ts",
+    "utilities",
+    "thin-wrapper"
+  ],
+  "license": "MIT",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.ts",
+        "require": "./dist/index.d.ts",
+        "default": "./dist/index.d.ts"
+      },
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
+      },
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*"
+      ],
+      "index": [
+        "./dist/index.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "dependencies": {
+    "lodash-es": "^4.17.21",
+    "@types/lodash-es": "^4.17.12",
+    "bignumber.js": "^9.1.2",
+    "dayjs": "^1.11.19"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "name": "@base-web-kits/base-tools",
+  "version": "0.8.7",
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "lint": "tsc --noEmit && eslint ./src --ext .ts,.js --fix && prettier --write .",
+    "lint:lint-staged": "tsc --noEmit && lint-staged",
+    "test": "vitest run",
+    "build": "npm run test && tsup && tsc -p tsconfig.build.json --emitDeclarationOnly && node scripts/copy-dists.mjs",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "publish:ts": "cd packages/base-tools-ts && npm publish --access public --registry https://registry.npmjs.org",
+    "publish:web": "cd packages/base-tools-web && npm publish --access public --registry https://registry.npmjs.org",
+    "publish:uni": "cd packages/base-tools-uni && npm publish --access public --registry https://registry.npmjs.org",
+    "publish:react": "cd packages/base-tools-react && npm publish --access public --registry https://registry.npmjs.org",
+    "publish:vue": "cd packages/base-tools-vue && npm publish --access public --registry https://registry.npmjs.org",
+    "publish:all": "npm run publish:ts && npm run publish:web && npm run publish:uni && npm run publish:react && npm run publish:vue"
+  },
+  "exports": {
+    "./ts": {
+      "types": "./dist/ts/index.d.ts",
+      "import": "./dist/ts/index.js"
+    },
+    "./ts/*": {
+      "types": "./dist/ts/*/index.d.ts",
+      "import": "./dist/ts/index.js"
+    },
+    "./uni": {
+      "types": "./dist/uni/index.d.ts",
+      "import": "./dist/uni/index.js"
+    },
+    "./uni/*": {
+      "types": "./dist/uni/*/index.d.ts",
+      "import": "./dist/uni/index.js"
+    },
+    "./web": {
+      "types": "./dist/web/index.d.ts",
+      "import": "./dist/web/index.js"
+    },
+    "./web/*": {
+      "types": "./dist/web/*/index.d.ts",
+      "import": "./dist/web/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    },
+    "./react/*": {
+      "types": "./dist/react/*/index.d.ts",
+      "import": "./dist/react/index.js"
+    },
+    "./vue": {
+      "types": "./dist/vue/index.d.ts",
+      "import": "./dist/vue/index.js"
+    },
+    "./vue/*": {
+      "types": "./dist/vue/*/index.d.ts",
+      "import": "./dist/vue/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^17.6.1",
+    "@commitlint/config-conventional": "^17.6.1",
+    "@dcloudio/types": "^3.4.28",
+    "@types/lodash": "^4.14.202",
+    "@types/node": "^24.10.0",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^16.2.6",
+    "miniprogram-api-typings": "^4.1.0",
+    "prettier": "^3.6.2",
+    "react": "^18.3.1",
+    "tsup": "^8.5.0",
+    "typedoc": "^0.28.14",
+    "typedoc-plugin-markdown": "^4.9.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.2",
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-search": "1.0.4-alpha.22",
+    "vitest": "^1.6.0",
+    "vue": "^3.4.35"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.json": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "@types/lodash-es": "^4.17.7",
+    "@vueuse/core": "^14.0.0",
+    "ahooks": "^3.9.6",
+    "axios": "^1.13.1",
+    "bignumber.js": "^9.1.2",
+    "dayjs": "^1.11.19",
+    "lodash-es": "^4.17.21"
+  },
+  "typesVersions": {
+    "*": {
+      "ts": [
+        "dist/ts/index.d.ts"
+      ],
+      "ts/*": [
+        "dist/ts/*/index.d.ts"
+      ],
+      "web": [
+        "dist/web/index.d.ts"
+      ],
+      "web/*": [
+        "dist/web/*/index.d.ts"
+      ],
+      "uni": [
+        "dist/uni/index.d.ts"
+      ],
+      "uni/*": [
+        "dist/uni/*/index.d.ts"
+      ],
+      "react": [
+        "dist/react/index.d.ts"
+      ],
+      "react/*": [
+        "dist/react/*/index.d.ts"
+      ],
+      "vue": [
+        "dist/vue/index.d.ts"
+      ],
+      "vue/*": [
+        "dist/vue/*/index.d.ts"
+      ]
+    }
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  }
+}

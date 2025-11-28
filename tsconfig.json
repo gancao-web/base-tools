@@ -1,0 +1,46 @@
+{
+  // TypeScript 编译器选项
+  "compilerOptions": {
+    // 生成的 JS 目标语法版本，ES2022 支持 class fields、顶层 await 等现代特性
+    "target": "ES2022",
+
+    // 提供浏览器环境的全局与 DOM API 类型
+    "lib": ["ES2022", "DOM"],
+
+    // 生成的模块系统，ESNext 代表使用原生 ESM（import/export）
+    "module": "ESNext",
+
+    // 模块解析策略，bundler 与现代打包器（Vite/RSPack）一致，优化包入口与导入解析
+    "moduleResolution": "bundler",
+
+    // 允许合成默认导入，解决某些库的默认导入问题
+    "allowSyntheticDefaultImports": true,
+
+    // JSX 转换：React 17+ 自动 JSX 运行时
+    "jsx": "react-jsx",
+
+    // 开启严格模式（推荐），提升类型安全
+    "strict": true,
+
+    // 跳过依赖库的类型检查，显著加快 tsc 检查速度
+    "skipLibCheck": true,
+
+    // 强制文件名大小写一致，避免跨平台大小写问题
+    "forceConsistentCasingInFileNames": true,
+
+    "types": [
+      // uni API 相关的 TypeScript 类型(如uni.showModal)，需要安装 @dcloudio/types
+      "@dcloudio/types",
+      // wx API 相关的 TypeScript 类型(如wx.requestSubscribeMessage)，需要安装 miniprogram-api-typings
+      "miniprogram-api-typings",
+      // node 相关的 TypeScript 类型(如NodeJS.Timeout,process.env.NODE_ENV)，需要安装 @types/node
+      "node"
+    ]
+  },
+
+  // 编译/类型检查包含的源码目录
+  "include": ["src"],
+
+  // 显式排除无需检查的目录
+  "exclude": ["node_modules", "dist"]
+}
