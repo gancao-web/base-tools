@@ -6,7 +6,7 @@ web前端团队常用工具库，包含`ts`、`web`、`react`、`vue`、`uni`模
 
 ## 安装
 
-用哪个模块就安装哪个,模块之间不会相互依赖
+按需安装即可,模块之间不相互依赖
 
 - `npm i @base-web-kits/base-tools-ts`
 - `npm i @base-web-kits/base-tools-web`
