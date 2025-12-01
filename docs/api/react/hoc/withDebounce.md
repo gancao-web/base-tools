@@ -1,10 +1,11 @@
 # withDebounce
+
 防抖 props HOC：在 props 频繁变化时，延迟传递到内部组件，降低渲染频率。
 
-## Example
+## 示例
 
 ```ts
-import { withDebounce } from '@base-web-kits/base-tools/react';
+import { withDebounce } from '@base-web-kits/base-tools-react';
 // 输入联动场景：防抖减少渲染
 const DebouncedSearch = withDebounce(300)(SearchBox);
 

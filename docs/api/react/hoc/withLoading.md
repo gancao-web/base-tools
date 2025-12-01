@@ -2,10 +2,10 @@
 
 加载占位 HOC：当 `props[prop]` 为真时展示 `fallback`，否则渲染组件。
 
-## Example
+## 示例
 
 ```tsx
-import { withLoading } from '@base-web-kits/base-tools/react';
+import { withLoading } from '@base-web-kits/base-tools-react';
 
 // 基础用法：通过 loading 控制骨架屏
 export default withLoading(<Skeleton />)(List);

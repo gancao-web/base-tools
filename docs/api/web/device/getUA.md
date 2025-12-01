@@ -1,9 +1,9 @@
 # getUA
+
 获取用户代理字符串（UA）
 
-## Example
+## 示例
 
 ```ts
-import { getUA } from '@base-web-kits/base-tools/web';
-
+import { getUA } from '@base-web-kits/base-tools-web';
 ```

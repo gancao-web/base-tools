@@ -2,10 +2,10 @@
 
 创建 dayjs 实例
 
-## Example
+## 示例
 
 ```ts
-import { toDayjs } from '@base-web-kits/base-tools/ts';
+import { toDayjs } from '@base-web-kits/base-tools-ts';
 const d = toDayjs('2021-01-01'); // dayjs 实例
 d.format('YYYY-MM-DD HH:mm:ss'); // "2025-12-10 11:33:16"
 d.valueOf(); // 毫秒时间戳，如 1765337596913

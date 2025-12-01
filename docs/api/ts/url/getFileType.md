@@ -1,9 +1,9 @@
 # getFileType
+
 根据文件后缀判断文件类型。
 
-## Example
+## 示例
 
 ```ts
-import { getFileType } from '@base-web-kits/base-tools/ts';
-
+import { getFileType } from '@base-web-kits/base-tools-ts';
 ```

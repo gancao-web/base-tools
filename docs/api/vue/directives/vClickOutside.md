@@ -1,9 +1,10 @@
 # vClickOutside
+
 点击在元素外部的事件
 
-## Example
+## 示例
 
 ```ts
-import { vClickOutside } from '@base-web-kits/base-tools/vue';
+import { vClickOutside } from '@base-web-kits/base-tools-vue';
 <div v-click-outside="onOutside" />
 ```

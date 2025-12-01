@@ -1,9 +1,9 @@
 # buildOssUrl
+
 构造oss处理地址
 
-## Example
+## 示例
 
 ```ts
-import { buildOssUrl } from '@base-web-kits/base-tools/ts';
-
+import { buildOssUrl } from '@base-web-kits/base-tools-ts';
 ```

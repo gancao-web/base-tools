@@ -1,9 +1,9 @@
 # getBrowserName
+
 获取浏览器名字
 
-## Example
+## 示例
 
 ```ts
-import { getBrowserName } from '@base-web-kits/base-tools/web';
-
+import { getBrowserName } from '@base-web-kits/base-tools-web';
 ```

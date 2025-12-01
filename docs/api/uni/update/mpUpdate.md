@@ -1,9 +1,7 @@
 # mpUpdate
 
-
-## Example
+## 示例
 
 ```ts
-import { mpUpdate } from '@base-web-kits/base-tools/uni';
-
+import { mpUpdate } from '@base-web-kits/base-tools-uni';
 ```

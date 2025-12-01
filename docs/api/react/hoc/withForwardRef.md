@@ -2,10 +2,10 @@
 
 转发 `ref` 的 HOC：将外部的 `ref` 传递到内部组件。
 
-## Example
+## 示例
 
 ```tsx
-import { withForwardRef } from '@base-web-kits/base-tools/react';
+import { withForwardRef } from '@base-web-kits/base-tools-react';
 
 // 将 ref 透传到原生 input
 const Input = React.forwardRef<HTMLInputElement, { value?: string }>((props, ref) => (

@@ -1,10 +1,11 @@
 # toMaskName
+
 姓名打星：
 
-## Example
+## 示例
 
 ```ts
-import { toMaskName } from '@base-web-kits/base-tools/ts';
-toMaskName('张三') // => '张*'
-toMaskName('王小明') // => '王*明'
+import { toMaskName } from '@base-web-kits/base-tools-ts';
+toMaskName('张三'); // => '张*'
+toMaskName('王小明'); // => '王*明'
 ```

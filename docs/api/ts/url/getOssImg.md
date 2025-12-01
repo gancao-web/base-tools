@@ -1,11 +1,12 @@
 # getOssImg
+
 oss图片处理
 
-## Example
+## 示例
 
 ```ts
-import { getOssImg } from '@base-web-kits/base-tools/ts';
-缩放: getOssImg('xx.jpg', { resize: { w: 100, h: 100 } })
+import { getOssImg } from '@base-web-kits/base-tools-ts';
+缩放: getOssImg('xx.jpg', { resize: { w: 100, h: 100 } });
 水印: getOssImg('xx.jpg', { watermark: { text: '水印' } });
 翻转: getOssImg('xx.jpg', { flip: 1 });
 裁剪: getOssImg('xx.jpg', { crop: { w: 100, h: 100 } });

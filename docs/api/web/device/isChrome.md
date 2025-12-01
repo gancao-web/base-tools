@@ -1,9 +1,9 @@
 # isChrome
+
 是否为 Chrome 浏览器
 
-## Example
+## 示例
 
 ```ts
-import { isChrome } from '@base-web-kits/base-tools/web';
-
+import { isChrome } from '@base-web-kits/base-tools-web';
 ```

@@ -1,9 +1,11 @@
 # toHome
-跳首页
 
-## Example
+跳转到应用首页
+
+## 示例
 
 ```ts
-import { toHome } from '@base-web-kits/base-tools/uni';
+import { toHome } from '@base-web-kits/base-tools-uni';
 
+toHome();
 ```

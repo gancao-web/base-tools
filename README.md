@@ -1,16 +1,33 @@
 # Base Tools
 
-web前端团队常用工具库，包含`ts`、`web`、`react`、`vue`、`uni`模块。
+Web前端团队常用工具库，包含`ts`、`web`、`react`、`vue`、`uni`模块。
+
+## 📖 在线文档
+
+[https://gancao-web.github.io/base-tools/](https://gancao-web.github.io/base-tools/)
+
+## 🚀 快速开始
 
 **安装**
 
-用哪个模块就安装哪个,模块之间不会相互依赖
+按需安装即可,模块之间不相互依赖
 
-- `npm i @base-web-kits/base-tools-ts`
-- `npm i @base-web-kits/base-tools-web`
-- `npm i @base-web-kits/base-tools-react`
-- `npm i @base-web-kits/base-tools-vue`
-- `npm i @base-web-kits/base-tools-uni`
+```js
+// 通用 TS 模块
+npm i @base-web-kits/base-tools-ts
+
+// Web 模块
+npm i @base-web-kits/base-tools-web
+
+// React 模块
+npm i @base-web-kits/base-tools-react
+
+// Vue 模块
+npm i @base-web-kits/base-tools-vue
+
+// Uni 模块
+npm i @base-web-kits/base-tools-uni
+```
 
 **快速使用**
 
