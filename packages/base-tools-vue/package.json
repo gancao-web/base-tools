@@ -1,7 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-vue",
-  "version": "0.8.7",
-  "type": "module",
+  "version": "0.8.8",
   "sideEffects": false,
   "description": "Independent Vue utilities package built from src/vue.",
   "keywords": [
@@ -16,19 +15,21 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": {
-        "import": "./dist/index.d.ts",
-        "require": "./dist/index.d.ts",
-        "default": "./dist/index.d.ts"
-      },
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.cjs"
-      },
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./index": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./index.js": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
