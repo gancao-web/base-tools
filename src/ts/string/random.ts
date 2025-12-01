@@ -2,9 +2,9 @@
  * 生成UUID
  * @returns UUID字符串
  * @example
- * const uuid = createUuid() // '7982fcfe-5721-4632-bede-6000885be57d'
+ * const uuid = createUUID() // '7982fcfe-5721-4632-bede-6000885be57d'
  */
-export function createUuid() {
+export function createUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     const r = (Math.random() * 16) | 0,
       v = c === 'x' ? r : (r & 0x3) | 0x8;

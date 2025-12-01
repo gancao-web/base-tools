@@ -1,10 +1,10 @@
 import type {
-  OssOption,
-  OssAudioOption,
-  OssHlsOption,
-  OssImgOption,
-  OssVideoOption,
-  OssWatermarkOption,
+  OSSOption,
+  OSSAudioOption,
+  OSSHlsOption,
+  OSSImgOption,
+  OSSVideoOption,
+  OSSWatermarkOption,
 } from './index.d';
 
 export * from './index.d';
@@ -16,27 +16,27 @@ export * from './index.d';
  * @param option 图片处理选项
  * @returns 处理后的图片URL（格式: `{src}?x-oss-process=image/xx`）
  * @example
- * 缩放: getOssImg('xx.jpg', { resize: { w: 100, h: 100 } })
- * 水印: getOssImg('xx.jpg', { watermark: { text: '水印' } });
- * 翻转: getOssImg('xx.jpg', { flip: 1 });
- * 裁剪: getOssImg('xx.jpg', { crop: { w: 100, h: 100 } });
- * 质量: getOssImg('xx.jpg', { quality: { q: 80 } });
- * 格式转换: getOssImg('xx.jpg', { format: 'jpg' });
- * 获取信息: getOssImg('xx.jpg', { info: true });
- * 自适应方向: getOssImg('xx.jpg', { 'auto-orient': 1 });
- * 内切圆: getOssImg('xx.jpg', { circle: { r: 100 } });
- * 索引切割: getOssImg('xx.jpg', { indexcrop: { x: 100 } });
- * 圆角: getOssImg('xx.jpg', { 'rounded-corners': { r: 10 } });
- * 模糊: getOssImg('xx.jpg', { blur: { r: 10, s: 10 } });
- * 旋转: getOssImg('xx.jpg', { rotate: 90 });
- * 渐进显示: getOssImg('xx.jpg', { interlace: 1 });
- * 主色调: getOssImg('xx.jpg', { 'average-hue': true });
- * 亮度: getOssImg('xx.jpg', { bright: 10 });
- * 锐化: getOssImg('xx.jpg', { sharpen: 100 });
- * 对比度: getOssImg('xx.jpg', { contrast: 100 });
+ * 缩放: getOSSImg('xx.jpg', { resize: { w: 100, h: 100 } })
+ * 水印: getOSSImg('xx.jpg', { watermark: { text: '水印' } });
+ * 翻转: getOSSImg('xx.jpg', { flip: 1 });
+ * 裁剪: getOSSImg('xx.jpg', { crop: { w: 100, h: 100 } });
+ * 质量: getOSSImg('xx.jpg', { quality: { q: 80 } });
+ * 格式转换: getOSSImg('xx.jpg', { format: 'jpg' });
+ * 获取信息: getOSSImg('xx.jpg', { info: true });
+ * 自适应方向: getOSSImg('xx.jpg', { 'auto-orient': 1 });
+ * 内切圆: getOSSImg('xx.jpg', { circle: { r: 100 } });
+ * 索引切割: getOSSImg('xx.jpg', { indexcrop: { x: 100 } });
+ * 圆角: getOSSImg('xx.jpg', { 'rounded-corners': { r: 10 } });
+ * 模糊: getOSSImg('xx.jpg', { blur: { r: 10, s: 10 } });
+ * 旋转: getOSSImg('xx.jpg', { rotate: 90 });
+ * 渐进显示: getOSSImg('xx.jpg', { interlace: 1 });
+ * 主色调: getOSSImg('xx.jpg', { 'average-hue': true });
+ * 亮度: getOSSImg('xx.jpg', { bright: 10 });
+ * 锐化: getOSSImg('xx.jpg', { sharpen: 100 });
+ * 对比度: getOSSImg('xx.jpg', { contrast: 100 });
  */
-export function getOssImg(src: string, option: OssImgOption) {
-  return buildOssUrl(src, 'image', option);
+export function getOSSImg(src: string, option: OSSImgOption) {
+  return buildOSSUrl(src, 'image', option);
 }
 
 /**
@@ -46,16 +46,16 @@ export function getOssImg(src: string, option: OssImgOption) {
  * @param option 视频处理选项
  * @returns 处理后的URL（格式: `{src}?x-oss-process=video/xx`）
  * @example
- * 视频转码: getOssVideo('xx.mp4', { convert: { format: 'mp4' } })
- * 转为动图: getOssVideo('xx.mp4', { animation: { format: 'gif' } })
- * 雪碧图: getOssVideo('xx.mp4', { sprite: { format: 'png' } })
- * 多帧截取: getOssVideo('xx.mp4', { snapshots: { count: 3 } })
- * 视频拼接: getOssVideo('xx.mp4', { concat: { list: 'a.mp4,b.mp4' } })
- * 信息查询: getOssVideo('xx.mp4', { info: true })
- * 组合操作: getOssVideo('xx.mp4', { convert: { format: 'mp4' }, snapshots: { count: 3 } })
+ * 视频转码: getOSSVideo('xx.mp4', { convert: { format: 'mp4' } })
+ * 转为动图: getOSSVideo('xx.mp4', { animation: { format: 'gif' } })
+ * 雪碧图: getOSSVideo('xx.mp4', { sprite: { format: 'png' } })
+ * 多帧截取: getOSSVideo('xx.mp4', { snapshots: { count: 3 } })
+ * 视频拼接: getOSSVideo('xx.mp4', { concat: { list: 'a.mp4,b.mp4' } })
+ * 信息查询: getOSSVideo('xx.mp4', { info: true })
+ * 组合操作: getOSSVideo('xx.mp4', { convert: { format: 'mp4' }, snapshots: { count: 3 } })
  */
-export function getOssVideo(src: string, option: OssVideoOption) {
-  return buildOssUrl(src, 'video', option);
+export function getOSSVideo(src: string, option: OSSVideoOption) {
+  return buildOSSUrl(src, 'video', option);
 }
 
 /**
@@ -65,12 +65,12 @@ export function getOssVideo(src: string, option: OssVideoOption) {
  * @param option 音频处理选项
  * @returns 处理后的URL（格式: `{src}?x-oss-process=audio/xx`）
  * @example
- * 音频转码: getOssAudio('xx.mp3', { 'convert': { format: 'mp3' } })
- * 音频拼接: getOssAudio('xx.mp3', { 'concat': { list: 'a.mp3,b.mp3' } })
- * 信息查询: getOssAudio('xx.mp3', { 'info': true })
+ * 音频转码: getOSSAudio('xx.mp3', { 'convert': { format: 'mp3' } })
+ * 音频拼接: getOSSAudio('xx.mp3', { 'concat': { list: 'a.mp3,b.mp3' } })
+ * 信息查询: getOSSAudio('xx.mp3', { 'info': true })
  */
-export function getOssAudio(src: string, option: OssAudioOption) {
-  return buildOssUrl(src, 'audio', option);
+export function getOSSAudio(src: string, option: OSSAudioOption) {
+  return buildOSSUrl(src, 'audio', option);
 }
 
 /**
@@ -80,11 +80,11 @@ export function getOssAudio(src: string, option: OssAudioOption) {
  * @param option HLS 选项（或布尔）
  * @returns 处理后的URL（格式: `{src}?x-oss-process=hls/xx`）
  * @example
- * 生成播放列表: getOssHls('xx.mp4', { 'm3u8': true })
- * 配置参数: getOssHls('xx.mp4', { 'm3u8': { playlist: 1, segtime: 6 } })
+ * 生成播放列表: getOSSHls('xx.mp4', { 'm3u8': true })
+ * 配置参数: getOSSHls('xx.mp4', { 'm3u8': { playlist: 1, segtime: 6 } })
  */
-export function getOssHls(src: string, option: OssHlsOption) {
-  return buildOssUrl(src, 'hls', option);
+export function getOSSHls(src: string, option: OSSHlsOption) {
+  return buildOSSUrl(src, 'hls', option);
 }
 
 /**
@@ -94,7 +94,7 @@ export function getOssHls(src: string, option: OssHlsOption) {
  * @param option oss处理选项
  * @returns 处理后的URL（格式: `{src}?x-oss-process={type}/{segs.join('/')}`）
  */
-export function buildOssUrl(src: string, type: string, option: OssOption) {
+export function buildOSSUrl(src: string, type: string, option: OSSOption) {
   if (!src || !option) return src;
   if (src.startsWith('blob:')) return src;
   if (src.includes('.svg')) return src;
@@ -103,7 +103,7 @@ export function buildOssUrl(src: string, type: string, option: OssOption) {
 
   // 遍历选项,构造处理参数
   for (const [k, v] of Object.entries(option)) {
-    const seg = k === 'watermark' ? getWatermark(v as OssWatermarkOption) : getOssSegs(k, v);
+    const seg = k === 'watermark' ? getWatermark(v as OSSWatermarkOption) : getOSSSegs(k, v);
     if (seg) segs.push(seg);
   }
 
@@ -123,7 +123,7 @@ export function buildOssUrl(src: string, type: string, option: OssOption) {
  * @returns `string`返回格式为`format,jpg`
  * @returns `true`返回格式为`info`, `false`返回空字符串
  */
-function getOssSegs(type: string, option?: Record<string, unknown> | number | string | boolean) {
+function getOSSSegs(type: string, option?: Record<string, unknown> | number | string | boolean) {
   if (!option && option !== 0) return '';
 
   if (option === true) return type;
@@ -141,12 +141,12 @@ function getOssSegs(type: string, option?: Record<string, unknown> | number | st
  * 图片水印 (文本和图片已Base64编码)
  * @returns 格式: `watermark,text_xxx`
  */
-function getWatermark(w?: OssWatermarkOption) {
+function getWatermark(w?: OSSWatermarkOption) {
   if (!w) return '';
   if (w.image) w.image = toBase64Url(w.image);
   if (w.text) w.text = toBase64Url(w.text);
   if (w.type) w.type = toBase64Url(w.type);
-  return getOssSegs('watermark', w);
+  return getOSSSegs('watermark', w);
 }
 
 /**

@@ -1,11 +1,11 @@
 // 兼容oss后期添加的参数
 type OtherOption = Record<string, string | number | boolean | undefined>;
 
-export type OssGravity = 'nw' | 'north' | 'ne' | 'west' | 'center' | 'east' | 'sw' | 'south' | 'se';
+export type OSSGravity = 'nw' | 'north' | 'ne' | 'west' | 'center' | 'east' | 'sw' | 'south' | 'se';
 
-export type OssFormat = 'png' | 'jpg' | 'jpeg' | 'webp' | 'bmp' | 'gif' | 'tiff' | 'heic' | 'avif';
+export type OSSFormat = 'png' | 'jpg' | 'jpeg' | 'webp' | 'bmp' | 'gif' | 'tiff' | 'heic' | 'avif';
 
-export type OssResizeOption = {
+export type OSSResizeOption = {
   p?: number;
   w?: number;
   h?: number;
@@ -16,34 +16,34 @@ export type OssResizeOption = {
   color?: string;
 } & OtherOption;
 
-export type OssCropOption = {
+export type OSSCropOption = {
   w?: number;
   h?: number;
   x?: number;
   y?: number;
-  g?: OssGravity;
+  g?: OSSGravity;
   p?: number;
 } & OtherOption;
 
-export type OssIndexCropOption = {
+export type OSSIndexCropOption = {
   x?: number;
   y?: number;
   i?: number;
 } & OtherOption;
 
-export type OssQualityOption = {
+export type OSSQualityOption = {
   q?: number;
   Q?: number;
 } & OtherOption;
 
-export type OssWatermarkOption = {
+export type OSSWatermarkOption = {
   type?: string;
   text?: string;
   size?: number;
   color?: string;
   shadow?: number;
   t?: number;
-  g?: OssGravity;
+  g?: OSSGravity;
   x?: number;
   y?: number;
   voffset?: number;
@@ -54,34 +54,34 @@ export type OssWatermarkOption = {
   P?: number;
 } & OtherOption;
 
-export type OssBlurOption = {
+export type OSSBlurOption = {
   r: number;
   s: number;
   g?: 'face' | 'faces';
   p?: number;
 } & OtherOption;
 
-export type OssRoundedCornersOption = {
+export type OSSRoundedCornersOption = {
   r: number;
 } & OtherOption;
 
-export type OssCircleOption = {
+export type OSSCircleOption = {
   r: number;
 } & OtherOption;
 
-export type OssImgOption = {
-  resize?: OssResizeOption;
-  watermark?: OssWatermarkOption;
+export type OSSImgOption = {
+  resize?: OSSResizeOption;
+  watermark?: OSSWatermarkOption;
   flip?: 0 | 1 | 2;
-  crop?: OssCropOption;
-  quality?: OssQualityOption;
-  format?: OssFormat;
+  crop?: OSSCropOption;
+  quality?: OSSQualityOption;
+  format?: OSSFormat;
   info?: boolean;
   'auto-orient'?: 0 | 1;
-  circle?: OssCircleOption;
-  indexcrop?: OssIndexCropOption;
-  'rounded-corners'?: OssRoundedCornersOption;
-  blur?: OssBlurOption;
+  circle?: OSSCircleOption;
+  indexcrop?: OSSIndexCropOption;
+  'rounded-corners'?: OSSRoundedCornersOption;
+  blur?: OSSBlurOption;
   rotate?: number;
   interlace?: 0 | 1;
   'average-hue'?: boolean;
@@ -92,7 +92,7 @@ export type OssImgOption = {
   [action: string]: number | string | boolean | Record<string, unknown> | undefined;
 };
 
-export type OssVideoOption = {
+export type OSSVideoOption = {
   convert?: Record<string, unknown>;
   animation?: Record<string, unknown>;
   sprite?: Record<string, unknown>;
@@ -103,7 +103,7 @@ export type OssVideoOption = {
   [action: string]: number | string | boolean | Record<string, unknown> | undefined;
 };
 
-export type OssAudioOption = {
+export type OSSAudioOption = {
   convert?: Record<string, unknown>;
   concat?: Record<string, unknown>;
   info?: boolean;
@@ -111,10 +111,10 @@ export type OssAudioOption = {
   [action: string]: number | string | boolean | Record<string, unknown> | undefined;
 };
 
-export type OssHlsOption = {
+export type OSSHlsOption = {
   m3u8?: boolean | Record<string, unknown>;
 } & {
   [action: string]: number | string | boolean | Record<string, unknown> | undefined;
 };
 
-export type OssOption = OssImgOption | OssVideoOption | OssAudioOption | OssHlsOption;
+export type OSSOption = OSSImgOption | OSSVideoOption | OSSAudioOption | OSSHlsOption;
