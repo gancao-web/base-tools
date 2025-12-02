@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-ts",
-  "version": "0.8.11",
+  "version": "0.8.12",
   "sideEffects": false,
   "description": "Independent TS utilities package built from src/ts.",
   "keywords": [
@@ -10,18 +10,9 @@
     "thin-wrapper"
   ],
   "license": "MIT",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.js"
-    },
-    "./package.json": "./package.json"
-  },
+  "main": "./index.cjs",
+  "module": "./index.js",
+  "types": "./index.d.ts",
   "typesVersions": {
     "*": {
       "*": [
