@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools",
-  "version": "0.8.9",
+  "version": "0.8.11",
   "type": "module",
   "sideEffects": false,
   "scripts": {

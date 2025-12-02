@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-uni",
-  "version": "0.8.9",
+  "version": "0.8.11",
   "sideEffects": false,
   "description": "Independent Uni-app utilities package built from src/uni.",
   "keywords": [
@@ -10,7 +10,7 @@
     "thin-wrapper"
   ],
   "license": "MIT",
-  "main": "./index.js",
+  "main": "./index.cjs",
   "module": "./index.js",
   "types": "./index.d.ts",
   "exports": {
@@ -32,21 +32,12 @@
       "require": "./index.cjs",
       "default": "./index.js"
     },
-    "./dist/*": {
-      "types": "./dist/*.d.ts",
-      "import": "./dist/*.js",
-      "require": "./dist/*.cjs",
-      "default": "./dist/*.js"
-    },
     "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "./dist/*"
-      ],
       "index": [
-        "./dist/index.d.ts"
+        "./index.d.ts"
       ]
     }
   },

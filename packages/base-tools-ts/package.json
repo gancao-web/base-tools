@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-ts",
-  "version": "0.8.9",
+  "version": "0.8.11",
   "sideEffects": false,
   "description": "Independent TS utilities package built from src/ts.",
   "keywords": [
@@ -10,33 +10,15 @@
     "thin-wrapper"
   ],
   "license": "MIT",
-  "main": "./index.js",
-  "module": "./index.js",
-  "types": "./index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "import": "./index.js",
-      "require": "./index.cjs",
-      "default": "./index.js"
-    },
-    "./index": {
-      "types": "./index.d.ts",
-      "import": "./index.js",
-      "require": "./index.cjs",
-      "default": "./index.js"
-    },
-    "./index.js": {
-      "types": "./index.d.ts",
-      "import": "./index.js",
-      "require": "./index.cjs",
-      "default": "./index.js"
-    },
-    "./dist/*": {
-      "types": "./dist/*.d.ts",
-      "import": "./dist/*.js",
-      "require": "./dist/*.cjs",
-      "default": "./dist/*.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -52,6 +34,9 @@
   },
   "files": [
     "dist",
+    "index.d.ts",
+    "index.js",
+    "index.cjs",
     "README.md"
   ],
   "dependencies": {
