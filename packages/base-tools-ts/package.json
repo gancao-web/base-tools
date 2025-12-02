@@ -34,7 +34,8 @@
     "lodash-es": "^4.17.21",
     "@types/lodash-es": "^4.17.12",
     "bignumber.js": "^9.1.2",
-    "dayjs": "^1.11.19"
+    "dayjs": "^1.11.19",
+    "mitt": "^3.0.1"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
