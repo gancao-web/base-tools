@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5 测试项目 - Base Tools</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 10px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .result {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #f5f5f5;
+        border-radius: 4px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>HTML5 测试项目 - Base Tools</h1>
+
+      <div class="card">
+        <h2>TS 工具测试</h2>
+        <button id="testEventBus">测试 EventBus</button>
+        <button id="testToDayjs">测试 toDayjs</button>
+        <button id="testLodash">测试 Lodash 方法</button>
+        <div id="tsResult" class="result">点击按钮测试 TS 工具...</div>
+      </div>
+
+      <div class="card">
+        <h2>Web 工具测试</h2>
+        <button id="testStorage">测试 Storage</button>
+        <button id="testDevice">测试 Device</button>
+        <div id="webResult" class="result">点击按钮测试 Web 工具...</div>
+      </div>
+    </div>
+
+    <!-- 使用CDN引入UMD格式的工具库 -->
+    <script src="https://cdn.jsdelivr.net/npm/@base-web-kits/base-tools-ts/dist/base-tools-ts.umd.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@base-web-kits/base-tools-web/dist/base-tools-web.umd.global.js"></script>
+
+    <script>
+      // 获取DOM元素
+      const tsResult = document.getElementById('tsResult');
+      const webResult = document.getElementById('webResult');
+
+      // 测试EventBus
+      function testEventBus() {
+        try {
+          const { EventBus } = baseToolsTS;
+          const eventBus = new EventBus();
+
+          let received = false;
+          eventBus.on('test', (data) => {
+            received = true;
+            tsResult.textContent = `EventBus 测试成功! 收到数据: ${data}`;
+            tsResult.style.color = '#4CAF50';
+          });
+
+          eventBus.emit('test', 'Hello from EventBus!');
+
+          // 设置超时检查
+          setTimeout(() => {
+            if (!received) {
+              tsResult.textContent = '❌ EventBus测试失败';
+              tsResult.style.color = '#F44336';
+            }
+          }, 100);
+        } catch (error) {
+          tsResult.textContent = `❌ EventBus测试出错: ${error.message}`;
+          tsResult.style.color = '#F44336';
+        }
+      }
+
+      // 测试Storage
+      function testStorage() {
+        try {
+          const { setLocalStorage, getLocalStorage, removeLocalStorage } = baseToolsWeb;
+          const testData = { id: 1, name: '测试数据', timestamp: Date.now() };
+
+          // 设置值
+          setLocalStorage('testKey', testData);
+
+          // 获取值
+          const retrievedData = getLocalStorage('testKey');
+
+          // 清理
+          removeLocalStorage('testKey');
+
+          webResult.textContent = `Storage 测试成功! 存储并查询数据: ${JSON.stringify(retrievedData)}`;
+          webResult.style.color = '#4CAF50';
+        } catch (error) {
+          webResult.textContent = `❌ Storage测试出错: ${error.message}`;
+          webResult.style.color = '#F44336';
+        }
+      }
+
+      // 测试Device
+      function testDevice() {
+        try {
+          const { isMobile } = baseToolsWeb;
+
+          webResult.textContent = `Device 测试成功! 当前设备是${isMobile() ? '移动' : '桌面'}设备`;
+          webResult.style.color = '#4CAF50';
+        } catch (error) {
+          webResult.textContent = `❌ Device测试出错: ${error.message}`;
+          webResult.style.color = '#F44336';
+        }
+      }
+
+      // 测试 toDayjs
+      function testToDayjs() {
+        try {
+          const { toDayjs } = baseToolsTS;
+          const now = new Date();
+          const dayjsObj = toDayjs(now);
+
+          tsResult.textContent = `toDayjs 测试成功! 当前日期: ${dayjsObj.format('YYYY-MM-DD HH:mm:ss')}`;
+          tsResult.style.color = '#4CAF50';
+        } catch (error) {
+          tsResult.textContent = `❌ toDayjs测试出错: ${error.message}`;
+          tsResult.style.color = '#F44336';
+        }
+      }
+
+      // 测试 Lodash 方法
+      function testLodash() {
+        try {
+          const { findLastIndex } = baseToolsTS;
+
+          const testArray = [1, 2, 3, 4, 2];
+          const lastIndex = findLastIndex(testArray, (x) => x === 2);
+
+          tsResult.textContent = `Lodash 测试成功! findLastIndex: ${lastIndex}`;
+          tsResult.style.color = '#4CAF50';
+        } catch (error) {
+          tsResult.textContent = `❌ Lodash测试出错: ${error.message}`;
+          tsResult.style.color = '#F44336';
+        }
+      }
+
+      // 绑定事件监听器
+      document.getElementById('testEventBus').addEventListener('click', testEventBus);
+      document.getElementById('testStorage').addEventListener('click', testStorage);
+      document.getElementById('testDevice').addEventListener('click', testDevice);
+      document.getElementById('testToDayjs').addEventListener('click', testToDayjs);
+      document.getElementById('testLodash').addEventListener('click', testLodash);
+    </script>
+  </body>
+</html>

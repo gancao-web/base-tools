@@ -28,3 +28,8 @@ dist-ssr
 # VitePress cache and build output
 .vitepress/cache
 .vitepress/dist
+.test-ts4-project/dist
+.test-ts4-project/node_modules
+.test-ts5-project/dist
+.test-ts5-project/node_modules
+

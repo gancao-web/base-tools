@@ -23,7 +23,7 @@ function clearHistory() {
   });
 }
  */
-export default class HistoryStorage {
+export class HistoryStorage {
   private key: string;
 
   constructor(key: string) {

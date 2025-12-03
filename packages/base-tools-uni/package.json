@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-uni",
-  "version": "0.8.9",
+  "version": "0.9.3",
   "sideEffects": false,
   "description": "Independent Uni-app utilities package built from src/uni.",
   "keywords": [
@@ -10,49 +10,23 @@
     "thin-wrapper"
   ],
   "license": "MIT",
-  "main": "./index.js",
+  "main": "./index.cjs",
   "module": "./index.js",
   "types": "./index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./index.d.ts",
-      "import": "./index.js",
-      "require": "./index.cjs",
-      "default": "./index.js"
-    },
-    "./index": {
-      "types": "./index.d.ts",
-      "import": "./index.js",
-      "require": "./index.cjs",
-      "default": "./index.js"
-    },
-    "./index.js": {
-      "types": "./index.d.ts",
-      "import": "./index.js",
-      "require": "./index.cjs",
-      "default": "./index.js"
-    },
-    "./dist/*": {
-      "types": "./dist/*.d.ts",
-      "import": "./dist/*.js",
-      "require": "./dist/*.cjs",
-      "default": "./dist/*.js"
-    },
-    "./package.json": "./package.json"
-  },
   "typesVersions": {
     "*": {
-      "*": [
-        "./dist/*"
-      ],
       "index": [
-        "./dist/index.d.ts"
+        "./index.d.ts"
       ]
     }
   },
   "files": [
     "dist",
-    "README.md"
+    "index.d.ts",
+    "index.js",
+    "index.cjs",
+    "README.md",
+    "src"
   ],
   "dependencies": {},
   "publishConfig": {
