@@ -8,15 +8,18 @@
     "lint:lint-staged": "tsc --noEmit && lint-staged",
     "test": "vitest run",
     "build": "npm run test && tsup && tsc -p tsconfig.build.json --emitDeclarationOnly && node scripts/copy-dists.mjs",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs",
+    "version:major": "node scripts/version-bump.mjs major",
+    "version:minor": "node scripts/version-bump.mjs minor",
+    "version:patch": "node scripts/version-bump.mjs patch",
     "publish:ts": "cd packages/base-tools-ts && npm publish --access public --registry https://registry.npmjs.org",
     "publish:web": "cd packages/base-tools-web && npm publish --access public --registry https://registry.npmjs.org",
     "publish:uni": "cd packages/base-tools-uni && npm publish --access public --registry https://registry.npmjs.org",
     "publish:react": "cd packages/base-tools-react && npm publish --access public --registry https://registry.npmjs.org",
     "publish:vue": "cd packages/base-tools-vue && npm publish --access public --registry https://registry.npmjs.org",
-    "publish:all": "npm run publish:ts && npm run publish:web && npm run publish:uni && npm run publish:react && npm run publish:vue"
+    "publish:all": "npm run publish:ts && npm run publish:web && npm run publish:uni && npm run publish:react && npm run publish:vue",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "exports": {
     "./ts": {

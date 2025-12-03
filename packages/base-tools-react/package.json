@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-react",
-  "version": "0.9.1",
+  "version": "0.9.3",
   "sideEffects": false,
   "description": "Independent React utilities package built from src/react.",
   "keywords": [
@@ -25,7 +25,8 @@
     "index.d.ts",
     "index.js",
     "index.cjs",
-    "README.md"
+    "README.md",
+    "src"
   ],
   "dependencies": {
     "ahooks": "^3.9.6"

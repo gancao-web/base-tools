@@ -29,11 +29,22 @@ export default [
   },
   js.configs.recommended,
   {
-    files: ['**/*.{ts,js}'],
+    files: ['**/*.{ts,js,mjs}'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
       parserOptions: {},
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        exports: 'readonly',
+        module: 'readonly',
+        require: 'readonly',
+        global: 'readonly',
+      },
     },
     plugins: {
       import: importPlugin,
@@ -147,4 +158,11 @@ export default [
   eslintConfigPrettier,
   // 其他推荐配置
   ...tseslint.configs.recommended,
+  // Node.js 脚本文件的特殊配置
+  {
+    files: ['scripts/**/*.{js,mjs}'],
+    rules: {
+      'no-console': 'off', // 允许在脚本文件中使用 console
+    },
+  },
 ];

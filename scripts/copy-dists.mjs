@@ -44,6 +44,36 @@ function copyUMDFiles() {
   }
 }
 
+// 复制根目录README.md到各个包目录
+function copyReadmeToPackages() {
+  const rootReadmePath = path.join(process.cwd(), 'README.md');
+
+  if (!fs.existsSync(rootReadmePath)) {
+    console.log('Root README.md not found, skipping copy');
+    return;
+  }
+
+  const packageDirs = [
+    'packages/base-tools-ts',
+    'packages/base-tools-web',
+    'packages/base-tools-uni',
+    'packages/base-tools-react',
+    'packages/base-tools-vue',
+  ];
+
+  packageDirs.forEach((packageDir) => {
+    const packagePath = path.join(process.cwd(), packageDir);
+    const destReadmePath = path.join(packagePath, 'README.md');
+
+    if (fs.existsSync(packagePath)) {
+      fs.copyFileSync(rootReadmePath, destReadmePath);
+      console.log(`Copied README.md to ${packageDir}`);
+    } else {
+      console.log(`Package directory ${packageDir} not found, skipping`);
+    }
+  });
+}
+
 for (const key of Object.keys(map)) {
   const [src, dst] = map[key];
   copyDir(src, dst);
@@ -51,3 +81,6 @@ for (const key of Object.keys(map)) {
 
 // 复制UMD文件
 copyUMDFiles();
+
+// 复制README.md到各个包目录
+copyReadmeToPackages();
