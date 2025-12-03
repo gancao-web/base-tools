@@ -1,10 +1,11 @@
 # withErrorBoundary
+
 使用 `ErrorBoundary` 包裹组件，捕获渲染/生命周期错误并展示回退 UI。
 
-## Example
+## 示例
 
 ```ts
-import { withErrorBoundary } from '@base-web-kits/base-tools/react';
+import { withErrorBoundary } from '@base-web-kits/base-tools-react';
 // 页面级错误兜底
 const Page = () => { throw new Error('boom'); };
 export default withErrorBoundary(<ErrorHint />)(Page);

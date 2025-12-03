@@ -1,10 +1,11 @@
 # getLocalStorage
+
 读取 localStorage（自动 JSON 反序列化）
 
-## Example
+## 示例
 
 ```ts
-import { getLocalStorage } from '@base-web-kits/base-tools/web';
+import { getLocalStorage } from '@base-web-kits/base-tools-web';
 
 // 读取对象数据
 const user = getLocalStorage<{ id: number; name: string }>('user');

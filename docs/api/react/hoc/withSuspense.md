@@ -1,10 +1,11 @@
 # withSuspense
+
 使用 `Suspense` 包裹组件，统一处理异步加载占位。
 
-## Example
+## 示例
 
 ```ts
-import { withSuspense } from '@base-web-kits/base-tools/react';
+import { withSuspense } from '@base-web-kits/base-tools-react';
 // 路由级别懒加载
 const LazyPage = lazy(() => import('./Page'));
 export default withSuspense(<Spinner />)(LazyPage);

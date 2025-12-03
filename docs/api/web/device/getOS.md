@@ -1,9 +1,9 @@
 # getOS
+
 获取操作系统信息
 
-## Example
+## 示例
 
 ```ts
-import { getOS } from '@base-web-kits/base-tools/web';
-
+import { getOS } from '@base-web-kits/base-tools-web';
 ```

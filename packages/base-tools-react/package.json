@@ -1,7 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-react",
-  "version": "0.8.7",
-  "type": "module",
+  "version": "0.9.3",
   "sideEffects": false,
   "description": "Independent React utilities package built from src/react.",
   "keywords": [
@@ -11,41 +10,23 @@
     "thin-wrapper"
   ],
   "license": "MIT",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": {
-        "import": "./dist/index.d.ts",
-        "require": "./dist/index.d.ts",
-        "default": "./dist/index.d.ts"
-      },
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.cjs"
-      },
-      "default": "./dist/index.js"
-    },
-    "./package.json": "./package.json"
-  },
+  "main": "./index.cjs",
+  "module": "./index.js",
+  "types": "./index.d.ts",
   "typesVersions": {
     "*": {
-      "*": [
-        "./dist/*"
-      ],
       "index": [
-        "./dist/index.d.ts"
+        "./index.d.ts"
       ]
     }
   },
   "files": [
     "dist",
-    "README.md"
+    "index.d.ts",
+    "index.js",
+    "index.cjs",
+    "README.md",
+    "src"
   ],
   "dependencies": {
     "ahooks": "^3.9.6"

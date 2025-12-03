@@ -23,7 +23,7 @@ features:
     details: 基于 TS 开发，提供完整的类型定义，享受智能提示
   - icon: 📦
     title: 模块化设计
-    details: 开箱即用，按需引入，减小打包体积
+    details: 开箱即用，支持按需引入，兼容js环境
 ---
 
 ## 生产案例

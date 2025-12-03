@@ -1,3 +1,9 @@
+const WK = {
+  val: '__l_val',
+  exp: '__l_exp',
+  wrap: '__l_wrap',
+} as const;
+
 /**
  * 写入 localStorage（自动 JSON 序列化）
  * 当 `value` 为 `null` 或 `undefined` 时，会移除该键。
@@ -16,11 +22,17 @@ export function setLocalStorage(key: string, value: unknown, days?: number) {
     removeLocalStorage(key);
     return;
   }
+
   let toStore: unknown = value;
   if (typeof days === 'number' && days > 0) {
-    const ms = Math.floor(days * 24 * 60 * 60 * 1000);
-    toStore = { __l_val: value, __l_exp: Date.now() + ms };
+    const ms = days * 24 * 60 * 60 * 1000;
+    toStore = {
+      [WK.wrap]: true,
+      [WK.val]: value,
+      [WK.exp]: Date.now() + ms,
+    };
   }
+
   localStorage.setItem(key, JSON.stringify(toStore));
 }
 
@@ -40,17 +52,14 @@ export function getLocalStorage<T = unknown>(key: string): T | null {
   const raw = localStorage.getItem(key);
   if (raw === null) return null;
   try {
-    const parsed = JSON.parse(raw) as unknown;
-    if (parsed && typeof parsed === 'object') {
-      const obj = parsed as Record<string, unknown>;
-      if ('__l_exp' in obj && '__l_val' in obj) {
-        const exp = obj.__l_exp;
-        if (typeof exp === 'number' && Date.now() >= exp) {
-          removeLocalStorage(key);
-          return null;
-        }
-        return obj.__l_val as T;
+    const parsed = JSON.parse(raw);
+
+    if (parsed && typeof parsed === 'object' && WK.wrap in parsed && WK.exp in parsed) {
+      if (Date.now() > parsed[WK.exp]) {
+        removeLocalStorage(key);
+        return null;
       }
+      return parsed[WK.val] as T;
     }
     return parsed as T;
   } catch {

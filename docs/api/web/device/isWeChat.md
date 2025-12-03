@@ -1,9 +1,9 @@
 # isWeChat
+
 是否微信内置浏览器
 
-## Example
+## 示例
 
 ```ts
-import { isWeChat } from '@base-web-kits/base-tools/web';
-
+import { isWeChat } from '@base-web-kits/base-tools-web';
 ```

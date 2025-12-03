@@ -2,10 +2,10 @@
 
 拖拽排序 (不改变原数组)
 
-## Example
+## 示例
 
 ```ts
-import { arrayMove } from '@base-web-kits/base-tools/ts';
+import { arrayMove } from '@base-web-kits/base-tools-ts';
 
 const list = ['a', 'b', 'c', 'd'];
 const newList = arrayMove(list, 1, 3); // 将索引1的元素移动到索引3

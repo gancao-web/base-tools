@@ -1,10 +1,11 @@
 # getAgeByBirthdate
+
 通过出生日期计算年龄
 
-## Example
+## 示例
 
 ```ts
-import { getAgeByBirthdate } from '@base-web-kits/base-tools/ts';
+import { getAgeByBirthdate } from '@base-web-kits/base-tools-ts';
 // 假设当前日期为 2025-11-19
 getAgeByBirthdate('2025-05-10'); // { age: 6, type: 'month' }
 getAgeByBirthdate('2020-11-19'); // { age: 5, type: 'year' }

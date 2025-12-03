@@ -1,9 +1,10 @@
 # removeLocalStorage
+
 移除 localStorage 指定键
 
-## Example
+## 示例
 
 ```ts
-import { removeLocalStorage } from '@base-web-kits/base-tools/web';
+import { removeLocalStorage } from '@base-web-kits/base-tools-web';
 removeLocalStorage('token');
 ```

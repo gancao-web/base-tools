@@ -1,9 +1,9 @@
 # isTouchSupported
+
 检测是否支持触摸事件
 
-## Example
+## 示例
 
 ```ts
-import { isTouchSupported } from '@base-web-kits/base-tools/web';
-
+import { isTouchSupported } from '@base-web-kits/base-tools-web';
 ```

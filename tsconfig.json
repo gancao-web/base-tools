@@ -28,6 +28,9 @@
     // 强制文件名大小写一致，避免跨平台大小写问题
     "forceConsistentCasingInFileNames": true,
 
+    // 禁止输出编译后的JS文件，防止污染源代码目录
+    "noEmit": true,
+
     "types": [
       // uni API 相关的 TypeScript 类型(如uni.showModal)，需要安装 @dcloudio/types
       "@dcloudio/types",

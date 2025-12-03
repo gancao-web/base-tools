@@ -54,4 +54,30 @@ export default defineConfig([
     clean: true,
     tsconfig: 'tsconfig.json', // 使用主tsconfig，支持ESM语法
   },
+  // UMD builds for browser usage
+  {
+    entry: {
+      'base-tools-ts.umd': 'src/ts/index.ts',
+    },
+    outDir: 'dist/ts',
+    format: ['iife'],
+    dts: false,
+    splitting: false,
+    noExternal: ['lodash-es'],
+    clean: false, // Don't clean, we want to keep ESM/CJS builds
+    tsconfig: 'tsconfig.json',
+    globalName: 'baseToolsTS',
+  },
+  {
+    entry: {
+      'base-tools-web.umd': 'src/web/index.ts',
+    },
+    outDir: 'dist/web',
+    format: ['iife'],
+    dts: false,
+    splitting: false,
+    clean: false, // Don't clean, we want to keep ESM/CJS builds
+    tsconfig: 'tsconfig.json',
+    globalName: 'baseToolsWeb',
+  },
 ]);

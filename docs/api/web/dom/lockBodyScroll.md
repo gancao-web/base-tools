@@ -1,10 +1,11 @@
 # lockBodyScroll
+
 锁定页面滚动（移动端/PC）
 
-## Example
+## 示例
 
 ```ts
-import { lockBodyScroll, unlockBodyScroll } from '@base-web-kits/base-tools/web';
+import { lockBodyScroll, unlockBodyScroll } from '@base-web-kits/base-tools-web';
 
 // 显示弹窗时锁定滚动
 function showModal() {

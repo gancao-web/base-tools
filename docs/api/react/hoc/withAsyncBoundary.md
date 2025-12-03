@@ -1,10 +1,11 @@
 # withAsyncBoundary
+
 同时提供 `Suspense` 与 `ErrorBoundary` 的异步边界 HOC。
 
-## Example
+## 示例
 
 ```ts
-import { withAsyncBoundary } from '@base-web-kits/base-tools/react';
+import { withAsyncBoundary } from '@base-web-kits/base-tools-react';
 const LazyPage = lazy(() => import('./Page'));
 export default withAsyncBoundary({
 suspenseFallback: <Spinner />,

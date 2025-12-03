@@ -1,10 +1,17 @@
 # toast
-提示
 
-## Example
+显示提示消息
+
+## 示例
 
 ```ts
-import { toast } from '@base-web-kits/base-tools/uni';
+import { toast } from '@base-web-kits/base-tools-uni';
+
 await toast('保存成功');
-back(); // 小程序的toast是页面级的,而非全局;若toast不await,直接back,则toast会看不见
+back();
 ```
+
+## 参数
+
+- `msg: string` - 提示消息内容
+- `duration: number` - 提示持续时间（毫秒），默认为 `1000ms`

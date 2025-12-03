@@ -1,9 +1,12 @@
-# getWindowInfo
-窗口信息
+## getWindowInfo
 
-## Example
+获取窗口信息，包含屏幕尺寸、安全区域等
+
+## 示例
 
 ```ts
-import { getWindowInfo } from '@base-web-kits/base-tools/uni';
+import { getWindowInfo } from '@base-web-kits/base-tools-uni';
 
+const windowInfo = getWindowInfo();
+console.log('windowInfo:', windowInfo);
 ```

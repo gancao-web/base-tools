@@ -1,9 +1,12 @@
 # getSafeAreaBottom
-底部安全区高度
 
-## Example
+获取底部安全区高度（单位：px）
+
+## 示例
 
 ```ts
-import { getSafeAreaBottom } from '@base-web-kits/base-tools/uni';
+import { getSafeAreaBottom } from '@base-web-kits/base-tools-uni';
 
+const safeAreaBottom = getSafeAreaBottom();
+console.log('safeAreaBottom:', safeAreaBottom);
 ```

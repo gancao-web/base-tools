@@ -1,9 +1,9 @@
 # getBrowserVersion
+
 获取浏览器版本号
 
-## Example
+## 示例
 
 ```ts
-import { getBrowserVersion } from '@base-web-kits/base-tools/web';
-
+import { getBrowserVersion } from '@base-web-kits/base-tools-web';
 ```

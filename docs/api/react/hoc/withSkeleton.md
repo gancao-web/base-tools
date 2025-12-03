@@ -2,10 +2,10 @@
 
 骨架屏 HOC：当 `props[prop]` 为真时展示 `skeleton`，否则渲染组件。常用于页面/列表初次加载的占位。
 
-## Example
+## 示例
 
 ```tsx
-import { withSkeleton } from '@base-web-kits/base-tools/react';
+import { withSkeleton } from '@base-web-kits/base-tools-react';
 
 // 页面骨架
 export default withSkeleton(<PageSkeleton />)(Page);
