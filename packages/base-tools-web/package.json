@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-web",
-  "version": "0.9.3",
+  "version": "0.9.5",
   "sideEffects": false,
   "description": "Independent Web utilities package built from src/web.",
   "keywords": [

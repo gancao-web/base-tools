@@ -6,53 +6,53 @@ export default defineConfig([
     entry: ['src/ts/index.ts'],
     outDir: 'dist/ts',
     format: ['esm', 'cjs'],
-    dts: false,
+    dts: true,
     splitting: false,
     noExternal: ['lodash-es'],
     clean: true,
-    tsconfig: 'tsconfig.json', // 使用主tsconfig，支持ESM语法
+    tsconfig: 'tsconfig.build.json', // 使用专门的构建配置
   },
   // Uni-app utilities
   {
     entry: ['src/uni/index.ts'],
     outDir: 'dist/uni',
     format: ['esm', 'cjs'],
-    dts: false,
+    dts: true,
     splitting: false,
     clean: true,
-    tsconfig: 'tsconfig.json', // 使用主tsconfig，支持ESM语法
+    tsconfig: 'tsconfig.build.json', // 使用专门的构建配置
   },
   // Web utilities
   {
     entry: ['src/web/index.ts'],
     outDir: 'dist/web',
     format: ['esm', 'cjs'],
-    dts: false,
+    dts: true,
     splitting: false,
     clean: true,
-    tsconfig: 'tsconfig.json', // 使用主tsconfig，支持ESM语法
+    tsconfig: 'tsconfig.build.json', // 使用专门的构建配置
   },
   // React utilities
   {
     entry: ['src/react/index.ts'],
     outDir: 'dist/react',
     format: ['esm', 'cjs'],
-    dts: false,
+    dts: true,
     splitting: false,
     noExternal: ['ahooks'],
     clean: true,
-    tsconfig: 'tsconfig.json', // 使用主tsconfig，支持ESM语法
+    tsconfig: 'tsconfig.build.json', // 使用专门的构建配置
   },
   // Vue utilities
   {
     entry: ['src/vue/index.ts'],
     outDir: 'dist/vue',
     format: ['esm', 'cjs'],
-    dts: false,
+    dts: true,
     splitting: false,
     noExternal: ['@vueuse/core'],
     clean: true,
-    tsconfig: 'tsconfig.json', // 使用主tsconfig，支持ESM语法
+    tsconfig: 'tsconfig.build.json', // 使用专门的构建配置
   },
   // UMD builds for browser usage
   {
@@ -65,7 +65,7 @@ export default defineConfig([
     splitting: false,
     noExternal: ['lodash-es'],
     clean: false, // Don't clean, we want to keep ESM/CJS builds
-    tsconfig: 'tsconfig.json',
+    tsconfig: 'tsconfig.build.json',
     globalName: 'baseToolsTS',
   },
   {
@@ -77,7 +77,7 @@ export default defineConfig([
     dts: false,
     splitting: false,
     clean: false, // Don't clean, we want to keep ESM/CJS builds
-    tsconfig: 'tsconfig.json',
+    tsconfig: 'tsconfig.build.json',
     globalName: 'baseToolsWeb',
   },
 ]);
