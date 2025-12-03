@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-ts",
-  "version": "0.8.15",
+  "version": "0.9.1",
   "sideEffects": false,
   "description": "Independent TS utilities package built from src/ts.",
   "keywords": [
@@ -28,6 +28,8 @@
     "index.d.ts",
     "index.js",
     "index.cjs",
+    "base-tools-ts.umd.global.js",
+    "base-tools-ts.umd.global.js.map",
     "README.md"
   ],
   "dependencies": {

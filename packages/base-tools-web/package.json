@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-web",
-  "version": "0.8.12",
+  "version": "0.9.1",
   "sideEffects": false,
   "description": "Independent Web utilities package built from src/web.",
   "keywords": [
@@ -25,7 +25,9 @@
     "README.md",
     "index.d.ts",
     "index.js",
-    "index.cjs"
+    "index.cjs",
+    "base-tools-web.umd.global.js",
+    "base-tools-web.umd.global.js.map"
   ],
   "dependencies": {},
   "publishConfig": {

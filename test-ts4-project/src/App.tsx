@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { setLocalStorage, getLocalStorage } from '@base-web-kits/base-tools-web';
-import { createRandId } from '@base-web-kits/base-tools-ts';
-// import { createTimeRandId, getUrlParam, toDayjs, getObjectKeys } from '@base-web-kits/base-tools-ts'
-// import { setLocalStorage, getLocalStorage } from '@base-web-kits/base-tools-web'
+import { createRandId, toDayjs, findLastIndex } from '@base-web-kits/base-tools-ts';
 import './App.css';
 
 function App() {
@@ -14,18 +12,16 @@ function App() {
     try {
       // 测试 base-tools-ts 的功能
       results.push(`✅ Random ID: ${createRandId()}`);
-      // const timeRandId = createTimeRandId()
-      // results.push(`✅ createTimeRandId: ${timeRandId}`)
 
-      // const urlParams = getUrlParam('test', 'http://example.com?test=hello')
-      // results.push(`✅ getUrlParam: ${urlParams}`)
+      // 测试 toDayjs
+      const now = new Date();
+      const dayjsObj = toDayjs(now);
+      results.push(`✅ toDayjs: ${dayjsObj.format('YYYY-MM-DD HH:mm:ss')}`);
 
-      // const dayjsObj = toDayjs('2024-01-01')
-      // results.push(`✅ toDayjs: ${dayjsObj.format('YYYY-MM-DD')}`)
-
-      // const testObj = { a: 1, b: 2, c: 3 }
-      // const keys = getObjectKeys(testObj)
-      // results.push(`✅ getObjectKeys: [${keys.join(', ')}]`)
+      // 测试 Lodash 方法
+      const testArray = [1, 2, 3, 4, 2];
+      const lastIndex = findLastIndex(testArray, (x) => x === 2);
+      results.push(`✅ Lodash: findLastIndex=${lastIndex}`);
 
       // 测试 base-tools-web 的功能
       setLocalStorage('test-key', 'test-value-123');
@@ -43,7 +39,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>TS4 Base Tools 测试</h1>
+      <h1>Base Tools 测试 (TS 4.x + React)</h1>
       <div className="results">
         {testResults.map((result, index) => (
           <p key={index}>{result}</p>

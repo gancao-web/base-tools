@@ -323,6 +323,9 @@ packages:
   lodash-es@4.17.21:
     resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
 
+  mitt@3.0.1:
+    resolution: {integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==}
+
   nanoid@3.3.11:
     resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -391,6 +394,7 @@ snapshots:
       bignumber.js: 9.3.1
       dayjs: 1.11.19
       lodash-es: 4.17.21
+      mitt: 3.0.1
 
   '@base-web-kits/base-tools-web@file:../packages/base-tools-web': {}
 
@@ -575,6 +579,8 @@ snapshots:
     optional: true
 
   lodash-es@4.17.21: {}
+
+  mitt@3.0.1: {}
 
   nanoid@3.3.11: {}
 

@@ -12,8 +12,17 @@ type Events = Record<EventType, unknown>;
  * emitter.off('xx'); // 移除事件 xx 下全部监听
  * emitter.off('xx', fn); // 移除事件 xx 下指定监听
  * emitter.clear(); // 移除所有事件
+ *
+ * @example 类型约束
+ * type T = { a: number; b: string };
+ * const emitter = new EventBus<{ xx: T; yy: void }>();
+ * const fn = (arg: T) => {}
+ * emitter.on('xx', fn);
+ * emitter.off('xx', fn);
+ * emitter.emit('xx', { a: 123, b: '123' });
+ * emitter.emit('yy');
  */
-export default class EventBus<T extends Events = Events> {
+export class EventBus<T extends Events = Events> {
   private readonly _emitter: Emitter<T> = mitt<T>();
 
   /** 订阅 */
@@ -33,8 +42,8 @@ export default class EventBus<T extends Events = Events> {
   }
 
   /** 发布 */
-  emit<K extends keyof T>(type: K, event: T[K]) {
-    this._emitter.emit(type, event);
+  emit<K extends keyof T>(type: K, event?: T[K]): this {
+    this._emitter.emit(type, event as T[K]);
     return this;
   }
 
