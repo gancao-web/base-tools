@@ -82,6 +82,16 @@ export function getAppConfig() {
 
 /**
  * 初始化应用配置, 建议在入口文件先设置配置
+ * @example
+ * setAppConfig({
+ *   pathHome: '/pages/tabbar/home/index',
+ *   pathLogin: '/pages/login/index',
+ *   pathWebview: '/pages/webview/index',
+ *   hostFile: 'https://example.com/',
+ *   hostIcon: 'https://example.com/',
+ *   isTabBar: (url) => url.startsWith('/pages/tabbar/'),
+ *   isLogin: () => useUserStore().isLogin,
+ * });
  */
 export function setAppConfig(newConfig: AppConfig) {
   Object.assign(appConfig, newConfig);
