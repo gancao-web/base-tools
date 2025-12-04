@@ -10,3 +10,7 @@ import { getWindowWidth } from '@base-web-kits/base-tools-uni';
 const windowWidth = getWindowWidth();
 console.log('windowWidth:', windowWidth);
 ```
+
+## 版本
+
+- 1.0.0 新增

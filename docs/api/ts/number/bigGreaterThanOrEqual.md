@@ -9,3 +9,7 @@ import { bigGreaterThanOrEqualTo } from '@base-web-kits/base-tools-ts';
 bigGreaterThanOrEqualTo(2, 2); // => true
 bigGreaterThanOrEqualTo(1, 2); // => false
 ```
+
+## 版本
+
+- 1.0.0 新增

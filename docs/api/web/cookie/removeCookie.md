@@ -8,3 +8,7 @@
 import { removeCookie } from '@base-web-kits/base-tools-web';
 removeCookie('token');
 ```
+
+## 版本
+
+- 1.0.0 新增

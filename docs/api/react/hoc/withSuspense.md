@@ -15,3 +15,7 @@ const Product = lazy(() => import('./Product'));
 const withPageSuspense = withSuspense(<Skeleton />);
 export default withPageSuspense(Product);
 ```
+
+## 版本
+
+- 1.0.0 新增

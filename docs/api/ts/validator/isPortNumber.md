@@ -10,3 +10,7 @@ isPortNumber(80); // true
 isPortNumber('65535'); // true
 isPortNumber(70000); // false
 ```
+
+## 版本
+
+- 1.0.0 新增

@@ -10,3 +10,7 @@ import { getSafeAreaTop } from '@base-web-kits/base-tools-uni';
 const safeAreaTop = getSafeAreaTop();
 console.log('safeAreaTop:', safeAreaTop);
 ```
+
+## 版本
+
+- 1.0.0 新增

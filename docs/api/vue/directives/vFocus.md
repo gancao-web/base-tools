@@ -8,3 +8,7 @@
 import { vFocus } from '@base-web-kits/base-tools-vue';
 <input v-focus /> 或 <input v-focus="enabled" />
 ```
+
+## 版本
+
+- 1.0.0 新增

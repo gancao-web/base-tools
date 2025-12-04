@@ -12,3 +12,7 @@ import { getObjectKeys } from '@base-web-kits/base-tools-ts';
 const o = { a: 1, b: 'x' };
 const keys = getObjectKeys(o); // type: ('a' | 'b')[], value: ['a','b']
 ```
+
+## 版本
+
+- 1.0.0 新增

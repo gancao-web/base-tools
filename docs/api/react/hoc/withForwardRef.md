@@ -19,3 +19,7 @@ const App = () => {
   return <InputWithRef ref={ref} value="hi" />;
 };
 ```
+
+## 版本
+
+- 1.0.0 新增

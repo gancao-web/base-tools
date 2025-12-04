@@ -9,3 +9,7 @@ import { vLongpress } from '@base-web-kits/base-tools-vue';
 <button v-longpress="onLongpress" />
 <button v-longpress="{ handler: onLongpress, duration: 800 }" />
 ```
+
+## 版本
+
+- 1.0.0 新增

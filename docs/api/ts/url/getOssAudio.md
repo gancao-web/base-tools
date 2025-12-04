@@ -10,3 +10,7 @@ import { getOSSAudio } from '@base-web-kits/base-tools-ts';
 音频拼接: getOSSAudio('xx.mp3', { concat: { list: 'a.mp3,b.mp3' } });
 信息查询: getOSSAudio('xx.mp3', { info: true });
 ```
+
+## 版本
+
+- 1.0.0 新增

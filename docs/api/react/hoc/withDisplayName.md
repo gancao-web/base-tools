@@ -14,3 +14,7 @@ export default withDisplayName(Page, 'UserPage');
 // 与其他 HOC 组合使用，便于层级结构阅读
 export default withDisplayName(withMemo(List), 'Memo(List)');
 ```
+
+## 版本
+
+- 1.0.0 新增

@@ -14,3 +14,7 @@ toChineseCurrency(1001.01); // '壹仟零壹元壹分'
 toChineseCurrency('1234.5679', { precision: 3 }); // '壹仟贰佰叁拾肆元伍角陆分捌厘'
 toChineseCurrency(-1.2); // '负壹元贰角'
 ```
+
+## 版本
+
+- 1.0.0 新增

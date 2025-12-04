@@ -11,3 +11,7 @@ isIdentityCard('A123456789'); // true（台湾格式）
 isIdentityCard('A123456(3)'); // true（香港格式）
 isIdentityCard('1234567(8)'); // true（澳门格式）
 ```
+
+## 版本
+
+- 1.0.0 新增

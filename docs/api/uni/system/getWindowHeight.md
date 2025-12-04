@@ -10,3 +10,7 @@ import { getWindowHeight } from '@base-web-kits/base-tools-uni';
 const windowHeight = getWindowHeight();
 console.log('windowHeight:', windowHeight);
 ```
+
+## 版本
+
+- 1.0.0 新增

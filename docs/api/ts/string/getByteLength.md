@@ -17,3 +17,7 @@ getByteLength(new Uint8Array([0x41, 0x42, 0x43])); // 3
 getByteLength(new File(['abc'], 'test.txt')); // 3
 getByteLength(new Blob(['中文'], { type: 'text/plain' })); // 6
 ```
+
+## 版本
+
+- 1.0.0 新增

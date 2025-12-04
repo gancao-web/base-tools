@@ -10,3 +10,7 @@ import { getDeviceInfo } from '@base-web-kits/base-tools-uni';
 const deviceInfo = getDeviceInfo();
 console.log('deviceInfo:', deviceInfo);
 ```
+
+## 版本
+
+- 1.0.0 新增

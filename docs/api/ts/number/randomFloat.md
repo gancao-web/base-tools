@@ -14,3 +14,7 @@ const float2 = randomFloat(10, 0); // => [0, 10) 内的随机浮点数
 const float3 = randomFloat(5.2, 10.8); // => [5.2, 10.8) 内的随机浮点数
 console.log(float1, float2, float3);
 ```
+
+## 版本
+
+- 1.0.0 新增

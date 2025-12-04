@@ -10,3 +10,7 @@ hasJs('https://xx/xx.js'); // boolean
 hasJs('/xx.js'); // boolean
 hasJs('xx.js'); // boolean
 ```
+
+## 版本
+
+- 1.0.0 新增

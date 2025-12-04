@@ -19,3 +19,7 @@ const iconUrl = getIconUrl('icons/user.png');
 ## 返回值
 
 - `string` - 拼接后的完整图标地址
+
+## 版本
+
+- 1.0.0 新增

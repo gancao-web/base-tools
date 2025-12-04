@@ -10,3 +10,7 @@ isLicensePlate('京A12345'); // true
 isLicensePlate('沪A12345D'); // 新能源（末位 D/F）
 isLicensePlate('粤BDF12345'); // 新能源（第三位 D/F）
 ```
+
+## 版本
+
+- 1.0.0 新增

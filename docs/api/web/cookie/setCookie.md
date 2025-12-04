@@ -8,3 +8,7 @@
 import { setCookie } from '@base-web-kits/base-tools-web';
 setCookie('token', 'abc', 7);
 ```
+
+## 版本
+
+- 1.0.0 新增

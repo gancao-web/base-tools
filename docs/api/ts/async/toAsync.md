@@ -16,3 +16,7 @@ async function fetchData() {
   console.log(data);
 }
 ```
+
+## 版本
+
+- 1.0.0 新增

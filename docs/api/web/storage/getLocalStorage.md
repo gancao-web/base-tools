@@ -23,3 +23,7 @@ console.log(age); // 18 或 null
 const vip = getLocalStorage<boolean>('vip');
 console.log(vip); // true 或 null
 ```
+
+## 版本
+
+- 1.0.0 新增

@@ -34,3 +34,7 @@ d.diff(t, 'month'); // 与t相差的月数
 d.diff(t, 'quarter'); // 与t相差的季度数
 d.diff(t, 'year'); // 与t相差的年数
 ```
+
+## 版本
+
+- 1.0.0 新增

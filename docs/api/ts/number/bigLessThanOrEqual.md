@@ -10,3 +10,7 @@ bigLessThanOrEqual(2, 2); // => true
 bigLessThanOrEqual(1, 2); // => true
 bigLessThanOrEqual(2, 1); // => false
 ```
+
+## 版本
+
+- 1.0.0 新增

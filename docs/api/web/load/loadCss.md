@@ -9,3 +9,7 @@ import { loadCss } from '@base-web-kits/base-tools-web';
 await loadCss('https://xx/xx.css');
 await loadCss('/a.css', { media: 'print' });
 ```
+
+## 版本
+
+- 1.0.0 新增

@@ -37,3 +37,7 @@ href('/pages/detail/index', { throttle: 2000 }); // 2秒内不允许重复打开
   - `checkLogin?: boolean` - 是否校验登录，未登录则自动跳转到登录页
   - `mode?: 'redirectTo' | 'reLaunch'` - 打开方式，默认为 `navigateTo`
   - `throttle?: number` - 节流时间（毫秒），防止重复点击，默认为 `1000ms`
+
+## 版本
+
+- 1.0.0 新增

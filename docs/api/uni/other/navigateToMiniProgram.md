@@ -13,3 +13,7 @@ await navigateToMiniProgram({
   envVersion: 'release',
 });
 ```
+
+## 版本
+
+- 1.0.0 新增

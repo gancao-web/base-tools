@@ -9,3 +9,7 @@ import { back } from '@base-web-kits/base-tools-uni';
 
 back();
 ```
+
+## 版本
+
+- 1.0.0 新增

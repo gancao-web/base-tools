@@ -63,3 +63,7 @@ await saveImagePromise(
     - `toastSuccess` - 操作成功的toast提示，默认 `false`（支持函数返回自定义文本）
     - `toastError` - 是否显示操作失败的详细错误信息，默认 `true`（支持函数判断是否显示）
     - `showLog` - 是否显示日志，默认 `true`
+
+## 版本
+
+- 1.0.0 新增

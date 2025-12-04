@@ -8,3 +8,7 @@
 import { isMilitaryId } from '@base-web-kits/base-tools-ts';
 isCnMilitaryId('JX1234567'); // true
 ```
+
+## 版本
+
+- 1.0.0 新增

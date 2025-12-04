@@ -11,3 +11,7 @@ isPassport('P1234567'); // true
 isPassport('A12345678'); // true（台湾常见）
 isPassport('AB-1234567'); // true（移除分隔符后匹配）
 ```
+
+## 版本
+
+- 1.0.0 新增

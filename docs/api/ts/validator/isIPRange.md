@@ -9,3 +9,7 @@ import { isIPRange } from '@base-web-kits/base-tools-ts';
 isIPRange('10.0.0.0/8'); // true
 isIPRange('2001:db8::/129'); // false
 ```
+
+## 版本
+
+- 1.0.0 新增

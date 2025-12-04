@@ -9,3 +9,7 @@ import { isLandline } from '@base-web-kits/base-tools-ts';
 isLandline('010-88888888'); // true
 isLandline('0371-12345678-123'); // true
 ```
+
+## 版本
+
+- 1.0.0 新增

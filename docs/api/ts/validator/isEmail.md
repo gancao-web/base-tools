@@ -9,3 +9,7 @@ import { isEmail } from '@base-web-kits/base-tools-ts';
 isEmail('user@example.com'); // true
 isEmail('invalid@'); // false
 ```
+
+## 版本
+
+- 1.0.0 新增

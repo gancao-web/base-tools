@@ -8,3 +8,7 @@
 import { getDispositionFileName } from '@base-web-kits/base-tools-web';
 const fileName = getDispositionFileName(headers['content-disposition']);
 ```
+
+## 版本
+
+- 1.0.0 新增

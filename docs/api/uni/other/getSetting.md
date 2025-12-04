@@ -11,3 +11,7 @@ const setting = await getSetting();
 console.log(setting.authSetting);
 console.log(setting.subscriptionsSetting);
 ```
+
+## 版本
+
+- 1.0.0 新增

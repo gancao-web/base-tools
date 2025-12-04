@@ -11,3 +11,7 @@ useOn('eventName', (result) => {
   console.log(result);
 });
 ```
+
+## 版本
+
+- 1.0.0 新增

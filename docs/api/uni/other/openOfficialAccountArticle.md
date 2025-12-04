@@ -11,3 +11,7 @@ await openOfficialAccountArticle({
   url: 'https://mp.weixin.qq.com/s/xxxxx',
 });
 ```
+
+## 版本
+
+- 1.0.0 新增
