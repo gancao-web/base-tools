@@ -121,7 +121,7 @@ export function getDateRangeAfter(offset: number, fmt = 'YYYY-MM-DD') {
  * @returns 包含天、时、分、秒、毫秒的零填充对象
  * @example
  * const diff = toDayjs(t).diff(); // 毫秒差值
- * const parts = getCountdownParts(diff); // { d: '01', h: '02', m: '03', s: '04', ms: '567' }
+ * const parts = getCountdownParts(diff); // { d: '00', h: '00', m: '00', s: '00', ms: '000' }
  */
 export function getCountdownParts(diff: number) {
   if (diff <= 0) return { d: '00', h: '00', m: '00', s: '00', ms: '000' };
