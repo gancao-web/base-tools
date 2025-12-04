@@ -21,39 +21,39 @@ export function big(x: NumLike): BigNumber {
 /**
  * 高精度加法（支持多个参数连加）。
  * @example
- * bigAdd(0.1, 0.2); // => 0.3
- * bigAdd('0.1', '0.2'); // => 0.3
- * bigAdd(1, 2, 3, 4); // => 10  // 多参数连加: 1+2+3+4
+ * bigPlus(0.1, 0.2); // => 0.3
+ * bigPlus('0.1', '0.2'); // => 0.3
+ * bigPlus(1, 2, 3, 4); // => 10  // 多参数连加: 1+2+3+4
  */
-export function bigAdd(a: NumLike, ...rest: NumLike[]) {
-  let acc = big(a);
-  for (const x of rest) acc = acc.plus(big(x));
+export function bigPlus(...rest: NumLike[]) {
+  let acc = big(rest[0]);
+  for (const x of rest.slice(1)) acc = acc.plus(big(x));
   return acc.toNumber();
 }
 
 /**
  * 高精度减法（支持多个参数连减）。
  * @example
- * bigSub(1, 0.9); // => 0.1
- * bigSub('1.1', '0.2'); // => 0.9
- * bigSub(10, 1, 2, 3); // => 4  // 多参数连减: 10-1-2-3
+ * bigMinus(1, 0.9); // => 0.1
+ * bigMinus('1.1', '0.2'); // => 0.9
+ * bigMinus(10, 1, 2, 3); // => 4  // 多参数连减: 10-1-2-3
  */
-export function bigSub(a: NumLike, ...rest: NumLike[]) {
-  let acc = big(a);
-  for (const x of rest) acc = acc.minus(big(x));
+export function bigMinus(...rest: NumLike[]) {
+  let acc = big(rest[0]);
+  for (const x of rest.slice(1)) acc = acc.minus(big(x));
   return acc.toNumber();
 }
 
 /**
  * 高精度乘法（支持多个参数连乘）。
  * @example
- * bigMul(0.1, 0.2); // => 0.02
- * bigMul('1.5', '3'); // => 4.5
- * bigMul(2, 3, 4); // => 24  // 多参数连乘: 2*3*4
+ * bigTimes(0.1, 0.2); // => 0.02
+ * bigTimes('1.5', '3'); // => 4.5
+ * bigTimes(2, 3, 4); // => 24  // 多参数连乘: 2*3*4
  */
-export function bigMul(a: NumLike, ...rest: NumLike[]) {
-  let acc = big(a);
-  for (const x of rest) acc = acc.times(big(x));
+export function bigTimes(...rest: NumLike[]) {
+  let acc = big(rest[0]);
+  for (const x of rest.slice(1)) acc = acc.times(big(x));
   return acc.toNumber();
 }
 
@@ -64,9 +64,9 @@ export function bigMul(a: NumLike, ...rest: NumLike[]) {
  * bigDiv('10', '4'); // => 2.5
  * bigDiv(100, 5, 2); // => 10  // 多参数连除: 100/5/2
  */
-export function bigDiv(a: NumLike, ...rest: NumLike[]) {
-  let acc = big(a);
-  for (const x of rest) acc = acc.div(big(x));
+export function bigDiv(...rest: NumLike[]) {
+  let acc = big(rest[0]);
+  for (const x of rest.slice(1)) acc = acc.div(big(x));
   return acc.toNumber();
 }
 
@@ -84,7 +84,7 @@ export function bigPow(x: NumLike, y: NumLike) {
 }
 
 /**
- * 四舍五入到指定位数
+ * 四舍五入到指定小数位数
  * @param x 需要舍入的数值。
  * @param dp 保留的小数位数，默认 `0`（取整）。
  * @param rm 舍入模式，默认 `ROUND_HALF_UP`（四舍五入）。
@@ -106,13 +106,13 @@ export function bigRound(x: NumLike, dp = 0, rm: BigNumber.RoundingMode = BigNum
  * @param rm 舍入模式，默认 `ROUND_HALF_UP`（四舍五入）。
  * @returns 格式化后的字符串。
  * @example
- * toFixed('1'); // => '1.00'
- * +toFixed('1'); // => 1
- * toFixed(1.2345); // => '1.23'
- * toFixed(1.2345, 3); // => '1.235'
- * toFixed('1.2345', 0, BigNumber.ROUND_UP); // => '2'
+ * bigFixed('1'); // => '1.00'
+ * +bigFixed('1'); // => 1
+ * bigFixed(1.2345); // => '1.23'
+ * bigFixed(1.2345, 3); // => '1.235'
+ * bigFixed('1.2345', 0, BigNumber.ROUND_UP); // => '2'
  */
-export function toFixed(
+export function bigFixed(
   x: NumLike,
   dp = 2,
   rm: BigNumber.RoundingMode = BigNumber.ROUND_HALF_UP,
@@ -144,41 +144,41 @@ export function bigEqual(a: NumLike, b: NumLike): boolean {
 /**
  * 判断 a 是否大于 b。
  * @example
- * bigGt(2, 1); // => true
- * bigGt(1, 2); // => false
+ * bigGreaterThan(2, 1); // => true
+ * bigGreaterThan(1, 2); // => false
  */
-export function bigGt(a: NumLike, b: NumLike): boolean {
+export function bigGreaterThan(a: NumLike, b: NumLike): boolean {
   return big(a).isGreaterThan(big(b));
 }
 
 /**
  * 判断 a 是否大于等于 b。
  * @example
- * bigGte(2, 2); // => true
- * bigGte(1, 2); // => false
+ * bigGreaterThanOrEqual(2, 2); // => true
+ * bigGreaterThanOrEqual(1, 2); // => false
  */
-export function bigGte(a: NumLike, b: NumLike): boolean {
+export function bigGreaterThanOrEqualTo(a: NumLike, b: NumLike): boolean {
   return big(a).isGreaterThanOrEqualTo(big(b));
 }
 
 /**
  * 判断 a 是否小于 b。
  * @example
- * bigLt(1, 2); // => true
- * bigLt(2, 1); // => false
+ * bigLessThan(1, 2); // => true
+ * bigLessThan(2, 1); // => false
  */
-export function bigLt(a: NumLike, b: NumLike): boolean {
+export function bigLessThan(a: NumLike, b: NumLike): boolean {
   return big(a).isLessThan(big(b));
 }
 
 /**
  * 判断 a 是否小于等于 b。
  * @example
- * bigLte(2, 2); // => true
- * bigLte(1, 2); // => true
- * bigLte(2, 1); // => false
+ * bigLessThanOrEqual(2, 2); // => true
+ * bigLessThanOrEqual(1, 2); // => true
+ * bigLessThanOrEqual(2, 1); // => false
  */
-export function bigLte(a: NumLike, b: NumLike): boolean {
+export function bigLessThanOrEqual(a: NumLike, b: NumLike): boolean {
   return big(a).isLessThanOrEqualTo(big(b));
 }
 
