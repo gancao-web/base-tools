@@ -102,6 +102,34 @@ function copySourceFiles() {
   }
 }
 
+// 修复Source Map路径
+function fixSourceMaps() {
+  const distDirs = [
+    'packages/base-tools-ts/dist',
+    'packages/base-tools-web/dist',
+    'packages/base-tools-uni/dist',
+    'packages/base-tools-react/dist',
+    'packages/base-tools-vue/dist',
+  ];
+
+  distDirs.forEach((distDir) => {
+    const fullPath = path.join(process.cwd(), distDir);
+    if (!fs.existsSync(fullPath)) return;
+
+    const files = fs.readdirSync(fullPath);
+    files.forEach((file) => {
+      if (file.endsWith('.map')) {
+        const mapPath = path.join(fullPath, file);
+        const content = fs.readFileSync(mapPath, 'utf-8');
+        // 将 ../../src 替换为 ../src
+        const newContent = content.replace(/"\.\.\/\.\.\/src/g, '"../src');
+        fs.writeFileSync(mapPath, newContent);
+        console.log(`Fixed sourcemap: ${file}`);
+      }
+    });
+  });
+}
+
 for (const key of Object.keys(map)) {
   const [src, dst] = map[key];
   copyDir(src, dst);
@@ -115,3 +143,6 @@ copyReadmeToPackages();
 
 // 复制源码
 copySourceFiles();
+
+// 修复Source Map
+fixSourceMaps();
