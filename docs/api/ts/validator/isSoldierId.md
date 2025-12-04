@@ -8,3 +8,7 @@
 import { isSoldierId } from '@base-web-kits/base-tools-ts';
 isSoldierId('SB12345678'); // true
 ```
+
+## 版本
+
+- 1.0.0 新增

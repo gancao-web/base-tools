@@ -15,3 +15,7 @@ const num2 = randomInt(10, 0); // => 0..10 之间的随机整数（含 0 与 10�
 const num3 = randomInt(5.2, 10.8); // => 6..10 之间取整随机数（含 6 与 10）
 console.log(num1, num2, num3);
 ```
+
+## 版本
+
+- 1.0.0 新增

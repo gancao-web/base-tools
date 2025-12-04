@@ -11,3 +11,7 @@ isDigits('1.2'); // false
 isDigits('-12'); // false
 isDigits('a12'); // false
 ```
+
+## 版本
+
+- 1.0.0 新增

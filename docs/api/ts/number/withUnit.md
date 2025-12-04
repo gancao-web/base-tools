@@ -13,3 +13,7 @@ withUnit('1', '%'); // "1%"
 withUnit('auto', 'px'); // "auto"
 withUnit(null | undefined | ''); // ""
 ```
+
+## 版本
+
+- 1.0.0 新增

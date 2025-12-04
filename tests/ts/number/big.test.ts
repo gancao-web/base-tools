@@ -1,29 +1,29 @@
 import { describe, it, expect } from 'vitest';
 import {
   BigNumber,
-  bigAdd,
-  bigSub,
-  bigMul,
+  bigPlus,
+  bigMinus,
+  bigTimes,
   bigDiv,
   bigPow,
   bigRound,
-  toFixed,
+  bigFixed,
   bigCompare,
   bigEqual,
-  bigGt,
-  bigGte,
-  bigLt,
-  bigLte,
+  bigGreaterThan,
+  bigGreaterThanOrEqualTo,
+  bigLessThan,
+  bigLessThanOrEqual,
 } from '../../../src/ts';
 
 describe('ts/number big', () => {
   it('add/sub/mul/div', () => {
-    expect(bigAdd(0.1, 0.2)).toBeCloseTo(0.3);
-    expect(bigAdd(1, 2, 3, 4)).toBe(10);
-    expect(bigSub(1, 0.9)).toBeCloseTo(0.1);
-    expect(bigSub(10, 1, 2, 3)).toBe(4);
-    expect(bigMul(0.1, 0.2)).toBeCloseTo(0.02);
-    expect(bigMul(2, 3, 4)).toBe(24);
+    expect(bigPlus(0.1, 0.2)).toBeCloseTo(0.3);
+    expect(bigPlus(1, 2, 3, 4)).toBe(10);
+    expect(bigMinus(1, 0.9)).toBeCloseTo(0.1);
+    expect(bigMinus(10, 1, 2, 3)).toBe(4);
+    expect(bigTimes(0.1, 0.2)).toBeCloseTo(0.02);
+    expect(bigTimes(2, 3, 4)).toBe(24);
     expect(bigDiv(1, 3)).toBeCloseTo(1 / 3, 10);
     expect(bigDiv(100, 5, 2)).toBe(10);
   });
@@ -36,11 +36,11 @@ describe('ts/number big', () => {
   });
 
   it('toFixed formatting', () => {
-    expect(toFixed('1')).toBe('1.00');
-    expect(+toFixed('1')).toBe(1);
-    expect(toFixed(1.2345)).toBe('1.23');
-    expect(toFixed(1.2345, 3)).toBe('1.235');
-    expect(toFixed('1.2345', 0, BigNumber.ROUND_UP)).toBe('2');
+    expect(bigFixed('1')).toBe('1.00');
+    expect(+bigFixed('1')).toBe(1);
+    expect(bigFixed(1.2345)).toBe('1.23');
+    expect(bigFixed(1.2345, 3)).toBe('1.235');
+    expect(bigFixed('1.2345', 0, BigNumber.ROUND_UP)).toBe('2');
   });
 
   it('compare/equal relations', () => {
@@ -48,10 +48,10 @@ describe('ts/number big', () => {
     expect(bigCompare(3, 3)).toBe(0);
     expect(bigCompare('10', 2)).toBe(1);
     expect(bigEqual('1.0', 1)).toBe(true);
-    expect(bigGt(2, 1)).toBe(true);
-    expect(bigGte(2, 2)).toBe(true);
-    expect(bigLt(1, 2)).toBe(true);
-    expect(bigLte(1, 2)).toBe(true);
-    expect(bigLte(2, 1)).toBe(false);
+    expect(bigGreaterThan(2, 1)).toBe(true);
+    expect(bigGreaterThanOrEqualTo(2, 2)).toBe(true);
+    expect(bigLessThan(1, 2)).toBe(true);
+    expect(bigLessThanOrEqual(1, 2)).toBe(true);
+    expect(bigLessThanOrEqual(2, 1)).toBe(false);
   });
 });

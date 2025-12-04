@@ -8,3 +8,7 @@
 import { isOfficerId } from '@base-web-kits/base-tools-ts';
 isOfficerIdLoose('JX1234567'); // true
 ```
+
+## 版本
+
+- 1.0.0 新增

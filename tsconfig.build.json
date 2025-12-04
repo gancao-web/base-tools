@@ -4,7 +4,9 @@
     "moduleResolution": "node",
     "declaration": true,
     "declarationMap": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "rootDir": "src",
+    "noEmit": false
   },
   "exclude": ["node_modules", "dist", "tests"]
 }

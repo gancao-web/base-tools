@@ -11,3 +11,7 @@ import { copyNode } from '@base-web-kits/base-tools-web';
 const el = document.querySelector('#article')!;
 await copyNode(el);
 ```
+
+## 版本
+
+- 1.0.0 新增

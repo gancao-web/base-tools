@@ -22,7 +22,7 @@ type BaseTime = number | string | Date | dayjs.Dayjs | null | undefined;
  * @param t 各种规范或不规范的时间
  * @returns dayjs 实例
  * @example
- * const d = toDayjs('2021-01-01'); // dayjs 实例
+ * const d = toDayjs('2021-01-01'); // dayjs 实例 (无参,则默认当前时间)
  * d.format('YYYY-MM-DD HH:mm:ss'); // "2025-12-10 11:33:16"
  * d.valueOf(); // 毫秒时间戳，如 1765337596913
  * d.unix(); // 秒时间戳，如 1765337596
@@ -50,7 +50,7 @@ type BaseTime = number | string | Date | dayjs.Dayjs | null | undefined;
  * d.diff(t, 'quarter'); // 与t相差的季度数
  * d.diff(t, 'year'); // 与t相差的年数
  */
-export function toDayjs(t: BaseTime, fmt?: dayjs.OptionType) {
+export function toDayjs(t?: BaseTime, fmt?: dayjs.OptionType) {
   if (t === null || t === undefined) return dayjs();
   if (typeof t === 'number') {
     const s = String(Math.trunc(t));
@@ -121,7 +121,7 @@ export function getDateRangeAfter(offset: number, fmt = 'YYYY-MM-DD') {
  * @returns 包含天、时、分、秒、毫秒的零填充对象
  * @example
  * const diff = toDayjs(t).diff(); // 毫秒差值
- * const parts = getCountdownParts(diff); // { d: '01', h: '02', m: '03', s: '04', ms: '567' }
+ * const parts = getCountdownParts(diff); // { d: '00', h: '00', m: '00', s: '00', ms: '000' }
  */
 export function getCountdownParts(diff: number) {
   if (diff <= 0) return { d: '00', h: '00', m: '00', s: '00', ms: '000' };

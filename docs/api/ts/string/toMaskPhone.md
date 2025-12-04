@@ -8,3 +8,7 @@
 import { toMaskPhone } from '@base-web-kits/base-tools-ts';
 toMaskPhone('13800138000'); // => '138****8000'
 ```
+
+## 版本
+
+- 1.0.0 新增

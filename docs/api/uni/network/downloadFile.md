@@ -18,3 +18,7 @@ const tempPath = await downloadFile('/files/document.pdf');
   - `showLoading: string` - 下载时显示的加载提示文本
   - `toastSuccess: string` - 下载成功时的提示文本
   - `toastError: string` - 下载失败时的提示文本
+
+## 版本
+
+- 1.0.0 新增

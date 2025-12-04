@@ -11,3 +11,7 @@ setLocalStorage('age', 18); // 数字
 setLocalStorage('vip', true); // 布尔值
 setLocalStorage('token', 'abc123', 7); // 7 天后过期
 ```
+
+## 版本
+
+- 1.0.0 新增

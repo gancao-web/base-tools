@@ -25,3 +25,7 @@ import { getOSSImg } from '@base-web-kits/base-tools-ts';
 锐化: getOSSImg('xx.jpg', { sharpen: 100 });
 对比度: getOSSImg('xx.jpg', { contrast: 100 });
 ```
+
+## 版本
+
+- 1.0.0 新增

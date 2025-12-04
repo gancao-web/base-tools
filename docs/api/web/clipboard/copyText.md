@@ -9,3 +9,7 @@ import { copyText } from '@base-web-kits/base-tools-web';
 
 await copyText('hello world');
 ```
+
+## 版本
+
+- 1.0.0 新增

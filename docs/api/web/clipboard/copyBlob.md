@@ -11,3 +11,7 @@ import { copyBlob } from '@base-web-kits/base-tools-web';
 const svg = new Blob(['<svg></svg>'], { type: 'image/svg+xml' });
 await copyBlob(svg);
 ```
+
+## 版本
+
+- 1.0.0 新增

@@ -10,17 +10,28 @@ const map = {
 };
 
 function copyDir(src, dst) {
-  fs.rmSync(dst, { recursive: true, force: true });
-  fs.mkdirSync(dst, { recursive: true });
-  for (const ent of fs.readdirSync(src, { withFileTypes: true })) {
-    const sp = path.join(src, ent.name);
-    const dp = path.join(dst, ent.name);
-    if (ent.isDirectory()) {
-      copyDir(sp, dp);
-    } else {
-      fs.copyFileSync(sp, dp);
+  if (fs.existsSync(dst)) {
+    fs.rmSync(dst, { recursive: true, force: true });
+  }
+
+  function copyRecursive(currentSrc, currentDst) {
+    if (!fs.existsSync(currentSrc)) return;
+
+    const entries = fs.readdirSync(currentSrc, { withFileTypes: true });
+    for (const ent of entries) {
+      const sp = path.join(currentSrc, ent.name);
+      const dp = path.join(currentDst, ent.name);
+
+      if (ent.isDirectory()) {
+        copyRecursive(sp, dp);
+      } else {
+        fs.mkdirSync(currentDst, { recursive: true });
+        fs.copyFileSync(sp, dp);
+      }
     }
   }
+
+  copyRecursive(src, dst);
 }
 
 // 复制UMD文件到子包根目录
@@ -44,7 +55,7 @@ function copyUMDFiles() {
   }
 }
 
-// 复制根目录README.md到各个包目录
+// 复制README.md到各个包目录
 function copyReadmeToPackages() {
   const rootReadmePath = path.join(process.cwd(), 'README.md');
 
@@ -74,6 +85,59 @@ function copyReadmeToPackages() {
   });
 }
 
+// 复制源码文件到各个包目录
+function copySourceFiles() {
+  const sourceMap = {
+    ts: ['src/ts', 'packages/base-tools-ts/src/ts'],
+    web: ['src/web', 'packages/base-tools-web/src/web'],
+    uni: ['src/uni', 'packages/base-tools-uni/src/uni'],
+    react: ['src/react', 'packages/base-tools-react/src/react'],
+    vue: ['src/vue', 'packages/base-tools-vue/src/vue'],
+  };
+
+  for (const key of Object.keys(sourceMap)) {
+    const [src, dst] = sourceMap[key];
+    copyDir(src, dst);
+    console.log(`Copied source files for ${key}`);
+  }
+}
+
+// 修复Source Map路径
+function fixSourceMaps() {
+  const distDirs = [
+    'packages/base-tools-ts/dist',
+    'packages/base-tools-web/dist',
+    'packages/base-tools-uni/dist',
+    'packages/base-tools-react/dist',
+    'packages/base-tools-vue/dist',
+  ];
+
+  function processDir(currentDir) {
+    const files = fs.readdirSync(currentDir);
+    files.forEach((file) => {
+      const fullPath = path.join(currentDir, file);
+      const stat = fs.statSync(fullPath);
+
+      if (stat.isDirectory()) {
+        processDir(fullPath);
+      } else if (file.endsWith('.map')) {
+        const content = fs.readFileSync(fullPath, 'utf-8');
+        // 将 ../../src 替换为 ../src (减少一层层级，适用于 js.map 和 d.ts.map)
+        const newContent = content.replace(/\.\.\/\.\.\/src/g, '../src');
+        fs.writeFileSync(fullPath, newContent);
+        console.log(`Fixed sourcemap: ${file}`);
+      }
+    });
+  }
+
+  distDirs.forEach((distDir) => {
+    const fullPath = path.join(process.cwd(), distDir);
+    if (fs.existsSync(fullPath)) {
+      processDir(fullPath);
+    }
+  });
+}
+
 for (const key of Object.keys(map)) {
   const [src, dst] = map[key];
   copyDir(src, dst);
@@ -84,3 +148,9 @@ copyUMDFiles();
 
 // 复制README.md到各个包目录
 copyReadmeToPackages();
+
+// 复制源码
+copySourceFiles();
+
+// 修复Source Map
+fixSourceMaps();

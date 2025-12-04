@@ -10,3 +10,7 @@ const res = await axios.get(url, { responseType: 'blob' });
 const { blob, fileName } = await parseAxiosBlob(res);
 download(blob, fileName);
 ```
+
+## 版本
+
+- 1.0.0 新增

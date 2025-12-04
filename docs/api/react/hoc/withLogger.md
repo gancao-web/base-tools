@@ -13,3 +13,7 @@ export default withLogger({ label: 'UserList' })(UserList);
 const report = (type: string, info?: any) => sendToServer(type, info);
 export default withLogger({ label: 'Page', logger: (t, i) => report(t, i) })(Page);
 ```
+
+## 版本
+
+- 1.0.0 新增

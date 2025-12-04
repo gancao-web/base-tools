@@ -11,3 +11,7 @@ import { getQnVideo } from '@base-web-kits/base-tools-ts';
 });
 截帧: getQnVideo('xx.mp4', { vframe: { format: 'jpg', offset: 3, w: 480, h: 360 } });
 ```
+
+## 版本
+
+- 1.0.0 新增

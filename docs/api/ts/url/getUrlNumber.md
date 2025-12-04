@@ -11,3 +11,7 @@ const a = getUrlNumber('a', 'a=1'); // 1
 const a = getUrlNumber('a', 'a=1.2'); // 1.2
 const a = getUrlNumber('a', 'a=abc'); // null
 ```
+
+## 版本
+
+- 1.0.0 新增

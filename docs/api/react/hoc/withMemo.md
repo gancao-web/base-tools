@@ -14,3 +14,7 @@ const UserListMemo = withMemo(UserList);
 const CardMemo = withMemo(Card, (prev, next) => prev.title === next.title);
 export default CardMemo;
 ```
+
+## 版本
+
+- 1.0.0 新增

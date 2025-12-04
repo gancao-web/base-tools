@@ -8,3 +8,7 @@
 import { isBankCard } from '@base-web-kits/base-tools-ts';
 isBankCard('6222 0201 2345 6789'); // true
 ```
+
+## 版本
+
+- 1.0.0 新增

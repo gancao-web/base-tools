@@ -13,3 +13,7 @@ export default withErrorBoundary(<ErrorHint />)(Page);
 // 与 Suspense 组合：加载与错误统一处理
 export default withAsyncBoundary({ suspenseFallback: <Spinner />, errorFallback: <ErrorHint /> })(Page);
 ```
+
+## 版本
+
+- 1.0.0 新增

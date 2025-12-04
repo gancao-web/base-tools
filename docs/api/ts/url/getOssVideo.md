@@ -14,3 +14,7 @@ import { getOSSVideo } from '@base-web-kits/base-tools-ts';
 信息查询: getOSSVideo('xx.mp4', { info: true });
 组合操作: getOSSVideo('xx.mp4', { convert: { format: 'mp4' }, snapshots: { count: 3 } });
 ```
+
+## 版本
+
+- 1.0.0 新增

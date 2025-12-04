@@ -12,3 +12,7 @@ const list = getUrlParam('list', 'list=[1,2]'); // "[1,2]"
 const list = getUrlParam('list', 'list=null'); // null
 const list = getUrlParam('list', 'list=undefined'); // null
 ```
+
+## 版本
+
+- 1.0.0 新增

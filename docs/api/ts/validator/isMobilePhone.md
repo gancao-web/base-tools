@@ -9,3 +9,7 @@ import { isMobilePhone } from '@base-web-kits/base-tools-ts';
 isMobilePhone('13800138000'); // true
 isMobilePhone('12800138000'); // false
 ```
+
+## 版本
+
+- 1.0.0 新增

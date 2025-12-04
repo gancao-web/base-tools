@@ -27,3 +27,7 @@ await authorize('scope.writePhotosAlbum', "请开启'添加到相册'的权限",
 ## 返回值
 
 - `Promise<void>` - 用户已授权时resolve，未授权时抛出异常
+
+## 版本
+
+- 1.0.0 新增

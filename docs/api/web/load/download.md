@@ -10,3 +10,7 @@ download('https://xx/xx.pdf'); // 完整的下载地址
 download('https://xx/xx.pdf', 'xx.pdf'); // 自定义文件名（需含后缀）
 download(blob, '图片.jpg'); // base64字符串 | Blob对象
 ```
+
+## 版本
+
+- 1.0.0 新增

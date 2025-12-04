@@ -8,3 +8,7 @@
 import { isTaxID } from '@base-web-kits/base-tools-ts';
 isTaxID('91350100M000100Y43'); // true/false 取决于校验位
 ```
+
+## 版本
+
+- 1.0.0 新增

@@ -11,6 +11,7 @@
   "dependencies": {
     "@base-web-kits/base-tools-ts": "file:../packages/base-tools-ts",
     "@base-web-kits/base-tools-web": "file:../packages/base-tools-web",
+    "@base-web-kits/base-tools-react": "file:../packages/base-tools-react",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "antd": "^4.24.1",

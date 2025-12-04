@@ -15,3 +15,7 @@ isNumeric('0.50'); // true（始终允许）
 isNumeric('.5'); // false（整数部分不能省）
 isNumeric('123.'); // false（小数部分不能省）
 ```
+
+## 版本
+
+- 1.0.0 新增
