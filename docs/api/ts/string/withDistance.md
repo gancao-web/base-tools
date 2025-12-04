@@ -12,3 +12,7 @@ withDistance(1000); // => '1km'
 withDistance('1500'); // => '1.5km'
 withDistance('1728'); // => '1.73km'
 ```
+
+## 版本
+
+- 1.0.0 新增

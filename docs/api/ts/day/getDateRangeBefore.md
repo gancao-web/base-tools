@@ -10,3 +10,7 @@ import { getDateRangeBefore } from '@base-web-kits/base-tools-ts';
 getDateRangeBefore(1); // ['2025-11-18', '2025-11-19']
 getDateRangeBefore(1, 'YYYY-MM-DD HH:mm:ss'); // ['2025-11-18 00:00:00', '2025-11-19 23:59:59']
 ```
+
+## 版本
+
+- 1.0.0 新增

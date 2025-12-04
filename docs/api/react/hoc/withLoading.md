@@ -16,3 +16,7 @@ export default withLoading(<Spinner />, 'pending')(Button);
 // invert 场景：ready 为真时渲染
 export default withLoading(<Skeleton />, 'ready', true)(Profile);
 ```
+
+## 版本
+
+- 1.0.0 新增

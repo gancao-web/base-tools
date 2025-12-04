@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-vue",
-  "version": "0.9.3",
+  "version": "0.9.12",
   "sideEffects": false,
   "description": "Independent Vue utilities package built from src/vue.",
   "keywords": [
@@ -10,21 +10,18 @@
     "thin-wrapper"
   ],
   "license": "MIT",
-  "main": "./index.cjs",
-  "module": "./index.js",
-  "types": "./index.d.ts",
-  "typesVersions": {
-    "*": {
-      "index": [
-        "./index.d.ts"
-      ]
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
     "dist",
-    "index.d.ts",
-    "index.js",
-    "index.cjs",
     "README.md",
     "src"
   ],

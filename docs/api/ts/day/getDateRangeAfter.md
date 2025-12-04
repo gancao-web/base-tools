@@ -10,3 +10,7 @@ import { getDateRangeAfter } from '@base-web-kits/base-tools-ts';
 getDateRangeAfter(1); // ['2025-11-19', '2025-11-20']
 getDateRangeAfter(1, 'YYYY-MM-DD HH:mm:ss'); // ['2025-11-19 00:00:00', '2025-11-20 23:59:59']
 ```
+
+## 版本
+
+- 1.0.0 新增

@@ -8,3 +8,7 @@
 import { vClickOutside } from '@base-web-kits/base-tools-vue';
 <div v-click-outside="onOutside" />
 ```
+
+## 版本
+
+- 1.0.0 新增

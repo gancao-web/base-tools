@@ -10,3 +10,7 @@ import { loadJs } from '@base-web-kits/base-tools-web';
 await loadJs('https://xx/xx.js');
 await loadJs('/a.js', { defer: true });
 ```
+
+## 版本
+
+- 1.0.0 新增

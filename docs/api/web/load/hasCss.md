@@ -8,3 +8,7 @@
 import { hasCss } from '@base-web-kits/base-tools-web';
 hasCss('https://xx/xx.css'); // boolean
 ```
+
+## 版本
+
+- 1.0.0 新增

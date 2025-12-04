@@ -30,3 +30,7 @@ watch(activeTab, () => {
   - `selectorScroll: string` - 滚动容器的选择器
   - `selectorTab: string` - 需要滚动到中间的tab项的选择器
   - `onScrollLeft: (left: number) => void` - 滚动完成后的回调函数，接收计算出的滚动位置
+
+## 版本
+
+- 1.0.0 新增

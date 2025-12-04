@@ -10,3 +10,7 @@ import { copyUrl } from '@base-web-kits/base-tools-web';
 
 await copyUrl('https://example.com/page');
 ```
+
+## 版本
+
+- 1.0.0 新增

@@ -27,3 +27,7 @@ const fullUrl = getFileUrl('https://other.com/image.jpg');
 ## 返回值
 
 - `string` - 拼接后的完整文件地址
+
+## 版本
+
+- 1.0.0 新增

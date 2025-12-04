@@ -32,3 +32,7 @@ href('/pages/order/pay/success/index');
 ## 返回值
 
 - `Promise<void>` - 支付成功时resolve，失败或取消时抛出异常
+
+## 版本
+
+- 1.0.0 新增

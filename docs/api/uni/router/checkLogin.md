@@ -35,3 +35,7 @@ async function submitOrder() {
 ## 返回值
 
 - `boolean` - 用户是否已登录
+
+## 版本
+
+- 1.0.0 新增

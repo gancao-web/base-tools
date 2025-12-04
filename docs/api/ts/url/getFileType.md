@@ -7,3 +7,7 @@
 ```ts
 import { getFileType } from '@base-web-kits/base-tools-ts';
 ```
+
+## 版本
+
+- 1.0.0 新增

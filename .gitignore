@@ -33,3 +33,13 @@ dist-ssr
 .test-ts5-project/dist
 .test-ts5-project/node_modules
 
+# Package build artifacts
+packages/*/dist
+packages/*/index.js
+packages/*/index.cjs
+packages/*/index.d.ts
+packages/*/index.d.cts
+packages/*/*.umd.global.js
+packages/*/*.map
+packages/*/README.md
+packages/*/src

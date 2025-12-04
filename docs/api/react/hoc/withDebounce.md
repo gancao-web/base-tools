@@ -12,3 +12,7 @@ const DebouncedSearch = withDebounce(300)(SearchBox);
 // 仅首次立即更新，后续走 trailing
 const DebouncedList = withDebounce(500, { leading: true })(List);
 ```
+
+## 版本
+
+- 1.0.0 新增

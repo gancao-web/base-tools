@@ -16,3 +16,7 @@ export default withSkeleton(<ListSkeleton />, 'loading')(List);
 // ready 为真时渲染，未就绪显示骨架
 export default withSkeleton(<ProfileSkeleton />, 'ready', true)(Profile);
 ```
+
+## 版本
+
+- 1.0.0 新增

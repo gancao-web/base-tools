@@ -26,3 +26,7 @@ const closeButton = document.querySelector('#closeModal');
 openButton?.addEventListener('click', showModal);
 closeButton?.addEventListener('click', hideModal);
 ```
+
+## 版本
+
+- 1.0.0 新增

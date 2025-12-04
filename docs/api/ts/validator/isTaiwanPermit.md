@@ -10,3 +10,7 @@ isTaiwanPermit('12345678'); // true
 isTaiwanPermit('T12345678'); // true
 isTaiwanPermit('1234567890'); // true
 ```
+
+## 版本
+
+- 1.0.0 新增

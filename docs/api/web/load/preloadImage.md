@@ -8,3 +8,7 @@
 import { preloadImage } from '@base-web-kits/base-tools-web';
 await preloadImage('/a.png');
 ```
+
+## 版本
+
+- 1.0.0 新增

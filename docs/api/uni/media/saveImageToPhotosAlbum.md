@@ -9,3 +9,7 @@ import { saveImageToPhotosAlbum } from '@base-web-kits/base-tools-uni';
 
 await saveImageToPhotosAlbum('https://example.com/image.jpg');
 ```
+
+## 版本
+
+- 1.0.0 新增

@@ -15,3 +15,7 @@ export default withConditional(canRead, <NoAccess />)(AdminPanel);
 const enabled = (p: { featureOn: boolean }) => p.featureOn;
 export default withConditional(enabled, null)(NewFeature);
 ```
+
+## 版本
+
+- 1.0.0 新增

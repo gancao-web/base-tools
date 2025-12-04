@@ -6,7 +6,7 @@
 
 ```ts
 import { toDayjs } from '@base-web-kits/base-tools-ts';
-const d = toDayjs('2021-01-01'); // dayjs 实例
+const d = toDayjs('2021-01-01'); // dayjs 实例 (无参,则默认当前时间)
 d.format('YYYY-MM-DD HH:mm:ss'); // "2025-12-10 11:33:16"
 d.valueOf(); // 毫秒时间戳，如 1765337596913
 d.unix(); // 秒时间戳，如 1765337596
@@ -34,3 +34,7 @@ d.diff(t, 'month'); // 与t相差的月数
 d.diff(t, 'quarter'); // 与t相差的季度数
 d.diff(t, 'year'); // 与t相差的年数
 ```
+
+## 版本
+
+- 1.0.0 新增

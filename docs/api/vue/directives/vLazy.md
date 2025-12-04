@@ -8,3 +8,7 @@
 import { vLazy } from '@base-web-kits/base-tools-vue';
 <img v-lazy="imgUrl" />
 ```
+
+## 版本
+
+- 1.0.0 新增

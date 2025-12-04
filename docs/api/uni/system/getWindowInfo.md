@@ -10,3 +10,7 @@ import { getWindowInfo } from '@base-web-kits/base-tools-uni';
 const windowInfo = getWindowInfo();
 console.log('windowInfo:', windowInfo);
 ```
+
+## 版本
+
+- 1.0.0 新增

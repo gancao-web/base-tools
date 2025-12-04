@@ -14,3 +14,7 @@ await copyText('Hello World');
 
 - `text: string` - 要复制的文本内容
 - `toastSuccess?: string` - 复制成功的提示文字，默认为 `'复制成功'`
+
+## 版本
+
+- 1.0.0 新增

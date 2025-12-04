@@ -10,3 +10,7 @@ import { getPlatformOs } from '@base-web-kits/base-tools-uni';
 const platform = getPlatformOs();
 console.log('platform:', platform);
 ```
+
+## 版本
+
+- 1.0.0 新增

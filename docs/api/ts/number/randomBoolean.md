@@ -10,3 +10,7 @@ import { randomBoolean } from '@base-web-kits/base-tools-ts';
 const bool = randomBoolean(); // => 随机返回 true 或 false
 console.log(bool); // true 或 false
 ```
+
+## 版本
+
+- 1.0.0 新增

@@ -24,3 +24,7 @@ GIF颜色控制: getQnImg('xx.jpg', { colors: 64 });
 });
 文字水印: getQnImg('xx.jpg', { watermark: { type: 'text', text: '水印', fontsize: 18 } });
 ```
+
+## 版本
+
+- 1.0.0 新增

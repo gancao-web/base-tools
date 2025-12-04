@@ -13,3 +13,7 @@ await openDocument('documents/user-guide.pdf');
 ## 参数
 
 - `path` - 完整/相对文件地址
+
+## 版本
+
+- 1.0.0 新增
