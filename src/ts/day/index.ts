@@ -22,7 +22,7 @@ type BaseTime = number | string | Date | dayjs.Dayjs | null | undefined;
  * @param t 各种规范或不规范的时间
  * @returns dayjs 实例
  * @example
- * const d = toDayjs('2021-01-01'); // dayjs 实例
+ * const d = toDayjs('2021-01-01'); // dayjs 实例 (无参,则默认当前时间)
  * d.format('YYYY-MM-DD HH:mm:ss'); // "2025-12-10 11:33:16"
  * d.valueOf(); // 毫秒时间戳，如 1765337596913
  * d.unix(); // 秒时间戳，如 1765337596
@@ -50,7 +50,7 @@ type BaseTime = number | string | Date | dayjs.Dayjs | null | undefined;
  * d.diff(t, 'quarter'); // 与t相差的季度数
  * d.diff(t, 'year'); // 与t相差的年数
  */
-export function toDayjs(t: BaseTime, fmt?: dayjs.OptionType) {
+export function toDayjs(t?: BaseTime, fmt?: dayjs.OptionType) {
   if (t === null || t === undefined) return dayjs();
   if (typeof t === 'number') {
     const s = String(Math.trunc(t));
