@@ -5,7 +5,7 @@ export default defineConfig({
   outDir: 'dist/vue',
   format: ['esm', 'cjs'],
   sourcemap: true,
-  dts: true,
+  dts: false,
   splitting: false,
   noExternal: ['@vueuse/core'],
   clean: true,

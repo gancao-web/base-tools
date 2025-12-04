@@ -5,7 +5,7 @@ export default defineConfig({
   outDir: 'dist/ts',
   format: ['esm', 'cjs'],
   sourcemap: true,
-  dts: true,
+  dts: false,
   splitting: false,
   noExternal: ['lodash-es'],
   clean: true,

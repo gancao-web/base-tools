@@ -9,6 +9,7 @@ const commands = [
   'tsup --config config/tsup.react.ts',
   'tsup --config config/tsup.vue.ts',
   'tsup --config config/tsup.umd.ts',
+  'npx tsc --project tsconfig.build.json --emitDeclarationOnly',
   'node scripts/copy-dists.mjs',
 ];
 

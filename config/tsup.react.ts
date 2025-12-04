@@ -5,7 +5,7 @@ export default defineConfig({
   outDir: 'dist/react',
   format: ['esm', 'cjs'],
   sourcemap: true,
-  dts: true,
+  dts: false,
   splitting: false,
   noExternal: ['ahooks'],
   clean: true,

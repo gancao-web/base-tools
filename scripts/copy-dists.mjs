@@ -112,21 +112,29 @@ function fixSourceMaps() {
     'packages/base-tools-vue/dist',
   ];
 
-  distDirs.forEach((distDir) => {
-    const fullPath = path.join(process.cwd(), distDir);
-    if (!fs.existsSync(fullPath)) return;
-
-    const files = fs.readdirSync(fullPath);
+  function processDir(currentDir) {
+    const files = fs.readdirSync(currentDir);
     files.forEach((file) => {
-      if (file.endsWith('.map')) {
-        const mapPath = path.join(fullPath, file);
-        const content = fs.readFileSync(mapPath, 'utf-8');
-        // 将 ../../src 替换为 ../src
-        const newContent = content.replace(/"\.\.\/\.\.\/src/g, '"../src');
-        fs.writeFileSync(mapPath, newContent);
+      const fullPath = path.join(currentDir, file);
+      const stat = fs.statSync(fullPath);
+
+      if (stat.isDirectory()) {
+        processDir(fullPath);
+      } else if (file.endsWith('.map')) {
+        const content = fs.readFileSync(fullPath, 'utf-8');
+        // 将 ../../src 替换为 ../src (减少一层层级，适用于 js.map 和 d.ts.map)
+        const newContent = content.replace(/\.\.\/\.\.\/src/g, '../src');
+        fs.writeFileSync(fullPath, newContent);
         console.log(`Fixed sourcemap: ${file}`);
       }
     });
+  }
+
+  distDirs.forEach((distDir) => {
+    const fullPath = path.join(process.cwd(), distDir);
+    if (fs.existsSync(fullPath)) {
+      processDir(fullPath);
+    }
   });
 }
 

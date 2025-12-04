@@ -5,7 +5,7 @@ export default defineConfig({
   outDir: 'dist/uni',
   format: ['esm', 'cjs'],
   sourcemap: true,
-  dts: true,
+  dts: false,
   splitting: false,
   clean: true,
   tsconfig: 'tsconfig.build.json',
