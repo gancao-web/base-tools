@@ -7,7 +7,7 @@
     "lint": "tsc --noEmit && eslint ./src --ext .ts,.js --fix && prettier --write .",
     "lint:lint-staged": "tsc --noEmit && lint-staged",
     "test": "vitest run",
-    "build": "npm run test && tsup && node scripts/copy-dists.mjs",
+    "build": "node scripts/build.mjs",
     "version:major": "node scripts/version-bump.mjs major",
     "version:minor": "node scripts/version-bump.mjs minor",
     "version:patch": "node scripts/version-bump.mjs patch",
