@@ -55,7 +55,7 @@ function copyUMDFiles() {
   }
 }
 
-// 复制根目录README.md到各个包目录
+// 复制README.md到各个包目录
 function copyReadmeToPackages() {
   const rootReadmePath = path.join(process.cwd(), 'README.md');
 
@@ -85,6 +85,23 @@ function copyReadmeToPackages() {
   });
 }
 
+// 复制源码文件到各个包目录
+function copySourceFiles() {
+  const sourceMap = {
+    ts: ['src/ts', 'packages/base-tools-ts/src/ts'],
+    web: ['src/web', 'packages/base-tools-web/src/web'],
+    uni: ['src/uni', 'packages/base-tools-uni/src/uni'],
+    react: ['src/react', 'packages/base-tools-react/src/react'],
+    vue: ['src/vue', 'packages/base-tools-vue/src/vue'],
+  };
+
+  for (const key of Object.keys(sourceMap)) {
+    const [src, dst] = sourceMap[key];
+    copyDir(src, dst);
+    console.log(`Copied source files for ${key}`);
+  }
+}
+
 for (const key of Object.keys(map)) {
   const [src, dst] = map[key];
   copyDir(src, dst);
@@ -95,3 +112,6 @@ copyUMDFiles();
 
 // 复制README.md到各个包目录
 copyReadmeToPackages();
+
+// 复制源码
+copySourceFiles();

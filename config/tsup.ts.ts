@@ -4,6 +4,7 @@ export default defineConfig({
   entry: ['src/ts/index.ts'],
   outDir: 'dist/ts',
   format: ['esm', 'cjs'],
+  sourcemap: true,
   dts: true,
   splitting: false,
   noExternal: ['lodash-es'],

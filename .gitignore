@@ -42,3 +42,4 @@ packages/*/index.d.cts
 packages/*/*.umd.global.js
 packages/*/*.map
 packages/*/README.md
+packages/*/src
