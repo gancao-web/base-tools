@@ -10,17 +10,28 @@ const map = {
 };
 
 function copyDir(src, dst) {
-  fs.rmSync(dst, { recursive: true, force: true });
-  fs.mkdirSync(dst, { recursive: true });
-  for (const ent of fs.readdirSync(src, { withFileTypes: true })) {
-    const sp = path.join(src, ent.name);
-    const dp = path.join(dst, ent.name);
-    if (ent.isDirectory()) {
-      copyDir(sp, dp);
-    } else {
-      fs.copyFileSync(sp, dp);
+  if (fs.existsSync(dst)) {
+    fs.rmSync(dst, { recursive: true, force: true });
+  }
+
+  function copyRecursive(currentSrc, currentDst) {
+    if (!fs.existsSync(currentSrc)) return;
+
+    const entries = fs.readdirSync(currentSrc, { withFileTypes: true });
+    for (const ent of entries) {
+      const sp = path.join(currentSrc, ent.name);
+      const dp = path.join(currentDst, ent.name);
+
+      if (ent.isDirectory()) {
+        copyRecursive(sp, dp);
+      } else {
+        fs.mkdirSync(currentDst, { recursive: true });
+        fs.copyFileSync(sp, dp);
+      }
     }
   }
+
+  copyRecursive(src, dst);
 }
 
 // 复制UMD文件到子包根目录
