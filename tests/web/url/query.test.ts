@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getUrlQuery, getUrlQueryNumber, getUrlQueryAll } from '../../../src/web/url';
+import { getUrlQuery, getUrlQueryNumber, getUrlQueryAll } from '../../../src/web';
 
 describe('web/url query', () => {
   it('getUrlQuery decodes and handles null/undefined strings', () => {

@@ -3,7 +3,8 @@
  */
 export * from './clipboard';
 export * from './cookie';
+export * from './device';
+export * from './dom';
 export * from './load';
 export * from './storage';
-export * from './dom';
-export * from './device';
+export * from './url';
