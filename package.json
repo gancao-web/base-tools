@@ -8,6 +8,7 @@
     "lint:lint-staged": "tsc --noEmit && lint-staged",
     "test": "vitest run",
     "build": "node scripts/build.mjs",
+    "test:projects": "node scripts/test-projects.mjs",
     "version:major": "node scripts/version-bump.mjs major",
     "version:minor": "node scripts/version-bump.mjs minor",
     "version:patch": "node scripts/version-bump.mjs patch",
