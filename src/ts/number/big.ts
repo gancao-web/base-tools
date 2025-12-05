@@ -14,18 +14,18 @@ export type NumLike = string | number | BigNumber;
  * big('0.1'); // => BigNumber
  * big(0.2);   // => BigNumber
  */
-export function big(x: NumLike): BigNumber {
+function big(x: NumLike): BigNumber {
   return x instanceof BigNumber ? x : new BigNumber(x);
 }
 
 /**
  * 高精度加法（支持多个参数连加）。
  * @example
- * bigPlus(0.1, 0.2); // => 0.3
- * bigPlus('0.1', '0.2'); // => 0.3
- * bigPlus(1, 2, 3, 4); // => 10  // 多参数连加: 1+2+3+4
+ * mathPlus(0.1, 0.2); // => 0.3
+ * mathPlus('0.1', '0.2'); // => 0.3
+ * mathPlus(1, 2, 3, 4); // => 10  // 多参数连加: 1+2+3+4
  */
-export function bigPlus(...rest: NumLike[]) {
+export function mathPlus(...rest: NumLike[]) {
   let acc = big(rest[0]);
   for (const x of rest.slice(1)) acc = acc.plus(big(x));
   return acc.toNumber();
@@ -34,11 +34,11 @@ export function bigPlus(...rest: NumLike[]) {
 /**
  * 高精度减法（支持多个参数连减）。
  * @example
- * bigMinus(1, 0.9); // => 0.1
- * bigMinus('1.1', '0.2'); // => 0.9
- * bigMinus(10, 1, 2, 3); // => 4  // 多参数连减: 10-1-2-3
+ * mathMinus(1, 0.9); // => 0.1
+ * mathMinus('1.1', '0.2'); // => 0.9
+ * mathMinus(10, 1, 2, 3); // => 4  // 多参数连减: 10-1-2-3
  */
-export function bigMinus(...rest: NumLike[]) {
+export function mathMinus(...rest: NumLike[]) {
   let acc = big(rest[0]);
   for (const x of rest.slice(1)) acc = acc.minus(big(x));
   return acc.toNumber();
@@ -47,11 +47,11 @@ export function bigMinus(...rest: NumLike[]) {
 /**
  * 高精度乘法（支持多个参数连乘）。
  * @example
- * bigTimes(0.1, 0.2); // => 0.02
- * bigTimes('1.5', '3'); // => 4.5
- * bigTimes(2, 3, 4); // => 24  // 多参数连乘: 2*3*4
+ * mathTimes(0.1, 0.2); // => 0.02
+ * mathTimes('1.5', '3'); // => 4.5
+ * mathTimes(2, 3, 4); // => 24  // 多参数连乘: 2*3*4
  */
-export function bigTimes(...rest: NumLike[]) {
+export function mathTimes(...rest: NumLike[]) {
   let acc = big(rest[0]);
   for (const x of rest.slice(1)) acc = acc.times(big(x));
   return acc.toNumber();
@@ -60,11 +60,11 @@ export function bigTimes(...rest: NumLike[]) {
 /**
  * 高精度除法（支持多个参数连除）。
  * @example
- * bigDiv(1, 3); // => 0.333333...
- * bigDiv('10', '4'); // => 2.5
- * bigDiv(100, 5, 2); // => 10  // 多参数连除: 100/5/2
+ * mathDiv(1, 3); // => 0.333333...
+ * mathDiv('10', '4'); // => 2.5
+ * mathDiv(100, 5, 2); // => 10  // 多参数连除: 100/5/2
  */
-export function bigDiv(...rest: NumLike[]) {
+export function mathDiv(...rest: NumLike[]) {
   let acc = big(rest[0]);
   for (const x of rest.slice(1)) acc = acc.div(big(x));
   return acc.toNumber();
@@ -76,10 +76,10 @@ export function bigDiv(...rest: NumLike[]) {
  * @param y 指数。
  * @returns 计算结果。
  * @example
- * bigPow(2, 3); // => 8
- * bigPow('2.5', 2); // => 6.25
+ * mathPow(2, 3); // => 8
+ * mathPow('2.5', 2); // => 6.25
  */
-export function bigPow(x: NumLike, y: NumLike) {
+export function mathPow(x: NumLike, y: NumLike) {
   return big(x).pow(big(y)).toNumber();
 }
 
@@ -90,12 +90,16 @@ export function bigPow(x: NumLike, y: NumLike) {
  * @param rm 舍入模式，默认 `ROUND_HALF_UP`（四舍五入）。
  * @returns 舍入后的数值。
  * @example
- * bigRound(1.6); // => 2
- * bigRound('1.234', 2); // => 1.23
- * bigRound('1.235', 2); // => 1.24
- * bigRound('1.299', 2, BigNumber.ROUND_DOWN); // => 1.29
+ * mathRound(1.6); // => 2
+ * mathRound('1.234', 2); // => 1.23
+ * mathRound('1.235', 2); // => 1.24
+ * mathRound('1.299', 2, BigNumber.ROUND_DOWN); // => 1.29
  */
-export function bigRound(x: NumLike, dp = 0, rm: BigNumber.RoundingMode = BigNumber.ROUND_HALF_UP) {
+export function mathRound(
+  x: NumLike,
+  dp = 0,
+  rm: BigNumber.RoundingMode = BigNumber.ROUND_HALF_UP,
+) {
   return big(x).decimalPlaces(dp, rm).toNumber();
 }
 
@@ -106,13 +110,13 @@ export function bigRound(x: NumLike, dp = 0, rm: BigNumber.RoundingMode = BigNum
  * @param rm 舍入模式，默认 `ROUND_HALF_UP`（四舍五入）。
  * @returns 格式化后的字符串。
  * @example
- * bigFixed('1'); // => '1.00'
- * +bigFixed('1'); // => 1
- * bigFixed(1.2345); // => '1.23'
- * bigFixed(1.2345, 3); // => '1.235'
- * bigFixed('1.2345', 0, BigNumber.ROUND_UP); // => '2'
+ * mathFixed('1'); // => '1.00'
+ * +mathFixed('1'); // => 1
+ * mathFixed(1.2345); // => '1.23'
+ * mathFixed(1.2345, 3); // => '1.235'
+ * mathFixed('1.2345', 0, BigNumber.ROUND_UP); // => '2'
  */
-export function bigFixed(
+export function mathFixed(
   x: NumLike,
   dp = 2,
   rm: BigNumber.RoundingMode = BigNumber.ROUND_HALF_UP,
@@ -123,62 +127,62 @@ export function bigFixed(
 /**
  * 比较两个数值大小。
  * @example
- * bigCompare('2', '10'); // => -1
- * bigCompare(3, 3);      // => 0
- * bigCompare('10', 2);   // => 1
+ * mathCompare('2', '10'); // => -1
+ * mathCompare(3, 3);      // => 0
+ * mathCompare('10', 2);   // => 1
  */
-export function bigCompare(a: NumLike, b: NumLike): -1 | 0 | 1 | null {
+export function mathCompare(a: NumLike, b: NumLike): -1 | 0 | 1 | null {
   return big(a).comparedTo(big(b));
 }
 
 /**
  * 判断两个数值是否相等。
  * @example
- * bigEqual('1.0', 1); // => true
- * bigEqual(2, 1); // => false
+ * mathEqual('1.0', 1); // => true
+ * mathEqual(2, 1); // => false
  */
-export function bigEqual(a: NumLike, b: NumLike): boolean {
+export function mathEqual(a: NumLike, b: NumLike): boolean {
   return big(a).isEqualTo(big(b));
 }
 
 /**
  * 判断 a 是否大于 b。
  * @example
- * bigGreaterThan(2, 1); // => true
- * bigGreaterThan(1, 2); // => false
+ * mathGreaterThan(2, 1); // => true
+ * mathGreaterThan(1, 2); // => false
  */
-export function bigGreaterThan(a: NumLike, b: NumLike): boolean {
+export function mathGreaterThan(a: NumLike, b: NumLike): boolean {
   return big(a).isGreaterThan(big(b));
 }
 
 /**
  * 判断 a 是否大于等于 b。
  * @example
- * bigGreaterThanOrEqual(2, 2); // => true
- * bigGreaterThanOrEqual(1, 2); // => false
+ * mathGreaterThanOrEqual(2, 2); // => true
+ * mathGreaterThanOrEqual(1, 2); // => false
  */
-export function bigGreaterThanOrEqualTo(a: NumLike, b: NumLike): boolean {
+export function mathGreaterThanOrEqual(a: NumLike, b: NumLike): boolean {
   return big(a).isGreaterThanOrEqualTo(big(b));
 }
 
 /**
  * 判断 a 是否小于 b。
  * @example
- * bigLessThan(1, 2); // => true
- * bigLessThan(2, 1); // => false
+ * mathLessThan(1, 2); // => true
+ * mathLessThan(2, 1); // => false
  */
-export function bigLessThan(a: NumLike, b: NumLike): boolean {
+export function mathLessThan(a: NumLike, b: NumLike): boolean {
   return big(a).isLessThan(big(b));
 }
 
 /**
  * 判断 a 是否小于等于 b。
  * @example
- * bigLessThanOrEqual(2, 2); // => true
- * bigLessThanOrEqual(1, 2); // => true
- * bigLessThanOrEqual(2, 1); // => false
+ * mathLessThanOrEqual(2, 2); // => true
+ * mathLessThanOrEqual(1, 2); // => true
+ * mathLessThanOrEqual(2, 1); // => false
  */
-export function bigLessThanOrEqual(a: NumLike, b: NumLike): boolean {
+export function mathLessThanOrEqual(a: NumLike, b: NumLike): boolean {
   return big(a).isLessThanOrEqualTo(big(b));
 }
 
