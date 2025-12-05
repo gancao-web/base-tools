@@ -26,8 +26,8 @@ dist-ssr
 *.sw?
 
 # VitePress cache and build output
-.vitepress/cache
-.vitepress/dist
+docs/.vitepress/cache
+docs/.vitepress/dist
 .test-ts4-project/dist
 .test-ts4-project/node_modules
 .test-ts5-project/dist
