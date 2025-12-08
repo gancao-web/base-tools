@@ -1,12 +1,16 @@
 import {
   createTimeRandId,
-  getUrlParam,
   toDayjs,
   getObjectKeys,
   EventBus,
-  findLastIndex,
+  uniq,
 } from '@base-web-kits/base-tools-ts';
-import { setLocalStorage, getLocalStorage, isMobile } from '@base-web-kits/base-tools-web';
+import {
+  setLocalStorage,
+  getLocalStorage,
+  getUrlParam,
+  isMobile,
+} from '@base-web-kits/base-tools-web';
 
 // 测试 base-tools-ts 的功能
 const timeRandId = createTimeRandId();
@@ -21,7 +25,7 @@ const keys = getObjectKeys(testObj);
 
 // 测试 Lodash 方法
 const testArray = [1, 2, 3, 4, 2];
-const lastIndex = findLastIndex(testArray, (x) => x === 2);
+const uniqStr = uniq(testArray).toString();
 
 // 测试 EventBus
 const emitter = new EventBus();
@@ -47,7 +51,7 @@ if (resultDiv) {
     <p>✅ EventBus: 事件发布订阅功能测试成功</p>
     
     <h3>Lodash 测试结果：</h3>
-    <p>✅ findLastIndex: ${lastIndex}</p>
+    <p>✅ uniq: ${uniqStr}</p>
     
     <h3>Web 工具测试结果：</h3>
     <p>✅ Storage: ${JSON.stringify(storedValue)}</p>

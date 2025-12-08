@@ -10,7 +10,7 @@ export default defineConfig([
     sourcemap: true,
     dts: false,
     splitting: false,
-    noExternal: ['lodash-es'],
+    noExternal: ['es-toolkit'],
     clean: false,
     tsconfig: 'tsconfig.build.json',
     globalName: 'baseToolsTS',
