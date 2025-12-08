@@ -2,10 +2,13 @@
 
 获取url的查询参数值
 
+- url可选, 默认当前地址
+
 ## 示例
 
 ```ts
 import { getUrlParam } from '@base-web-kits/base-tools-ts';
+const a = getUrlParam('a'); // 默认当前地址
 const q = getUrlParam('q', 'https://a.com/?q=%E6%B5%8B%E8%AF%95'); // "测试"
 const a = getUrlParam('a', 'a=1'); // "1"
 const list = getUrlParam('list', 'list=[1,2]'); // "[1,2]"

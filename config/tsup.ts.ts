@@ -7,7 +7,7 @@ export default defineConfig({
   sourcemap: true,
   dts: false,
   splitting: false,
-  noExternal: ['lodash-es'],
+  noExternal: ['es-toolkit'],
   clean: true,
   tsconfig: 'tsconfig.build.json',
 });

@@ -15,3 +15,4 @@ export * from './string';
 export * from './system';
 export * from './ui';
 export * from './update';
+export * from './url';

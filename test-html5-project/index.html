@@ -155,12 +155,12 @@
       // 测试 Lodash 方法
       function testLodash() {
         try {
-          const { findLastIndex } = baseToolsTS;
+          const { uniq } = baseToolsTS;
 
           const testArray = [1, 2, 3, 4, 2];
-          const lastIndex = findLastIndex(testArray, (x) => x === 2);
+          const uniqStr = uniq(testArray).toString();
 
-          tsResult.textContent = `Lodash 测试成功! findLastIndex: ${lastIndex}`;
+          tsResult.textContent = `Lodash 测试成功! uniq: ${uniqStr}`;
           tsResult.style.color = '#4CAF50';
         } catch (error) {
           tsResult.textContent = `❌ Lodash测试出错: ${error.message}`;

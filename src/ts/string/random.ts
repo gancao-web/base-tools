@@ -36,7 +36,7 @@ export function createRandId(prefix = 'id_') {
 export function createTimeRandId(digits: number = 6) {
   const base = 10 ** (digits - 1);
   const range = 9 * base;
-  const randomInt = Math.floor(Math.random() * range) + base;
+  const int = Math.floor(Math.random() * range) + base;
 
-  return `${Date.now()}${randomInt}`;
+  return `${Date.now()}${int}`;
 }
