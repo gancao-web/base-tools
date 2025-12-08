@@ -26,7 +26,7 @@
 
 <script>
 import { ref, reactive, computed } from 'vue';
-import { toDayjs, findLastIndex } from '@base-web-kits/base-tools-ts';
+import { toDayjs, uniq } from '@base-web-kits/base-tools-ts';
 import { setLocalStorage, getLocalStorage, removeLocalStorage, isMobile } from '@base-web-kits/base-tools-web';
 
 export default {
@@ -51,10 +51,10 @@ export default {
     const testLodash = () => {
       try {
         const testArray = [1, 2, 3, 4, 2];
-        const lastIndex = findLastIndex(testArray, x => x === 2);
+        const uniqStr = uniq(testArray).toString();
 
         tsResult.value = `Lodash 测试成功!\n` +
-          `findLastIndex: ${lastIndex}`;
+          `uniq: ${uniqStr}`;
       } catch (error) {
         tsResult.value = `❌ Lodash测试出错: ${error.message}`;
       }

@@ -11,7 +11,6 @@ import {
   isOfficerId,
   isSoldierId,
   isMilitaryId,
-  isJSON,
   isURL,
   isIP,
   isIPRange,
@@ -91,13 +90,6 @@ describe('ts/validator', () => {
   });
 
   describe('网络/数据', () => {
-    it('isJSON', () => {
-      expect(isJSON('{"a":1}')).toBe(true);
-      expect(isJSON('[1,2]')).toBe(true);
-      expect(isJSON('abc')).toBe(false);
-      expect(isJSON({ a: 1 })).toBe(true);
-    });
-
     it('isURL', () => {
       expect(isURL('https://example.com/path?a=1')).toBe(true);
       expect(isURL('ftp://example.com')).toBe(true);

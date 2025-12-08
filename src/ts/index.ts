@@ -5,7 +5,7 @@ export * from './array';
 export * from './async';
 export * from './bean';
 export * from './day';
-export * from './lodash';
+export * from './es-toolkit';
 export * from './number';
 export * from './object';
 export * from './string';

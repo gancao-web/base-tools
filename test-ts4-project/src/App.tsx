@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { setLocalStorage, getLocalStorage } from '@base-web-kits/base-tools-web';
-import { createRandId, toDayjs, findLastIndex } from '@base-web-kits/base-tools-ts';
+import { createRandId, toDayjs, uniq } from '@base-web-kits/base-tools-ts';
 import './App.css';
 
 function App() {
@@ -20,8 +20,8 @@ function App() {
 
       // 测试 Lodash 方法
       const testArray = [1, 2, 3, 4, 2];
-      const lastIndex = findLastIndex(testArray, (x) => x === 2);
-      results.push(`✅ Lodash: findLastIndex=${lastIndex}`);
+      const uniqStr = uniq(testArray).toString();
+      results.push(`✅ Lodash: uniq=${uniqStr}`);
 
       // 测试 base-tools-web 的功能
       setLocalStorage('test-key', 'test-value-123');

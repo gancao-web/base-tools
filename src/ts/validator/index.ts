@@ -394,31 +394,6 @@ export function isTaxID(code: string) {
 }
 
 /**
- * 判断字符串是否为合法 JSON 文本。
- * 说明：传入字符串时尝试 `JSON.parse`；传入对象/数组则视为合法。
- * @param input 待判定的值或字符串
- * @returns 是否为合法 JSON
- * @example
- * isJSON('{"a":1}') // true
- * isJSON('[1,2]') // true
- * isJSON('abc') // false
- */
-export function isJSON(input: unknown) {
-  if (typeof input === 'string') {
-    const s = input.trim();
-    if (s === '') return false;
-    try {
-      JSON.parse(s);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-  if (input !== null && typeof input === 'object') return true;
-  return false;
-}
-
-/**
  * HEX 颜色值（支持 `#RGB`、`#RRGGBB`、`#RRGGBBAA`）。
  * @param s 颜色字符串
  * @returns 是否为合法 HEX 颜色
