@@ -49,20 +49,20 @@ export function promisifyUniApi<Option, Res, Err>(uniApi: UniApi<Option, Res, Er
         ...(option as Option),
         success(res) {
           if (showLoading) uni.hideLoading();
-          if (showLog) log?.('info', { desc: `${uniApi.name} success`, option, res });
+          if (showLog) log?.('info', { name: uniApi.name, status: 'success', option, res });
           resolve(res);
 
           const msg = typeof toastSuccess === 'function' ? toastSuccess(res) : toastSuccess;
           if (msg) toast(msg);
         },
-        fail(err) {
+        fail(e) {
           if (showLoading) uni.hideLoading();
-          if (showLog) log?.('error', { desc: `${uniApi.name} fail`, option, err });
-          reject(err);
+          if (showLog) log?.('error', { name: uniApi.name, status: 'fail', option, e });
+          reject(e);
 
-          const msg = typeof toastError === 'function' ? toastError(err) : toastError;
+          const msg = typeof toastError === 'function' ? toastError(e) : toastError;
           if (msg)
-            toast(typeof msg === 'string' ? msg : `${uniApi.name} fail: ${JSON.stringify(err)}`);
+            toast(typeof msg === 'string' ? msg : `${uniApi.name} fail: ${JSON.stringify(e)}`);
         },
       });
     });

@@ -84,12 +84,22 @@ export async function authorize(
     scope,
     fail(e) {
       // 用户拒绝授权后，短期内调用uni.authorize不会再出现授权弹窗，而是直接进入这里的fail, 此时需自行showModal提醒
-      log?.('info', { desc: 'uni.authorize fail, showModal openSetting..', scope, e });
+      log?.('info', {
+        name: 'authorize',
+        status: 'fail',
+        desc: 'showModal openSetting..',
+        option: { scope },
+        e,
+      });
       uni.showModal({
         ...option,
         content,
         success: (res) => {
-          log?.('info', { desc: 'showModal openSetting..', scope, res });
+          log?.('info', {
+            name: 'authorize.openSetting',
+            status: res.confirm ? 'success' : 'fail',
+            option: { scope },
+          });
           if (res.confirm) uni.openSetting();
         },
       });
