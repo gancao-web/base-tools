@@ -1,13 +1,12 @@
 {
   "name": "@base-web-kits/base-tools-vue",
-  "version": "0.9.99",
+  "version": "1.0.0",
   "sideEffects": false,
   "description": "Independent Vue utilities package built from src/vue.",
   "keywords": [
     "base-tools",
     "vue",
-    "utilities",
-    "thin-wrapper"
+    "utilities"
   ],
   "license": "MIT",
   "main": "./dist/index.cjs",
