@@ -1,13 +1,12 @@
 {
   "name": "@base-web-kits/base-tools-react",
-  "version": "0.9.99",
+  "version": "1.0.0",
   "sideEffects": false,
   "description": "Independent React utilities package built from src/react.",
   "keywords": [
     "base-tools",
     "react",
-    "utilities",
-    "thin-wrapper"
+    "utilities"
   ],
   "license": "MIT",
   "main": "./dist/index.cjs",

@@ -7,7 +7,8 @@
 
 ## 示例
 
-可直接使用es-toolkit的所有函数,无需安装
+- 无需安装, 可直接使用es-toolkit的所有函数
+- 不含过时的loadsh兼容包, 即不含'es-toolkit/compat'里面的函数
 
 ```ts
 import { cloneDeep, randomInt } from '@base-web-kits/base-tools-ts';

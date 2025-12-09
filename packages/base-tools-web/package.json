@@ -1,13 +1,12 @@
 {
   "name": "@base-web-kits/base-tools-web",
-  "version": "0.9.99",
+  "version": "1.0.0",
   "sideEffects": false,
   "description": "Independent Web utilities package built from src/web.",
   "keywords": [
     "base-tools",
     "web",
-    "utilities",
-    "thin-wrapper"
+    "utilities"
   ],
   "license": "MIT",
   "main": "./dist/index.cjs",
