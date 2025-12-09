@@ -6,8 +6,7 @@
   "keywords": [
     "base-tools",
     "react",
-    "utilities",
-    "thin-wrapper"
+    "utilities"
   ],
   "license": "MIT",
   "main": "./dist/index.cjs",
