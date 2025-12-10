@@ -58,39 +58,39 @@ function main() {
   run(`git push origin ${tagName}`);
   console.log(`\x1b[32mTag ${tagName} pushed to remote.\x1b[0m`);
 
-  // 5. Merge master into doc and push
-  console.log(`\x1b[36mMerging master into doc branch...\x1b[0m`);
+  // 5. Merge master into docs and push
+  console.log(`\x1b[36mMerging master into docs branch...\x1b[0m`);
 
-  // Check if doc branch exists locally
-  const localDoc = getOutput('git branch --list doc');
+  // Check if docs branch exists locally
+  const localDoc = getOutput('git branch --list docs');
 
   if (!localDoc) {
-    console.log('Local doc branch not found. Creating tracking branch from origin/doc...');
+    console.log('Local docs branch not found. Creating tracking branch from origin/docs...');
     try {
-      run('git checkout -b doc origin/doc');
+      run('git checkout -b docs origin/docs');
     } catch (e) {
       console.error(
-        '\x1b[31mFailed to checkout doc branch. Make sure it exists on remote.\x1b[0m',
+        '\x1b[31mFailed to checkout docs branch. Make sure it exists on remote.\x1b[0m',
         e,
       );
       process.exit(1);
     }
   } else {
-    run('git checkout doc');
+    run('git checkout docs');
     // Try to pull to ensure we are up to date, but don't fail if it's just local
     try {
-      run('git pull origin doc');
+      run('git pull origin docs');
     } catch (e) {
-      console.warn('Warning: Failed to pull origin doc. Continuing...', e);
+      console.warn('Warning: Failed to pull origin docs. Continuing...', e);
     }
   }
 
   try {
     run('git merge master');
-    run('git push origin doc');
-    console.log(`\x1b[32mSuccessfully merged master to doc and pushed.\x1b[0m`);
+    run('git push origin docs');
+    console.log(`\x1b[32mSuccessfully merged master to docs and pushed.\x1b[0m`);
   } catch (e) {
-    console.error('\x1b[31mFailed to merge or push doc branch.\x1b[0m', e);
+    console.error('\x1b[31mFailed to merge or push docs branch.\x1b[0m', e);
     process.exit(1);
   } finally {
     // Switch back to master
