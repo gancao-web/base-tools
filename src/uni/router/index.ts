@@ -82,7 +82,17 @@ export function checkLogin(autoLogin = true) {
  * - 需在入口文件初始化应用配置 setAppConfig({ pathHome })
  */
 export function toHome() {
-  href(getAppConfig().pathHome);
+  const { pathHome } = getAppConfig();
+  href(pathHome);
+}
+
+/**
+ * 跳登录页
+ * - 需在入口文件初始化应用配置 setAppConfig({ pathLogin })
+ */
+export function toLogin() {
+  const { pathLogin } = getAppConfig();
+  href(pathLogin);
 }
 
 /**

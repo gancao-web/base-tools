@@ -1,4 +1,4 @@
-type AppConfig = {
+export type AppConfig = {
   /**
    * 首页路径 (使toHome方法能够跳转首页)
    * @example
@@ -60,7 +60,30 @@ type AppConfig = {
    * @param level 日志级别 'info' | 'error' | 'warn' | 'debug'
    * @param data 日志数据
    */
-  log?: (level: 'info' | 'error' | 'warn' | 'debug', data: Record<string, unknown>) => void;
+  log?: (level: 'info' | 'error' | 'warn' | 'debug', data: AppLogInfo) => void;
+};
+
+export type AppLogInfo = {
+  /** 调用函数的名称 */
+  name: string;
+
+  /** 函数的调用状态 */
+  status: 'success' | 'fail';
+
+  /** 函数的调用参数 */
+  option?: unknown;
+
+  /** 函数的调用结果 */
+  res?: unknown;
+
+  /** 函数的调用错误 */
+  e?: unknown;
+
+  /** 日志描述 */
+  desc?: string;
+
+  // 其他自定义属性
+  [key: string]: unknown;
 };
 
 const appConfig: AppConfig = {
@@ -91,6 +114,8 @@ export function getAppConfig() {
  *   hostIcon: 'https://example.com/',
  *   isTabBar: (url) => url.startsWith('/pages/tabbar/'),
  *   isLogin: () => useUserStore().isLogin,
+ *   // onBeforeHref: (path) => {},
+ *   // log: (level, data) => console[level](data),
  * });
  */
 export function setAppConfig(newConfig: AppConfig) {

@@ -17,7 +17,7 @@ export async function chooseMedia(option: UniApp.ChooseMediaOption) {
   if (cache.isChooseMedia) {
     const { log } = getAppConfig();
     const desc = 'Choosing media, please wait..';
-    log?.('error', { desc });
+    log?.('error', { name: 'chooseMedia', status: 'fail', desc, option });
     throw new Error(desc);
   }
 
