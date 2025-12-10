@@ -51,6 +51,19 @@ function main() {
 
   console.log(`🚀 Bumping ${versionType} version for all packages...\n`);
 
+  // Update root package.json
+  try {
+    const rootDir = join(__dirname, '..');
+    const packageJsonPath = join(rootDir, 'package.json');
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+    const currentVersion = packageJson.version;
+    const newVersion = bumpVersion(currentVersion, versionType);
+
+    updatePackageVersion(rootDir, newVersion);
+  } catch (error) {
+    console.error(`❌ Failed to update root package: ${error.message}`);
+  }
+
   packages.forEach((packageName) => {
     const packagePath = join(packagesDir, packageName);
     const packageJsonPath = join(packagePath, 'package.json');
