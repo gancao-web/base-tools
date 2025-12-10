@@ -52,3 +52,7 @@ export function requestApi<T>(url: string, param: RequestParam, config?: Request
 ## 返回值
 
 `Promise<T> & { task?: UniApp.RequestTask }`
+
+## 版本
+
+- 1.0.1 新增

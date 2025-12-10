@@ -5,6 +5,7 @@ import { getPlatformOs } from '../system';
 import { toast } from '../ui';
 import type { AppConfig, AppLogInfo } from '../config';
 
+/** 请求参数 */
 export type RequestParam = UniApp.RequestOptions['data'];
 
 /** 请求配置 */

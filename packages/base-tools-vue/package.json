@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-vue",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "sideEffects": false,
   "description": "Independent Vue utilities package built from src/vue.",
   "keywords": [
