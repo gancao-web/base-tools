@@ -3,7 +3,7 @@ import { getAppConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformOs } from '../system';
 import { toast } from '../ui';
-import type { AppLogInfo } from '../config';
+import type { AppConfig, AppLogInfo } from '../config';
 
 export type RequestParam = UniApp.RequestOptions['data'];
 
@@ -35,7 +35,13 @@ export type RequestConfig = Omit<
 
   /** 是否输出日志 */
   isLog?: boolean;
+
+  /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失；默认0,不开启缓存 */
+  cacheTime?: number;
 };
+
+/** 请求缓存 */
+const requestCache = new Map<string, { res: unknown; expire: number }>();
 
 /**
  * 基础请求 (返回promise和task对象)
@@ -48,9 +54,9 @@ export type RequestConfig = Omit<
  * // 项目基础请求的封装
  * export function requestApi<T>(url: string, param: RequestParam, config?: RequestConfig) {
  *    return requestBase<T>(HOST + url, param, {
- *      ...config,
  *      dataPath: 'data',
  *      header: { token: 'xx', version: 'xx', tid: 'xx' },
+ *      ...config,
  *      response(res) {
  *        return {
  *          res,
@@ -66,6 +72,9 @@ export function request<T>(url: string, param: RequestParam, config: RequestConf
   // 请求对象
   const temp: { task?: UniApp.RequestTask } = {};
 
+  // 日志
+  const { log } = getAppConfig();
+
   // 创建promise
   const promise: Promise<T> & { task?: UniApp.RequestTask } = new Promise((resolve, reject) => {
     const {
@@ -74,10 +83,23 @@ export function request<T>(url: string, param: RequestParam, config: RequestConf
       dataPath = false,
       isLog = true,
       onResponse,
+      cacheTime,
       ...uniConfig
     } = config;
 
-    const { log } = getAppConfig();
+    // 缓存处理
+    const isCache = cacheTime && cacheTime > 0;
+    const cacheKey = isCache ? JSON.stringify({ url, param }) : '';
+    if (isCache) {
+      const cached = requestCache.get(cacheKey);
+      if (cached && cached.expire > Date.now()) {
+        const { res } = cached;
+        const data = getPathData(res, dataPath);
+        logRequestInfo({ log, isLog, url, param, config, res, isSuccess: true, data });
+        resolve(data as T);
+        return;
+      }
+    }
 
     // 显示进度条
     if (showLoading) uni.showLoading();
@@ -92,36 +114,25 @@ export function request<T>(url: string, param: RequestParam, config: RequestConf
         if (showLoading) uni.hideLoading();
 
         // 解析数据
-        const { data } = xhr;
         const { res, isSuccess, isRelogin, msg } =
           !uniConfig.enableChunked && onResponse
-            ? onResponse(data)
-            : { isSuccess: true, isRelogin: false, msg: '', res: data ?? '' };
+            ? onResponse(xhr.data)
+            : { isSuccess: true, isRelogin: false, msg: '', res: xhr.data ?? '' };
+
+        // 缓存数据
+        if (isSuccess && isCache) {
+          requestCache.set(cacheKey, { res, expire: Date.now() + cacheTime });
+        }
 
         // 业务正常的dataPath数据
-        const resolveData = isSuccess ? (dataPath ? getObjectValue(res, dataPath) : res) : '';
+        const data = isSuccess ? getPathData(res, dataPath) : '';
 
         // 日志
-        if (isLog && log) {
-          const info: AppLogInfo = {
-            name: 'request',
-            status: isSuccess ? 'success' : 'fail',
-            url,
-            param,
-            ...config,
-            res: cloneDeep(res), // 深拷贝,避免外部修改对象,造成输出不一致
-          };
-
-          if (getPlatformOs() === 'devtools') {
-            info.text = JSON.stringify(resolveData); // 微信开发工具额外输出JSON字符串,快捷定义ts
-          }
-
-          log('info', info);
-        }
+        logRequestInfo({ log, isLog, url, param, config, res, isSuccess, data });
 
         if (isSuccess) {
           // 业务正常
-          resolve(resolveData);
+          resolve(data as T);
         } else if (isRelogin) {
           // 重新登录
           toLogin();
@@ -149,4 +160,41 @@ export function request<T>(url: string, param: RequestParam, config: RequestConf
   promise.task = temp.task;
 
   return promise;
+}
+
+// 获取dataPath的数据
+function getPathData(res: unknown, dataPath: string | false) {
+  if (!dataPath) return res;
+  return getObjectValue(res, dataPath);
+}
+
+// 日志输出
+function logRequestInfo(options: {
+  log: AppConfig['log'];
+  isLog: boolean;
+  url: string;
+  param: RequestParam;
+  config: RequestConfig;
+  res: unknown;
+  isSuccess: boolean;
+  data?: unknown;
+}) {
+  if (!options.isLog || !options.log) return;
+
+  const { url, param, config, res, isSuccess, data, log } = options;
+
+  const info: AppLogInfo = {
+    name: 'request',
+    status: isSuccess ? 'success' : 'fail',
+    url,
+    param,
+    ...config,
+    res: cloneDeep(res), // 深拷贝,避免外部修改对象,造成输出不一致
+  };
+
+  if (getPlatformOs() === 'devtools') {
+    info.text = JSON.stringify(data); // 微信开发工具额外输出JSON字符串,快捷定义ts
+  }
+
+  log('info', info);
 }

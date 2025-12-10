@@ -13,9 +13,9 @@ import type { RequestParam, RequestConfig } from '@base-web-kits/base-tools-uni'
 // 项目基础请求的封装
 export function requestApi<T>(url: string, param: RequestParam, config?: RequestConfig) {
   return request<T>(HOST + url, param, {
-    ...config,
     dataPath: 'data',
     header: { token: 'xx', version: 'xx', tid: 'xx' },
+    ...config,
     onResponse(res: any) {
       return {
         res,
@@ -47,6 +47,7 @@ export function requestApi<T>(url: string, param: RequestParam, config?: Request
 - `toastError?: boolean` - 是否提示接口异常，默认 `true`
 - `dataPath?: string | false` - 获取响应数据的字段，支持 "a[0].b.c" 的格式。当配置 `false` 时返回完整的响应数据
 - `isLog?: boolean` - 是否输出日志
+- `cacheTime?: number` - 缓存时间，默认 `0` 不缓存
 
 ## 返回值
 
