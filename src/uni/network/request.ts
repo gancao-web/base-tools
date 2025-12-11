@@ -1,4 +1,4 @@
-import { cloneDeep, getObjectValue, pickBy } from '../../ts';
+import { cloneDeep, getObjectValue, isPlainObject, pickBy } from '../../ts';
 import { getAppConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformOs } from '../system';
@@ -97,7 +97,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * task.offChunkReceived(); // 取消监听,中断流式接收
  * task.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已经成功)
  */
-export function request<T>(url: string, param: RequestParam, config: RequestConfig) {
+export function request<T>(url: string, params: RequestParam, config: RequestConfig) {
   // 请求对象
   const temp: { task?: UniApp.RequestTask } = {};
 
@@ -116,6 +116,11 @@ export function request<T>(url: string, param: RequestParam, config: RequestConf
       cacheTime,
       ...uniConfig
     } = config;
+
+    // 过滤undefined参数, 避免接口处理异常 (不可过滤 null 、 "" 、 false 这些有效值)
+    const param = isPlainObject(params)
+      ? pickBy(params as Record<string, unknown>, (val) => val !== undefined)
+      : params;
 
     // 缓存处理
     const isCache = cacheTime && cacheTime > 0;
