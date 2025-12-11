@@ -3,7 +3,7 @@ import { getAppConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformOs } from '../system';
 import { toast } from '../ui';
-import type { AppConfig, AppLogInfo } from '../config';
+import type { AppLogInfo } from '../config';
 
 /** 请求参数 */
 export type RequestParam = UniApp.RequestOptions['data'];
@@ -13,26 +13,31 @@ export type RequestConfig = Omit<
   UniApp.RequestOptions,
   'url' | 'data' | 'success' | 'fail' | 'complete'
 > & {
-  /** 响应数据的处理 */
-  onResponse?: (xhrData: unknown) => {
-    /** 完整的响应数据 */
-    res: unknown;
-    /** 消息提示 */
-    msg: string;
-    /** 是否成功 */
-    isSuccess: boolean;
-    /** 是否需要登录 */
-    isRelogin: boolean;
-  };
+  /** 响应拦截 */
+  responseInterceptor?: (
+    data: UniApp.RequestSuccessCallbackResult['data'],
+  ) => UniApp.RequestSuccessCallbackResult['data'];
+
+  /** 接口返回响应数据的字段, 支持"a[0].b.c"的格式, 当配置false时返回完整的响应数据 */
+  dataKey: string | false;
+
+  /** 接口返回响应消息的字段, 支持"a[0].b.c"的格式 */
+  msgKey: string;
+
+  /** 接口返回响应状态码的字段, 支持"a[0].b.c"的格式 */
+  codeKey: string;
+
+  /** 成功状态码 */
+  successCode: (number | string)[];
+
+  /** 登录过期状态码 */
+  reloginCode: (number | string)[];
 
   /** 是否显示进度条: 默认true */
   showLoading?: boolean;
 
   /** 是否提示接口异常: 默认true */
   toastError?: boolean;
-
-  /** 获取响应数据的字段, 支持"a[0].b.c"的格式, 当配置false时返回完整的响应数据 */
-  dataPath?: string | false;
 
   /** 是否输出日志 */
   isLog?: boolean;
@@ -54,18 +59,14 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * @example
  * // 项目基础请求的封装
  * export function requestApi<T>(url: string, param: RequestParam, config?: RequestConfig) {
- *    return requestBase<T>(HOST + url, param, {
- *      dataPath: 'data',
+ *    return request<T>(HOST + url, param, {
+ *      dataKey: 'data',
+ *      msgKey: 'message',
+ *      codeKey: 'status',
+ *      successCode: [1],
+ *      reloginCode: [-10],
  *      header: { token: 'xx', version: 'xx', tid: 'xx' },
  *      ...config,
- *      response(res) {
- *        return {
- *          res,
- *          msg: res.message,
- *          isSuccess: res.status === 1,
- *          isRelogin: res.status === -10,
- *        };
- *      },
  *    });
  * }
  */
@@ -73,17 +74,18 @@ export function request<T>(url: string, param: RequestParam, config: RequestConf
   // 请求对象
   const temp: { task?: UniApp.RequestTask } = {};
 
-  // 日志
-  const { log } = getAppConfig();
-
   // 创建promise
   const promise: Promise<T> & { task?: UniApp.RequestTask } = new Promise((resolve, reject) => {
     const {
       showLoading = true,
       toastError = true,
-      dataPath = false,
       isLog = true,
-      onResponse,
+      responseInterceptor,
+      dataKey,
+      msgKey,
+      codeKey,
+      successCode,
+      reloginCode,
       cacheTime,
       ...uniConfig
     } = config;
@@ -95,8 +97,8 @@ export function request<T>(url: string, param: RequestParam, config: RequestConf
       const cached = requestCache.get(cacheKey);
       if (cached && cached.expire > Date.now()) {
         const { res } = cached;
-        const data = getPathData(res, dataPath);
-        logRequestInfo({ log, isLog, url, param, config, res, isSuccess: true, data });
+        const data = dataKey === false ? res : getObjectValue(res, dataKey);
+        logRequestInfo({ isLog, url, param, config, res, isSuccess: true, data });
         resolve(data as T);
         return;
       }
@@ -114,22 +116,25 @@ export function request<T>(url: string, param: RequestParam, config: RequestConf
         // 隐藏进度条 (不能写在complete回调,否则toast会被hideLoading隐藏)
         if (showLoading) uni.hideLoading();
 
+        // 响应拦截
+        const res = responseInterceptor ? responseInterceptor(xhr.data) : xhr.data;
+
         // 解析数据
-        const { res, isSuccess, isRelogin, msg } =
-          !uniConfig.enableChunked && onResponse
-            ? onResponse(xhr.data)
-            : { isSuccess: true, isRelogin: false, msg: '', res: xhr.data ?? '' };
+        const code = getObjectValue(res, codeKey);
+        const msg = getObjectValue(res, msgKey);
+        const isSuccess = successCode.includes(code);
+        const isRelogin = reloginCode.includes(code);
 
         // 缓存数据
         if (isSuccess && isCache) {
           requestCache.set(cacheKey, { res, expire: Date.now() + cacheTime });
         }
 
-        // 业务正常的dataPath数据
-        const data = isSuccess ? getPathData(res, dataPath) : '';
+        // 业务数据
+        const data = dataKey === false ? res : getObjectValue(res, dataKey);
 
         // 日志
-        logRequestInfo({ log, isLog, url, param, config, res, isSuccess, data });
+        logRequestInfo({ isLog, url, param, config, res, isSuccess, data });
 
         if (isSuccess) {
           // 业务正常
@@ -152,6 +157,7 @@ export function request<T>(url: string, param: RequestParam, config: RequestConf
         if (toastError) toast('请求失败,请检查网络');
         reject(e);
         // 上报日志
+        const { log } = getAppConfig();
         log?.('error', { name: 'request', status: 'fail', url, param, ...config, e });
       },
     });
@@ -163,15 +169,8 @@ export function request<T>(url: string, param: RequestParam, config: RequestConf
   return promise;
 }
 
-// 获取dataPath的数据
-function getPathData(res: unknown, dataPath: string | false) {
-  if (!dataPath) return res;
-  return getObjectValue(res, dataPath);
-}
-
 // 日志输出
 function logRequestInfo(options: {
-  log: AppConfig['log'];
   isLog: boolean;
   url: string;
   param: RequestParam;
@@ -180,9 +179,11 @@ function logRequestInfo(options: {
   isSuccess: boolean;
   data?: unknown;
 }) {
-  if (!options.isLog || !options.log) return;
+  const { log } = getAppConfig();
 
-  const { url, param, config, res, isSuccess, data, log } = options;
+  if (!log || !options.isLog) return;
+
+  const { url, param, config, res, isSuccess, data } = options;
 
   const info: AppLogInfo = {
     name: 'request',
