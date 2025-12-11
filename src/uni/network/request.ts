@@ -33,16 +33,16 @@ export type RequestConfig = Omit<
   /** 登录过期状态码 */
   reloginCode: (number | string)[];
 
-  /** 是否显示进度条: 默认true */
+  /** 是否显示进度条 (默认true) */
   showLoading?: boolean;
 
-  /** 是否提示接口异常: 默认true */
+  /** 是否提示接口异常 (默认true) */
   toastError?: boolean;
 
-  /** 是否输出日志 */
+  /** 是否输出日志 (默认true) */
   isLog?: boolean;
 
-  /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失；默认0,不开启缓存 */
+  /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
   cacheTime?: number;
 };
 
@@ -106,7 +106,6 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
     const {
       showLoading = true,
       toastError = true,
-      isLog = true,
       responseInterceptor,
       dataKey,
       msgKey,
@@ -129,8 +128,8 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
       const cached = requestCache.get(cacheKey);
       if (cached && cached.expire > Date.now()) {
         const { res } = cached;
-        const data = dataKey === false ? res : getObjectValue(res, dataKey);
-        logRequestInfo({ isLog, url, param, config, res, isSuccess: true, data });
+        logRequestInfo({ url, param, config, res, isFromCache: true });
+        const data = dataKey ? getObjectValue(res, dataKey) : res;
         resolve(data as T);
         return;
       }
@@ -167,14 +166,12 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
           requestCache.set(cacheKey, { res, expire: Date.now() + cacheTime });
         }
 
-        // 业务数据
-        const data = dataKey === false ? res : getObjectValue(res, dataKey);
-
         // 日志
-        logRequestInfo({ isLog, url, param, config, res, isSuccess, data });
+        logRequestInfo({ url, param, config, res, isFromCache: false });
 
         if (isSuccess) {
           // 业务正常
+          const data = dataKey ? getObjectValue(res, dataKey) : res;
           resolve(data as T);
         } else if (isRelogin) {
           // 重新登录
@@ -206,33 +203,49 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
   return promise;
 }
 
-// 日志输出
-function logRequestInfo(options: {
-  isLog: boolean;
+/**
+ * 日志输出 (config.isLog 为 true 时有效)
+ * - 需在入口文件初始化应用配置 setAppConfig({ log })
+ * @param options 日志选项
+ * @param options.url 请求URL
+ * @param options.param 请求参数
+ * @param options.config 请求配置
+ * @param options.res 响应数据
+ * @param options.isFromCache 响应数据是否从缓存中获取的
+ * @example
+ * logRequestInfo({ url, param, config, res });
+ */
+export function logRequestInfo(options: {
   url: string;
   param: RequestParams;
   config: RequestConfig;
   res: unknown;
-  isSuccess: boolean;
-  data?: unknown;
+  isFromCache?: boolean;
 }) {
   const { log } = getAppConfig();
+  const { isLog = true } = options.config;
 
-  if (!log || !options.isLog) return;
+  if (!log || !isLog) return;
 
-  const { url, param, config, res, isSuccess, data } = options;
+  const { url, param, config, res, isFromCache } = options;
 
   const info: AppLogInfo = {
     name: 'request',
-    status: isSuccess ? 'success' : 'fail',
     url,
     param,
     ...config,
     res: cloneDeep(res), // 深拷贝,避免外部修改对象,造成输出不一致
   };
 
+  if (isFromCache !== undefined) info.isFromCache = isFromCache;
+
   if (getPlatformOs() === 'devtools') {
-    info.text = JSON.stringify(data); // 微信开发工具额外输出JSON字符串,快捷定义ts
+    const { dataKey } = config;
+    const data = dataKey ? getObjectValue(res, dataKey) : res;
+
+    if (data && typeof data === 'object') {
+      info.text = JSON.stringify(data); // 微信开发工具额外输出JSON字符串,快捷定义ts
+    }
   }
 
   log('info', info);

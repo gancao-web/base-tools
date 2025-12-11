@@ -68,7 +68,7 @@ export type AppLogInfo = {
   name: string;
 
   /** 函数的调用状态 */
-  status: 'success' | 'fail';
+  status?: 'success' | 'fail';
 
   /** 函数的调用参数 */
   option?: unknown;

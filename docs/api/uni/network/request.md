@@ -69,8 +69,8 @@ task.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求
 - `responseInterceptor?: (data: any) => any` - 响应拦截，可预处理响应数据 (如解密)
 - `showLoading?: boolean` - 是否显示进度条，默认 `true`
 - `toastError?: boolean` - 是否提示接口异常，默认 `true`
-- `isLog?: boolean` - 是否输出日志
-- `cacheTime?: number` - 缓存时间，默认 `0` 不缓存
+- `isLog?: boolean` - 是否输出日志，默认 `true`
+- `cacheTime?: number` - 缓存时间，默认 `0` 不缓存 (单位毫秒)
 
 ## 返回值
 
