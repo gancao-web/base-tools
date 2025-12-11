@@ -6,7 +6,7 @@ import { toast } from '../ui';
 import type { AppLogInfo } from '../config';
 
 /** 请求参数 */
-export type RequestParam = UniApp.RequestOptions['data'];
+export type RequestParams = UniApp.RequestOptions['data'];
 
 /** 请求配置 */
 export type RequestConfig = Omit<
@@ -53,13 +53,13 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * 基础请求 (返回promise和task对象)
  * - 需在入口文件初始化应用配置 setAppConfig({ pathLogin, log })
  * @param url 请求地址
- * @param param 请求参数
+ * @param params 请求参数 (已过滤undefined参数)
  * @param config 请求配置
  * @returns Promise<T> & { task?: UniApp.RequestTask }
  * @example
  * // 封装项目的基础请求
- * export function requestApi<T>(url: string, param: RequestParam, config?: RequestConfig) {
- *    return request<T>(HOST + url, param, {
+ * export function requestApi<T>(url: string, params: RequestParams, config?: RequestConfig) {
+ *    return request<T>(HOST + url, params, {
  *      header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
  *      // responseInterceptor: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
  *      dataKey: 'data',
@@ -72,15 +72,15 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * }
  *
  * // 1. 基于上面 requestApi 的普通接口
- * export function apiGoodList(param: { page: number, size: number }) {
- *   return requestApi<GoodItem[]>('/goods/list', param, { dataKey: 'data.list' });
+ * export function apiGoodList(params: { page: number, size: number }) {
+ *   return requestApi<GoodItem[]>('/goods/list', params, { dataKey: 'data.list' });
  * }
  *
  * const goodList = await apiGoodList({ page:1, size:10 });
  *
  * // 2. 基于上面 requestApi 的流式接口
- * export function apiChatStream(param: { question: string }) {
- *   return requestApi('/sse/chatStream', param, {
+ * export function apiChatStream(params: { question: string }) {
+ *   return requestApi('/sse/chatStream', params, {
  *     dataKey: false,
  *     showLoading: false,
  *     responseType: 'arraybuffer',
@@ -97,7 +97,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * task.offChunkReceived(); // 取消监听,中断流式接收
  * task.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已经成功)
  */
-export function request<T>(url: string, params: RequestParam, config: RequestConfig) {
+export function request<T>(url: string, params: RequestParams, config: RequestConfig) {
   // 请求对象
   const temp: { task?: UniApp.RequestTask } = {};
 
@@ -210,7 +210,7 @@ export function request<T>(url: string, params: RequestParam, config: RequestCon
 function logRequestInfo(options: {
   isLog: boolean;
   url: string;
-  param: RequestParam;
+  param: RequestParams;
   config: RequestConfig;
   res: unknown;
   isSuccess: boolean;

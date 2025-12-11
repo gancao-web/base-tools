@@ -8,10 +8,10 @@
 
 ```ts
 import { request } from '@base-web-kits/base-tools-uni';
-import type { RequestParam, RequestConfig } from '@base-web-kits/base-tools-uni';
+import type { RequestParams, RequestConfig } from '@base-web-kits/base-tools-uni';
 
 // 封装项目的基础请求
-export function requestApi<T>(url: string, param: RequestParam, config?: RequestConfig) {
+export function requestApi<T>(url: string, param: RequestParams, config?: RequestConfig) {
   return request<T>(HOST + url, param, {
     header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
     // responseInterceptor: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
@@ -54,7 +54,7 @@ task.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求
 ## 参数
 
 - `url: string` - 请求地址
-- `param: RequestParam` - 请求参数 (`UniApp.RequestOptions['data']`)
+- `param: RequestParams` - 请求参数 (已过滤undefined值)
 - `config: RequestConfig` - 请求配置
 
 ### RequestConfig
