@@ -18,7 +18,7 @@ export function requestApi<T>(url: string, param: RequestParam, config?: Request
     codeKey: 'status',
     successCode: [1],
     reloginCode: [-10],
-    header: { token: 'xx', version: 'xx', tid: 'xx' },
+    header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
     // responseInterceptor: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
     ...config,
   });

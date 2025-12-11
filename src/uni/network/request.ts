@@ -1,4 +1,4 @@
-import { cloneDeep, getObjectValue } from '../../ts';
+import { cloneDeep, getObjectValue, pickBy } from '../../ts';
 import { getAppConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformOs } from '../system';
@@ -65,7 +65,8 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  *      codeKey: 'status',
  *      successCode: [1],
  *      reloginCode: [-10],
- *      header: { token: 'xx', version: 'xx', tid: 'xx' },
+ *      header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
+ *      // responseInterceptor: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
  *      ...config,
  *    });
  * }
@@ -106,6 +107,11 @@ export function request<T>(url: string, param: RequestParam, config: RequestConf
 
     // 显示进度条
     if (showLoading) uni.showLoading();
+
+    // 请求头的值在服务器端都是字符串, 所以这里过滤空值 (undefined, null, "", false)
+    if (uniConfig.header) {
+      uniConfig.header = pickBy(uniConfig.header, (val) => !!val || val === 0);
+    }
 
     // 发送请求
     temp.task = uni.request({
