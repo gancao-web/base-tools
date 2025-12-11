@@ -57,19 +57,45 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * @param config 请求配置
  * @returns Promise<T> & { task?: UniApp.RequestTask }
  * @example
- * // 项目基础请求的封装
+ * // 封装项目的基础请求
  * export function requestApi<T>(url: string, param: RequestParam, config?: RequestConfig) {
  *    return request<T>(HOST + url, param, {
+ *      header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
+ *      // responseInterceptor: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
  *      dataKey: 'data',
  *      msgKey: 'message',
  *      codeKey: 'status',
  *      successCode: [1],
  *      reloginCode: [-10],
- *      header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
- *      // responseInterceptor: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
  *      ...config,
  *    });
  * }
+ *
+ * // 1. 基于上面 requestApi 的普通接口
+ * export function apiGoodList(param: { page: number, size: number }) {
+ *   return requestApi<GoodItem[]>('/goods/list', param, { dataKey: 'data.list' });
+ * }
+ *
+ * const goodList = await apiGoodList({ page:1, size:10 });
+ *
+ * // 2. 基于上面 requestApi 的流式接口
+ * export function apiChatStream(param: { question: string }) {
+ *   return requestApi('/sse/chatStream', param, {
+ *     dataKey: false,
+ *     showLoading: false,
+ *     responseType: 'arraybuffer',
+ *     enableChunked: true,
+ *   });
+ * }
+ *
+ * const { task } = apiChatStream({question: '你好'}); // 发起流式请求
+ *
+ * task.onProgressUpdate((res) => {
+ *   console.log('ArrayBuffer', res.data); // 接收流式数据
+ * });
+ *
+ * task.offChunkReceived(); // 取消监听,中断流式接收
+ * task.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已经成功)
  */
 export function request<T>(url: string, param: RequestParam, config: RequestConfig) {
   // 请求对象
