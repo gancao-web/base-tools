@@ -24,7 +24,8 @@ function bumpVersion(currentVersion, type) {
     throw new Error(`Invalid version format: ${currentVersion}`);
   }
 
-  let [major, minor, patch, preType, preVer] = match;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let [_, major, minor, patch, preType, preVer] = match;
   major = parseInt(major);
   minor = parseInt(minor);
   patch = parseInt(patch);
@@ -45,8 +46,8 @@ function bumpVersion(currentVersion, type) {
       if (preType === 'alpha') {
         return `${major}.${minor}.${patch}-alpha.${preVer + 1}`;
       }
-      // If stable, bump patch and start alpha
-      return `${major}.${minor}.${patch + 1}-alpha.0`;
+      // If stable, add alpha.0
+      return `${major}.${minor}.${patch}-alpha.0`;
     default:
       throw new Error(`Invalid version type: ${type}. Use major, minor, patch, or alpha.`);
   }
