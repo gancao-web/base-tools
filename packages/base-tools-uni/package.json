@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-uni",
-  "version": "1.0.1-alpha.3",
+  "version": "1.0.1-alpha.4",
   "sideEffects": false,
   "description": "Independent Uni-app utilities package built from src/uni.",
   "keywords": [

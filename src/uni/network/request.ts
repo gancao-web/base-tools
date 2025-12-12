@@ -13,11 +13,6 @@ export type RequestConfig = Omit<
   UniApp.RequestOptions,
   'url' | 'data' | 'success' | 'fail' | 'complete'
 > & {
-  /** 响应拦截 */
-  responseInterceptor?: (
-    data: UniApp.RequestSuccessCallbackResult['data'],
-  ) => UniApp.RequestSuccessCallbackResult['data'];
-
   /** 接口返回响应数据的字段, 支持"a[0].b.c"的格式, 当配置false时返回完整的响应数据 */
   dataKey: string | false;
 
@@ -44,6 +39,11 @@ export type RequestConfig = Omit<
 
   /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
   cacheTime?: number;
+
+  /** 响应拦截 */
+  responseInterceptor?: (
+    data: UniApp.RequestSuccessCallbackResult['data'],
+  ) => UniApp.RequestSuccessCallbackResult['data'];
 };
 
 /** 请求缓存 */
@@ -104,20 +104,29 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
   // 创建promise
   const promise: Promise<T> & { task?: UniApp.RequestTask } = new Promise((resolve, reject) => {
     const {
-      showLoading = true,
-      toastError = true,
-      responseInterceptor,
       dataKey,
       msgKey,
       codeKey,
       successCode,
       reloginCode,
+      showLoading = true,
+      toastError = true,
+      isLog = true,
       cacheTime,
+      responseInterceptor,
       ...uniConfig
     } = config;
 
-    // 过滤undefined参数, 避免接口处理异常 (不可过滤 null 、 "" 、 false 这些有效值)
+    const { header, method } = uniConfig;
+
+    // 参数: 过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 这些有效值)
     const fillParams = isPlainObject(params) ? pickBy(params, (val) => val !== undefined) : params;
+
+    // 请求头: 过滤空值 (undefined, null, "", false), 因为服务器端接收到的都是字符串
+    const fillHeader = header ? pickBy(header, (val) => !!val || val === 0) : {};
+
+    // 日志输出的config
+    const logConfig = { isLog, header: fillHeader, method, dataKey };
 
     // 缓存处理
     const isCache = cacheTime && cacheTime > 0;
@@ -126,7 +135,7 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
       const cached = requestCache.get(cacheKey);
       if (cached && cached.expire > Date.now()) {
         const { res } = cached;
-        logRequestInfo({ url, params: fillParams, config, res, isFromCache: true });
+        logRequestInfo({ url, params: fillParams, config: logConfig, res, isFromCache: true });
         const data = dataKey ? getObjectValue(res, dataKey) : res;
         resolve(data as T);
         return;
@@ -136,16 +145,12 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
     // 显示进度条
     if (showLoading) uni.showLoading();
 
-    // 请求头的值在服务器端都是字符串, 所以这里过滤空值 (undefined, null, "", false)
-    if (uniConfig.header) {
-      uniConfig.header = pickBy(uniConfig.header, (val) => !!val || val === 0);
-    }
-
     // 发送请求
     temp.task = uni.request({
       ...uniConfig,
       url,
       data: fillParams,
+      header: fillHeader,
       success: (xhr) => {
         // 隐藏进度条 (不能写在complete回调,否则toast会被hideLoading隐藏)
         if (showLoading) uni.hideLoading();
@@ -165,7 +170,7 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
         }
 
         // 日志
-        logRequestInfo({ url, params: fillParams, config, res, isFromCache: false });
+        logRequestInfo({ url, params: fillParams, config: logConfig, res });
 
         if (isSuccess) {
           // 业务正常
@@ -216,7 +221,7 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
 export function logRequestInfo(options: {
   url: string;
   params: RequestParams;
-  config: RequestConfig;
+  config: Pick<RequestConfig, 'isLog' | 'header' | 'method' | 'dataKey'>;
   res: unknown;
   isFromCache?: boolean;
 }) {
@@ -226,16 +231,18 @@ export function logRequestInfo(options: {
   if (!log || !isLog) return;
 
   const { url, params, config, res, isFromCache } = options;
+  const { header, method } = config;
 
   const info: AppLogInfo = {
     name: 'request',
     url,
     params,
-    ...config,
+    method,
+    header,
     res: cloneDeep(res), // 深拷贝,避免外部修改对象,造成输出不一致
   };
 
-  if (isFromCache !== undefined) info.isFromCache = isFromCache;
+  if (isFromCache) info.isFromCache = true;
 
   if (getPlatformOs() === 'devtools') {
     const { dataKey } = config;
