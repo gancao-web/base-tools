@@ -1,44 +1,49 @@
-import { cloneDeep, getObjectValue } from '../../ts';
+import { cloneDeep, getObjectValue, isPlainObject, pickBy } from '../../ts';
 import { getAppConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformOs } from '../system';
 import { toast } from '../ui';
-import type { AppConfig, AppLogInfo } from '../config';
+import type { AppLogInfo } from '../config';
 
 /** 请求参数 */
-export type RequestParam = UniApp.RequestOptions['data'];
+export type RequestParams = UniApp.RequestOptions['data'];
 
 /** 请求配置 */
 export type RequestConfig = Omit<
   UniApp.RequestOptions,
   'url' | 'data' | 'success' | 'fail' | 'complete'
 > & {
-  /** 响应数据的处理 */
-  onResponse?: (xhrData: unknown) => {
-    /** 完整的响应数据 */
-    res: unknown;
-    /** 消息提示 */
-    msg: string;
-    /** 是否成功 */
-    isSuccess: boolean;
-    /** 是否需要登录 */
-    isRelogin: boolean;
-  };
+  /** 接口返回响应数据的字段, 支持"a[0].b.c"的格式, 当配置false时返回完整的响应数据 */
+  dataKey: string | false;
 
-  /** 是否显示进度条: 默认true */
+  /** 接口返回响应消息的字段, 支持"a[0].b.c"的格式 */
+  msgKey: string;
+
+  /** 接口返回响应状态码的字段, 支持"a[0].b.c"的格式 */
+  codeKey: string;
+
+  /** 成功状态码 */
+  successCode: (number | string)[];
+
+  /** 登录过期状态码 */
+  reloginCode: (number | string)[];
+
+  /** 是否显示进度条 (默认true) */
   showLoading?: boolean;
 
-  /** 是否提示接口异常: 默认true */
+  /** 是否提示接口异常 (默认true) */
   toastError?: boolean;
 
-  /** 获取响应数据的字段, 支持"a[0].b.c"的格式, 当配置false时返回完整的响应数据 */
-  dataPath?: string | false;
-
-  /** 是否输出日志 */
+  /** 是否输出日志 (默认true) */
   isLog?: boolean;
 
-  /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失；默认0,不开启缓存 */
+  /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
   cacheTime?: number;
+
+  /** 响应拦截 */
+  responseInterceptor?: (
+    data: UniApp.RequestSuccessCallbackResult['data'],
+  ) => UniApp.RequestSuccessCallbackResult['data'];
 };
 
 /** 请求缓存 */
@@ -48,55 +53,90 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * 基础请求 (返回promise和task对象)
  * - 需在入口文件初始化应用配置 setAppConfig({ pathLogin, log })
  * @param url 请求地址
- * @param param 请求参数
+ * @param params 请求参数 (已过滤undefined参数)
  * @param config 请求配置
  * @returns Promise<T> & { task?: UniApp.RequestTask }
  * @example
- * // 项目基础请求的封装
- * export function requestApi<T>(url: string, param: RequestParam, config?: RequestConfig) {
- *    return requestBase<T>(HOST + url, param, {
- *      dataPath: 'data',
- *      header: { token: 'xx', version: 'xx', tid: 'xx' },
+ * // 封装项目的基础请求
+ * export function requestApi<T>(url: string, params: RequestParams, config?: RequestConfig) {
+ *    return request<T>(HOST + url, params, {
+ *      header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
+ *      // responseInterceptor: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
+ *      dataKey: 'data',
+ *      msgKey: 'message',
+ *      codeKey: 'status',
+ *      successCode: [1],
+ *      reloginCode: [-10],
  *      ...config,
- *      response(res) {
- *        return {
- *          res,
- *          msg: res.message,
- *          isSuccess: res.status === 1,
- *          isRelogin: res.status === -10,
- *        };
- *      },
  *    });
  * }
+ *
+ * // 1. 基于上面 requestApi 的普通接口
+ * export function apiGoodList(params: { page: number, size: number }) {
+ *   return requestApi<GoodItem[]>('/goods/list', params, { dataKey: 'data.list' });
+ * }
+ *
+ * const goodList = await apiGoodList({ page:1, size:10 });
+ *
+ * // 2. 基于上面 requestApi 的流式接口
+ * export function apiChatStream(params: { question: string }) {
+ *   return requestApi('/sse/chatStream', params, {
+ *     dataKey: false,
+ *     showLoading: false,
+ *     responseType: 'arraybuffer',
+ *     enableChunked: true,
+ *   });
+ * }
+ *
+ * const { task } = apiChatStream({question: '你好'}); // 发起流式请求
+ *
+ * task.onProgressUpdate((res) => {
+ *   console.log('ArrayBuffer', res.data); // 接收流式数据
+ * });
+ *
+ * task.offChunkReceived(); // 取消监听,中断流式接收
+ * task.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已经成功)
  */
-export function request<T>(url: string, param: RequestParam, config: RequestConfig) {
+export function request<T>(url: string, params: RequestParams, config: RequestConfig) {
   // 请求对象
   const temp: { task?: UniApp.RequestTask } = {};
-
-  // 日志
-  const { log } = getAppConfig();
 
   // 创建promise
   const promise: Promise<T> & { task?: UniApp.RequestTask } = new Promise((resolve, reject) => {
     const {
+      dataKey,
+      msgKey,
+      codeKey,
+      successCode,
+      reloginCode,
       showLoading = true,
       toastError = true,
-      dataPath = false,
       isLog = true,
-      onResponse,
       cacheTime,
+      responseInterceptor,
       ...uniConfig
     } = config;
 
+    const { header, method, enableChunked } = uniConfig;
+
+    // 参数: 过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 这些有效值)
+    const fillParams = isPlainObject(params) ? pickBy(params, (val) => val !== undefined) : params;
+
+    // 请求头: 过滤空值 (undefined, null, "", false), 因为服务器端接收到的都是字符串
+    const fillHeader = header ? pickBy(header, (val) => !!val || val === 0) : {};
+
+    // 日志输出的config
+    const logConfig = { isLog, header: fillHeader, method, dataKey };
+
     // 缓存处理
     const isCache = cacheTime && cacheTime > 0;
-    const cacheKey = isCache ? JSON.stringify({ url, param }) : '';
+    const cacheKey = isCache ? JSON.stringify({ url, params: fillParams }) : '';
     if (isCache) {
       const cached = requestCache.get(cacheKey);
       if (cached && cached.expire > Date.now()) {
         const { res } = cached;
-        const data = getPathData(res, dataPath);
-        logRequestInfo({ log, isLog, url, param, config, res, isSuccess: true, data });
+        logRequestInfo({ url, params: fillParams, config: logConfig, res, isFromCache: true });
+        const data = getResData(res, dataKey);
         resolve(data as T);
         return;
       }
@@ -109,30 +149,32 @@ export function request<T>(url: string, param: RequestParam, config: RequestConf
     temp.task = uni.request({
       ...uniConfig,
       url,
-      data: param,
+      data: fillParams,
+      header: fillHeader,
       success: (xhr) => {
         // 隐藏进度条 (不能写在complete回调,否则toast会被hideLoading隐藏)
         if (showLoading) uni.hideLoading();
 
-        // 解析数据
-        const { res, isSuccess, isRelogin, msg } =
-          !uniConfig.enableChunked && onResponse
-            ? onResponse(xhr.data)
-            : { isSuccess: true, isRelogin: false, msg: '', res: xhr.data ?? '' };
+        // 响应拦截
+        const res = responseInterceptor ? responseInterceptor(xhr.data) : xhr.data;
+
+        // 解析数据 (分块传输会先不断执行task.onChunkReceived回调,流式传输完毕才执行success回调)
+        const code = enableChunked ? '' : getObjectValue(res, codeKey);
+        const msg = enableChunked ? '' : getObjectValue(res, msgKey);
+        const isSuccess = enableChunked ? true : successCode.includes(code);
+        const isRelogin = enableChunked ? false : reloginCode.includes(code);
 
         // 缓存数据
         if (isSuccess && isCache) {
           requestCache.set(cacheKey, { res, expire: Date.now() + cacheTime });
         }
 
-        // 业务正常的dataPath数据
-        const data = isSuccess ? getPathData(res, dataPath) : '';
-
         // 日志
-        logRequestInfo({ log, isLog, url, param, config, res, isSuccess, data });
+        logRequestInfo({ url, params: fillParams, config: logConfig, res });
 
         if (isSuccess) {
           // 业务正常
+          const data = getResData(res, dataKey);
           resolve(data as T);
         } else if (isRelogin) {
           // 重新登录
@@ -152,7 +194,8 @@ export function request<T>(url: string, param: RequestParam, config: RequestConf
         if (toastError) toast('请求失败,请检查网络');
         reject(e);
         // 上报日志
-        log?.('error', { name: 'request', status: 'fail', url, param, ...config, e });
+        const { log } = getAppConfig();
+        log?.('error', { name: 'request', status: 'fail', url, params: fillParams, ...config, e });
       },
     });
   });
@@ -163,39 +206,59 @@ export function request<T>(url: string, param: RequestParam, config: RequestConf
   return promise;
 }
 
-// 获取dataPath的数据
-function getPathData(res: unknown, dataPath: string | false) {
-  if (!dataPath) return res;
-  return getObjectValue(res, dataPath);
-}
-
-// 日志输出
-function logRequestInfo(options: {
-  log: AppConfig['log'];
-  isLog: boolean;
+/**
+ * 日志输出 (config.isLog 为 true 时有效)
+ * - 需在入口文件初始化应用配置 setAppConfig({ log })
+ * @param options 日志选项
+ * @param options.url 请求URL
+ * @param options.params 请求参数
+ * @param options.config 请求配置
+ * @param options.res 响应数据
+ * @param options.isFromCache 响应数据是否从缓存中获取的
+ * @example
+ * logRequestInfo({ url, params, config, res });
+ */
+export function logRequestInfo(options: {
   url: string;
-  param: RequestParam;
-  config: RequestConfig;
+  params: RequestParams;
+  config: Pick<RequestConfig, 'isLog' | 'header' | 'method' | 'dataKey'>;
   res: unknown;
-  isSuccess: boolean;
-  data?: unknown;
+  isFromCache?: boolean;
 }) {
-  if (!options.isLog || !options.log) return;
+  const { log } = getAppConfig();
+  const { isLog = true } = options.config;
 
-  const { url, param, config, res, isSuccess, data, log } = options;
+  if (!log || !isLog) return;
+
+  const { url, params, config, res, isFromCache } = options;
+  const { header, method } = config;
 
   const info: AppLogInfo = {
     name: 'request',
-    status: isSuccess ? 'success' : 'fail',
     url,
-    param,
-    ...config,
+    params,
+    method,
+    header,
     res: cloneDeep(res), // 深拷贝,避免外部修改对象,造成输出不一致
   };
 
-  if (getPlatformOs() === 'devtools') {
-    info.text = JSON.stringify(data); // 微信开发工具额外输出JSON字符串,快捷定义ts
+  if (isFromCache) info.isFromCache = true;
+
+  if (getPlatformOs() === 'devtools' && res && typeof res === 'object') {
+    const { dataKey } = config;
+    const data = getResData(res, dataKey);
+
+    if (data && typeof data === 'object') {
+      info.text = JSON.stringify(data); // 微信开发工具额外输出JSON字符串,快捷定义ts
+    }
   }
 
   log('info', info);
+}
+
+// 获取dataKey对应的数据
+function getResData(res: unknown, dataKey?: RequestConfig['dataKey']) {
+  if (!res || !dataKey || typeof res !== 'object') return res;
+
+  return getObjectValue(res, dataKey);
 }
