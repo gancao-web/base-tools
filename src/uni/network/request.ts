@@ -117,7 +117,7 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
       ...uniConfig
     } = config;
 
-    const { header, method } = uniConfig;
+    const { header, method, enableChunked } = uniConfig;
 
     // 参数: 过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 这些有效值)
     const fillParams = isPlainObject(params) ? pickBy(params, (val) => val !== undefined) : params;
@@ -136,7 +136,7 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
       if (cached && cached.expire > Date.now()) {
         const { res } = cached;
         logRequestInfo({ url, params: fillParams, config: logConfig, res, isFromCache: true });
-        const data = dataKey ? getObjectValue(res, dataKey) : res;
+        const data = getResData(res, dataKey);
         resolve(data as T);
         return;
       }
@@ -158,11 +158,11 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
         // 响应拦截
         const res = responseInterceptor ? responseInterceptor(xhr.data) : xhr.data;
 
-        // 解析数据
-        const code = getObjectValue(res, codeKey);
-        const msg = getObjectValue(res, msgKey);
-        const isSuccess = successCode.includes(code);
-        const isRelogin = reloginCode.includes(code);
+        // 解析数据 (分块传输会先不断执行task.onChunkReceived回调,流式传输完毕才执行success回调)
+        const code = enableChunked ? '' : getObjectValue(res, codeKey);
+        const msg = enableChunked ? '' : getObjectValue(res, msgKey);
+        const isSuccess = enableChunked ? true : successCode.includes(code);
+        const isRelogin = enableChunked ? false : reloginCode.includes(code);
 
         // 缓存数据
         if (isSuccess && isCache) {
@@ -174,7 +174,7 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
 
         if (isSuccess) {
           // 业务正常
-          const data = dataKey ? getObjectValue(res, dataKey) : res;
+          const data = getResData(res, dataKey);
           resolve(data as T);
         } else if (isRelogin) {
           // 重新登录
@@ -244,9 +244,9 @@ export function logRequestInfo(options: {
 
   if (isFromCache) info.isFromCache = true;
 
-  if (getPlatformOs() === 'devtools') {
+  if (getPlatformOs() === 'devtools' && res && typeof res === 'object') {
     const { dataKey } = config;
-    const data = dataKey ? getObjectValue(res, dataKey) : res;
+    const data = getResData(res, dataKey);
 
     if (data && typeof data === 'object') {
       info.text = JSON.stringify(data); // 微信开发工具额外输出JSON字符串,快捷定义ts
@@ -254,4 +254,11 @@ export function logRequestInfo(options: {
   }
 
   log('info', info);
+}
+
+// 获取dataKey对应的数据
+function getResData(res: unknown, dataKey?: RequestConfig['dataKey']) {
+  if (!res || !dataKey || typeof res !== 'object') return res;
+
+  return getObjectValue(res, dataKey);
 }
