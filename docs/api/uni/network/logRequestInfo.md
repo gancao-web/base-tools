@@ -14,7 +14,7 @@
 ```ts
 import { logRequestInfo } from '@base-web-kits/base-tools-uni';
 
-logRequestInfo({ url, param, config, res });
+logRequestInfo({ url, params, config, res });
 ```
 
 ## 参数
@@ -22,7 +22,7 @@ logRequestInfo({ url, param, config, res });
 `options` 对象包含以下属性：
 
 - `url: string` - 请求 URL
-- `param: RequestParams` - 请求参数
+- `params: RequestParams` - 请求参数
 - `config: RequestConfig` - 请求配置
 - `res: unknown` - 响应数据
 - `isFromCache?: boolean` - 响应数据是否从缓存中获取的

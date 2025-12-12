@@ -117,18 +117,16 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
     } = config;
 
     // 过滤undefined参数, 避免接口处理异常 (不可过滤 null 、 "" 、 false 这些有效值)
-    const param = isPlainObject(params)
-      ? pickBy(params as Record<string, unknown>, (val) => val !== undefined)
-      : params;
+    const cloneParams = isPlainObject(params) ? pickBy(params, (val) => val !== undefined) : params;
 
     // 缓存处理
     const isCache = cacheTime && cacheTime > 0;
-    const cacheKey = isCache ? JSON.stringify({ url, param }) : '';
+    const cacheKey = isCache ? JSON.stringify({ url, params: cloneParams }) : '';
     if (isCache) {
       const cached = requestCache.get(cacheKey);
       if (cached && cached.expire > Date.now()) {
         const { res } = cached;
-        logRequestInfo({ url, param, config, res, isFromCache: true });
+        logRequestInfo({ url, params: cloneParams, config, res, isFromCache: true });
         const data = dataKey ? getObjectValue(res, dataKey) : res;
         resolve(data as T);
         return;
@@ -147,7 +145,7 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
     temp.task = uni.request({
       ...uniConfig,
       url,
-      data: param,
+      data: cloneParams,
       success: (xhr) => {
         // 隐藏进度条 (不能写在complete回调,否则toast会被hideLoading隐藏)
         if (showLoading) uni.hideLoading();
@@ -167,7 +165,7 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
         }
 
         // 日志
-        logRequestInfo({ url, param, config, res, isFromCache: false });
+        logRequestInfo({ url, params: cloneParams, config, res, isFromCache: false });
 
         if (isSuccess) {
           // 业务正常
@@ -192,7 +190,7 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
         reject(e);
         // 上报日志
         const { log } = getAppConfig();
-        log?.('error', { name: 'request', status: 'fail', url, param, ...config, e });
+        log?.('error', { name: 'request', status: 'fail', url, params: cloneParams, ...config, e });
       },
     });
   });
@@ -208,16 +206,16 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
  * - 需在入口文件初始化应用配置 setAppConfig({ log })
  * @param options 日志选项
  * @param options.url 请求URL
- * @param options.param 请求参数
+ * @param options.params 请求参数
  * @param options.config 请求配置
  * @param options.res 响应数据
  * @param options.isFromCache 响应数据是否从缓存中获取的
  * @example
- * logRequestInfo({ url, param, config, res });
+ * logRequestInfo({ url, params, config, res });
  */
 export function logRequestInfo(options: {
   url: string;
-  param: RequestParams;
+  params: RequestParams;
   config: RequestConfig;
   res: unknown;
   isFromCache?: boolean;
@@ -227,12 +225,12 @@ export function logRequestInfo(options: {
 
   if (!log || !isLog) return;
 
-  const { url, param, config, res, isFromCache } = options;
+  const { url, params, config, res, isFromCache } = options;
 
   const info: AppLogInfo = {
     name: 'request',
     url,
-    param,
+    params,
     ...config,
     res: cloneDeep(res), // 深拷贝,避免外部修改对象,造成输出不一致
   };
