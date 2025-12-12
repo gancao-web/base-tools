@@ -117,16 +117,16 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
     } = config;
 
     // 过滤undefined参数, 避免接口处理异常 (不可过滤 null 、 "" 、 false 这些有效值)
-    const cloneParams = isPlainObject(params) ? pickBy(params, (val) => val !== undefined) : params;
+    const fillParams = isPlainObject(params) ? pickBy(params, (val) => val !== undefined) : params;
 
     // 缓存处理
     const isCache = cacheTime && cacheTime > 0;
-    const cacheKey = isCache ? JSON.stringify({ url, params: cloneParams }) : '';
+    const cacheKey = isCache ? JSON.stringify({ url, params: fillParams }) : '';
     if (isCache) {
       const cached = requestCache.get(cacheKey);
       if (cached && cached.expire > Date.now()) {
         const { res } = cached;
-        logRequestInfo({ url, params: cloneParams, config, res, isFromCache: true });
+        logRequestInfo({ url, params: fillParams, config, res, isFromCache: true });
         const data = dataKey ? getObjectValue(res, dataKey) : res;
         resolve(data as T);
         return;
@@ -145,7 +145,7 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
     temp.task = uni.request({
       ...uniConfig,
       url,
-      data: cloneParams,
+      data: fillParams,
       success: (xhr) => {
         // 隐藏进度条 (不能写在complete回调,否则toast会被hideLoading隐藏)
         if (showLoading) uni.hideLoading();
@@ -165,7 +165,7 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
         }
 
         // 日志
-        logRequestInfo({ url, params: cloneParams, config, res, isFromCache: false });
+        logRequestInfo({ url, params: fillParams, config, res, isFromCache: false });
 
         if (isSuccess) {
           // 业务正常
@@ -190,7 +190,7 @@ export function request<T>(url: string, params: RequestParams, config: RequestCo
         reject(e);
         // 上报日志
         const { log } = getAppConfig();
-        log?.('error', { name: 'request', status: 'fail', url, params: cloneParams, ...config, e });
+        log?.('error', { name: 'request', status: 'fail', url, params: fillParams, ...config, e });
       },
     });
   });
