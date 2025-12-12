@@ -17,7 +17,19 @@ const packages = [
 ];
 
 function bumpVersion(currentVersion, type) {
-  const [major, minor, patch] = currentVersion.split('.').map(Number);
+  const regex = /^(\d+)\.(\d+)\.(\d+)(?:-(alpha)\.(\d+))?$/;
+  const match = currentVersion.match(regex);
+
+  if (!match) {
+    throw new Error(`Invalid version format: ${currentVersion}`);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let [_, major, minor, patch, preType, preVer] = match;
+  major = parseInt(major);
+  minor = parseInt(minor);
+  patch = parseInt(patch);
+  preVer = preVer ? parseInt(preVer) : 0;
 
   switch (type) {
     case 'major':
@@ -25,9 +37,19 @@ function bumpVersion(currentVersion, type) {
     case 'minor':
       return `${major}.${minor + 1}.0`;
     case 'patch':
+      // If it is a pre-release (e.g., 1.0.1-alpha.0), "patch" should stabilize it to 1.0.1
+      if (preType) {
+        return `${major}.${minor}.${patch}`;
+      }
       return `${major}.${minor}.${patch + 1}`;
+    case 'alpha':
+      if (preType === 'alpha') {
+        return `${major}.${minor}.${patch}-alpha.${preVer + 1}`;
+      }
+      // If stable, add alpha.0
+      return `${major}.${minor}.${patch}-alpha.0`;
     default:
-      throw new Error(`Invalid version type: ${type}. Use major, minor, or patch.`);
+      throw new Error(`Invalid version type: ${type}. Use major, minor, patch, or alpha.`);
   }
 }
 
@@ -44,8 +66,8 @@ function updatePackageVersion(packagePath, newVersion) {
 function main() {
   const versionType = process.argv[2];
 
-  if (!versionType || !['major', 'minor', 'patch'].includes(versionType)) {
-    console.error('Usage: node scripts/version-bump.mjs <major|minor|patch>');
+  if (!versionType || !['major', 'minor', 'patch', 'alpha'].includes(versionType)) {
+    console.error('Usage: node scripts/version-bump.mjs <major|minor|patch|alpha>');
     process.exit(1);
   }
 

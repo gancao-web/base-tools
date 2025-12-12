@@ -12,6 +12,8 @@ import type { ComponentInternalInstance } from 'vue';
  */
 export function toast(msg: string, duration = 1000) {
   return new Promise<void>((resolve) => {
+    if (!msg) return resolve();
+
     uni.showToast({ icon: 'none', title: msg, duration });
 
     setTimeout(() => resolve(), duration);
