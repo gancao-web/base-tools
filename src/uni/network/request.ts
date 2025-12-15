@@ -6,7 +6,7 @@ import { toast } from '../ui';
 import type { AppLogInfo } from '../config';
 
 /** 请求参数 */
-export type RequestParams = UniApp.RequestOptions['data'];
+export type RequestData = UniApp.RequestOptions['data'];
 
 /** 请求配置 */
 export type RequestConfig = Omit<UniApp.RequestOptions, 'success' | 'fail' | 'complete'> & {

@@ -8,7 +8,7 @@
 
 ```ts
 import { request } from '@base-web-kits/base-tools-uni';
-import type { RequestParams, RequestConfig } from '@base-web-kits/base-tools-uni';
+import type { RequestData, RequestConfig } from '@base-web-kits/base-tools-uni';
 
 // 封装项目的基础请求
 export function requestApi<T>(config: RequestConfig) {
