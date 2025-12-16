@@ -9,7 +9,13 @@ import type { AppLogInfo } from '../config';
 export type RequestData = UniApp.RequestOptions['data'];
 
 /** 请求配置 */
-export type RequestConfig = Omit<UniApp.RequestOptions, 'success' | 'fail' | 'complete'> & {
+export type RequestConfig<D extends RequestData = RequestData> = Omit<
+  UniApp.RequestOptions,
+  'success' | 'fail' | 'complete' | 'data'
+> & {
+  /** 请求参数 */
+  data?: D;
+
   /** 接口返回响应数据的字段, 支持"a[0].b.c"的格式, 当配置false时返回完整的响应数据 */
   resKey: string | false;
 
@@ -76,7 +82,14 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  *
  * const goodList = await apiGoodList({ page:1, size:10 });
  *
- * // 2. 基于上面 requestApi 的流式接口
+ * // 2. 参数泛型的写法
+ * export function apiGoodList(config: RequestConfig<{ page: number, size: number }>) {
+ *   return requestApi<GoodItem[]>({ url: '/goods/list', resKey: 'data.list', ...config });
+ * }
+ *
+ * const goodList = await apiGoodList({ data: { page:1, size:10 }, showLoading: false });
+ *
+ * // 3. 基于上面 requestApi 的流式接口
  * export function apiChatStream(data: { question: string }) {
  *   return requestApi<T>({
  *     url: '/sse/chatStream',
@@ -97,7 +110,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * task.offChunkReceived(); // 取消监听,中断流式接收 (调用时机:流式结束,组件销毁,页面关闭)
  * task.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已经成功)
  */
-export function request<T>(config: RequestConfig) {
+export function request<T, D extends RequestData = RequestData>(config: RequestConfig<D>) {
   // 请求对象
   const temp: { task?: UniApp.RequestTask } = {};
 
@@ -210,7 +223,7 @@ export function request<T>(config: RequestConfig) {
  * 日志输出
  */
 export function logRequestInfo(options: {
-  config: RequestConfig;
+  config: RequestConfig<RequestData>;
   res: unknown;
   fromCache: boolean;
   startTime: number;

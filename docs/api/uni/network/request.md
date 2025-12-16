@@ -31,7 +31,14 @@ export function apiGoodList(data: { page: number; size: number }) {
 
 const goodList = await apiGoodList({ page: 1, size: 10 });
 
-// 2. 基于上面 requestApi 的流式接口
+// 2. 参数泛型的写法
+export function apiGoodList(config: RequestConfig<{ page: number; size: number }>) {
+  return requestApi<GoodItem[]>({ url: '/goods/list', resKey: 'data.list', ...config });
+}
+
+const goodList = await apiGoodList({ data: { page: 1, size: 10 }, showLoading: false });
+
+// 3. 基于上面 requestApi 的流式接口
 export function apiChatStream(data: { question: string }) {
   return requestApi<T>({
     url: '/sse/chatStream',
