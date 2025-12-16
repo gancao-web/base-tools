@@ -67,6 +67,7 @@ task.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求
 - `resKey: string | false` - 接口返回响应数据的字段, 支持"a[0].b.c"的格式, 当配置false时返回完整的响应数据
 - `msgKey: string` - 接口返回响应消息的字段, 支持"a[0].b.c"的格式
 - `codeKey: string` - 接口返回响应状态码的字段, 支持"a[0].b.c"的格式
+- `successKey?: string` - 接口返回成功状态码的字段, 支持"a[0].b.c"的格式 (默认取 codeKey)
 - `successCode: (number | string)[]` - 成功状态码列表
 - `reloginCode: (number | string)[]` - 登录过期状态码列表
 - `responseInterceptor?: (data: any) => any` - 响应拦截，可预处理响应数据 (如解密)
