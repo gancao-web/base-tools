@@ -8,8 +8,13 @@ import type { AppLogInfo } from '../config';
 /** 请求参数 */
 export type RequestData = UniApp.RequestOptions['data'];
 
-/** 请求配置 */
-export type RequestConfig<D extends RequestData = RequestData> = Omit<
+/**
+ * 发起请求的配置 (对外,参数可选)
+ */
+export type RequestConfig<D extends RequestData = RequestData> = Partial<RequestConfigBase<D>>;
+
+/** 自定义请求的配置 (接口字段参数必填) */
+export type RequestConfigBase<D extends RequestData = RequestData> = Omit<
   UniApp.RequestOptions,
   'success' | 'fail' | 'complete' | 'data'
 > & {
@@ -110,7 +115,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * task.offChunkReceived(); // 取消监听,中断流式接收 (调用时机:流式结束,组件销毁,页面关闭)
  * task.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已经成功)
  */
-export function request<T, D extends RequestData = RequestData>(config: RequestConfig<D>) {
+export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
   // 请求对象
   const temp: { task?: UniApp.RequestTask } = {};
 
@@ -223,7 +228,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
  * 日志输出
  */
 export function logRequestInfo(options: {
-  config: RequestConfig<RequestData>;
+  config: RequestConfigBase<RequestData>;
   res: unknown;
   fromCache: boolean;
   startTime: number;
@@ -264,7 +269,7 @@ export function logRequestInfo(options: {
 }
 
 // 获取 resKey 对应的数据
-function getResult(res: unknown, resKey?: RequestConfig['resKey']) {
+function getResult(res: unknown, resKey?: RequestConfigBase['resKey']) {
   if (!res || !resKey || typeof res !== 'object') return res;
 
   return getObjectValue(res, resKey);
