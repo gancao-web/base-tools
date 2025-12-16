@@ -30,6 +30,9 @@ export type RequestConfigBase<D extends RequestData = RequestData> = Omit<
   /** 接口返回响应状态码的字段, 支持"a[0].b.c"的格式 */
   codeKey: string;
 
+  /** 接口返回成功状态码的字段, 支持"a[0].b.c"的格式 (默认取 codeKey) */
+  successKey?: string;
+
   /** 成功状态码 */
   successCode: (number | string)[];
 
@@ -128,6 +131,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       resKey,
       msgKey,
       codeKey,
+      successKey,
       successCode,
       reloginCode,
       showLoading = true,
@@ -179,8 +183,9 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 
         // 解析数据 (分块传输会先不断执行task.onChunkReceived回调,流式传输完毕才执行success回调)
         const code = enableChunked ? '' : getObjectValue(res, codeKey);
+        const scode = enableChunked ? '' : successKey ? getObjectValue(res, successKey) : code;
         const msg = enableChunked ? '' : getObjectValue(res, msgKey);
-        const isSuccess = enableChunked ? true : successCode.includes(code);
+        const isSuccess = enableChunked ? true : successCode.includes(scode);
         const isRelogin = enableChunked ? false : reloginCode.includes(code);
 
         // 缓存数据
