@@ -6,10 +6,21 @@ import { toast } from '../ui';
 import type { AppLogInfo } from '../config';
 
 /** 请求参数 */
-export type RequestParams = UniApp.RequestOptions['data'];
+export type RequestData = UniApp.RequestOptions['data'];
 
-/** 请求配置 */
-export type RequestConfig = Omit<UniApp.RequestOptions, 'success' | 'fail' | 'complete'> & {
+/**
+ * 发起请求的配置 (对外,参数可选)
+ */
+export type RequestConfig<D extends RequestData = RequestData> = Partial<RequestConfigBase<D>>;
+
+/** 自定义请求的配置 (接口字段参数必填) */
+export type RequestConfigBase<D extends RequestData = RequestData> = Omit<
+  UniApp.RequestOptions,
+  'success' | 'fail' | 'complete' | 'data'
+> & {
+  /** 请求参数 */
+  data?: D;
+
   /** 接口返回响应数据的字段, 支持"a[0].b.c"的格式, 当配置false时返回完整的响应数据 */
   resKey: string | false;
 
@@ -18,6 +29,9 @@ export type RequestConfig = Omit<UniApp.RequestOptions, 'success' | 'fail' | 'co
 
   /** 接口返回响应状态码的字段, 支持"a[0].b.c"的格式 */
   codeKey: string;
+
+  /** 接口返回成功状态码的字段, 支持"a[0].b.c"的格式 (默认取 codeKey) */
+  successKey?: string;
 
   /** 成功状态码 */
   successCode: (number | string)[];
@@ -76,7 +90,14 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  *
  * const goodList = await apiGoodList({ page:1, size:10 });
  *
- * // 2. 基于上面 requestApi 的流式接口
+ * // 2. 参数泛型的写法
+ * export function apiGoodList(config: RequestConfig<{ page: number, size: number }>) {
+ *   return requestApi<GoodItem[]>({ url: '/goods/list', resKey: 'data.list', ...config });
+ * }
+ *
+ * const goodList = await apiGoodList({ data: { page:1, size:10 }, showLoading: false });
+ *
+ * // 3. 基于上面 requestApi 的流式接口
  * export function apiChatStream(data: { question: string }) {
  *   return requestApi<T>({
  *     url: '/sse/chatStream',
@@ -97,7 +118,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * task.offChunkReceived(); // 取消监听,中断流式接收 (调用时机:流式结束,组件销毁,页面关闭)
  * task.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已经成功)
  */
-export function request<T>(config: RequestConfig) {
+export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
   // 请求对象
   const temp: { task?: UniApp.RequestTask } = {};
 
@@ -110,6 +131,7 @@ export function request<T>(config: RequestConfig) {
       resKey,
       msgKey,
       codeKey,
+      successKey,
       successCode,
       reloginCode,
       showLoading = true,
@@ -138,7 +160,7 @@ export function request<T>(config: RequestConfig) {
       const cached = requestCache.get(cacheKey);
       if (cached && cached.expire > startTime) {
         const { res } = cached;
-        logRequestInfo({ config: logConfig, res, fromCache: true, startTime });
+        logRequestInfo({ status: 'success', config: logConfig, fromCache: true, startTime, res });
         resolve(getResult(res, resKey));
         return;
       }
@@ -161,8 +183,9 @@ export function request<T>(config: RequestConfig) {
 
         // 解析数据 (分块传输会先不断执行task.onChunkReceived回调,流式传输完毕才执行success回调)
         const code = enableChunked ? '' : getObjectValue(res, codeKey);
+        const scode = enableChunked ? '' : successKey ? getObjectValue(res, successKey) : code;
         const msg = enableChunked ? '' : getObjectValue(res, msgKey);
-        const isSuccess = enableChunked ? true : successCode.includes(code);
+        const isSuccess = enableChunked ? true : successCode.includes(scode);
         const isRelogin = enableChunked ? false : reloginCode.includes(code);
 
         // 缓存数据
@@ -171,7 +194,7 @@ export function request<T>(config: RequestConfig) {
         }
 
         // 日志
-        logRequestInfo({ config: logConfig, res, fromCache: false, startTime });
+        logRequestInfo({ status: 'success', config: logConfig, startTime, res });
 
         if (isSuccess) {
           // 业务正常
@@ -194,8 +217,7 @@ export function request<T>(config: RequestConfig) {
         if (toastError) toast('请求失败,请检查网络');
         reject(e);
         // 上报日志
-        const { log } = getAppConfig();
-        log?.('error', { ...config, name: 'request', status: 'fail', data: fillData, e });
+        logRequestInfo({ status: 'fail', config: logConfig, startTime, e });
       },
     });
   });
@@ -209,29 +231,31 @@ export function request<T>(config: RequestConfig) {
 /**
  * 日志输出
  */
-export function logRequestInfo(options: {
-  config: RequestConfig;
-  res: unknown;
-  fromCache: boolean;
+function logRequestInfo(options: {
+  config: RequestConfigBase<RequestData>;
+  fromCache?: boolean;
   startTime: number;
+  status: 'success' | 'fail';
+  res?: unknown;
+  e?: unknown;
 }) {
   const { log } = getAppConfig();
   const { isLog = true } = options.config;
 
   if (!log || !isLog) return;
 
-  const { config, res, fromCache, startTime } = options;
+  const { config, res, fromCache = false, startTime, status, e } = options;
   const { url, data, header, method, extraLog } = config;
   const endTime = Date.now();
   const fmt = 'YYYY-MM-DD HH:mm:ss.SSS';
 
   const info: AppLogInfo = {
     name: 'request',
+    status,
     url,
     data,
     method,
     header,
-    res: cloneDeep(res), // 深拷贝,避免外部修改对象,造成输出不一致
     fromCache,
     startTime: toDayjs(startTime).format(fmt),
     endTime: toDayjs(endTime).format(fmt),
@@ -239,19 +263,28 @@ export function logRequestInfo(options: {
     ...extraLog,
   };
 
-  if (getPlatformOs() === 'devtools' && res && typeof res === 'object') {
-    const result = getResult(res, config.resKey);
+  if (status === 'success') {
+    // 深拷贝,避免外部修改对象,造成输出不一致
+    info.res = cloneDeep(res);
 
-    if (result && typeof result === 'object') {
-      info._res = { text: JSON.stringify(result) }; // 微信开发工具输出JSON字符串,快捷复制定义ts (使用对象的形式,避免控制台展开根对象时占用太多屏幕)
+    // 微信开发工具输出JSON字符串,快捷复制定义ts (使用对象的形式,避免控制台展开根对象时占用太多屏幕)
+    if (getPlatformOs() === 'devtools' && res && typeof res === 'object') {
+      const result = getResult(res, config.resKey);
+
+      if (result && typeof result === 'object') {
+        info._res = { text: JSON.stringify(result) };
+      }
     }
+    log('info', info);
+  } else {
+    // 失败日志
+    info.e = e;
+    log('error', info);
   }
-
-  log('info', info);
 }
 
 // 获取 resKey 对应的数据
-function getResult(res: unknown, resKey?: RequestConfig['resKey']) {
+function getResult(res: unknown, resKey?: RequestConfigBase['resKey']) {
   if (!res || !resKey || typeof res !== 'object') return res;
 
   return getObjectValue(res, resKey);
