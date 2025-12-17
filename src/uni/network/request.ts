@@ -160,7 +160,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       const cached = requestCache.get(cacheKey);
       if (cached && cached.expire > startTime) {
         const { res } = cached;
-        logRequestInfo({ config: logConfig, res, fromCache: true, startTime });
+        logRequestInfo({ status: 'success', config: logConfig, fromCache: true, startTime, res });
         resolve(getResult(res, resKey));
         return;
       }
@@ -194,7 +194,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         }
 
         // 日志
-        logRequestInfo({ config: logConfig, res, fromCache: false, startTime });
+        logRequestInfo({ status: 'success', config: logConfig, startTime, res });
 
         if (isSuccess) {
           // 业务正常
@@ -217,8 +217,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         if (toastError) toast('请求失败,请检查网络');
         reject(e);
         // 上报日志
-        const { log } = getAppConfig();
-        log?.('error', { ...config, name: 'request', status: 'fail', data: fillData, e });
+        logRequestInfo({ status: 'fail', config: logConfig, startTime, e });
       },
     });
   });
@@ -232,29 +231,31 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 /**
  * 日志输出
  */
-export function logRequestInfo(options: {
+function logRequestInfo(options: {
   config: RequestConfigBase<RequestData>;
-  res: unknown;
-  fromCache: boolean;
+  fromCache?: boolean;
   startTime: number;
+  status: 'success' | 'fail';
+  res?: unknown;
+  e?: unknown;
 }) {
   const { log } = getAppConfig();
   const { isLog = true } = options.config;
 
   if (!log || !isLog) return;
 
-  const { config, res, fromCache, startTime } = options;
+  const { config, res, fromCache = false, startTime, status, e } = options;
   const { url, data, header, method, extraLog } = config;
   const endTime = Date.now();
   const fmt = 'YYYY-MM-DD HH:mm:ss.SSS';
 
   const info: AppLogInfo = {
     name: 'request',
+    status,
     url,
     data,
     method,
     header,
-    res: cloneDeep(res), // 深拷贝,避免外部修改对象,造成输出不一致
     fromCache,
     startTime: toDayjs(startTime).format(fmt),
     endTime: toDayjs(endTime).format(fmt),
@@ -262,15 +263,24 @@ export function logRequestInfo(options: {
     ...extraLog,
   };
 
-  if (getPlatformOs() === 'devtools' && res && typeof res === 'object') {
-    const result = getResult(res, config.resKey);
+  if (status === 'success') {
+    // 深拷贝,避免外部修改对象,造成输出不一致
+    info.res = cloneDeep(res);
 
-    if (result && typeof result === 'object') {
-      info._res = { text: JSON.stringify(result) }; // 微信开发工具输出JSON字符串,快捷复制定义ts (使用对象的形式,避免控制台展开根对象时占用太多屏幕)
+    // 微信开发工具输出JSON字符串,快捷复制定义ts (使用对象的形式,避免控制台展开根对象时占用太多屏幕)
+    if (getPlatformOs() === 'devtools' && res && typeof res === 'object') {
+      const result = getResult(res, config.resKey);
+
+      if (result && typeof result === 'object') {
+        info._res = { text: JSON.stringify(result) };
+      }
     }
+    log('info', info);
+  } else {
+    // 失败日志
+    info.e = e;
+    log('error', info);
   }
-
-  log('info', info);
 }
 
 // 获取 resKey 对应的数据
