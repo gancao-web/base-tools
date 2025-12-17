@@ -8,7 +8,7 @@
 
 ```ts
 import { request } from '@base-web-kits/base-tools-uni';
-import type { RequestParams, RequestConfig } from '@base-web-kits/base-tools-uni';
+import type { RequestData, RequestConfig } from '@base-web-kits/base-tools-uni';
 
 // 封装项目的基础请求
 export function requestApi<T>(config: RequestConfig) {
@@ -31,7 +31,14 @@ export function apiGoodList(data: { page: number; size: number }) {
 
 const goodList = await apiGoodList({ page: 1, size: 10 });
 
-// 2. 基于上面 requestApi 的流式接口
+// 2. 参数泛型的写法
+export function apiGoodList(config: RequestConfig<{ page: number; size: number }>) {
+  return requestApi<GoodItem[]>({ url: '/goods/list', resKey: 'data.list', ...config });
+}
+
+const goodList = await apiGoodList({ data: { page: 1, size: 10 }, showLoading: false });
+
+// 3. 基于上面 requestApi 的流式接口
 export function apiChatStream(data: { question: string }) {
   return requestApi<T>({
     url: '/sse/chatStream',
@@ -60,6 +67,7 @@ task.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求
 - `resKey: string | false` - 接口返回响应数据的字段, 支持"a[0].b.c"的格式, 当配置false时返回完整的响应数据
 - `msgKey: string` - 接口返回响应消息的字段, 支持"a[0].b.c"的格式
 - `codeKey: string` - 接口返回响应状态码的字段, 支持"a[0].b.c"的格式
+- `successKey?: string` - 接口返回成功状态码的字段, 支持"a[0].b.c"的格式 (默认取 codeKey)
 - `successCode: (number | string)[]` - 成功状态码列表
 - `reloginCode: (number | string)[]` - 登录过期状态码列表
 - `responseInterceptor?: (data: any) => any` - 响应拦截，可预处理响应数据 (如解密)
