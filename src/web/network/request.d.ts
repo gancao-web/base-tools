@@ -27,6 +27,11 @@ export type RequestData =
   | null;
 
 /**
+ * 响应数据类型
+ */
+export type ResponseData = string | ArrayBuffer | Blob | Record<string, unknown> | unknown[] | null;
+
+/**
  * 发起请求的配置 (对外,参数可选)
  */
 export type RequestConfig<D extends RequestData = RequestData> = Partial<RequestConfigBase<D>>;
@@ -86,7 +91,7 @@ export type RequestConfigBase<D extends RequestData = RequestData> = {
   responseType?: 'text' | 'arraybuffer' | 'json';
 
   /** 响应拦截 */
-  responseInterceptor?: (data: unknown) => unknown;
+  responseInterceptor?: (data: ResponseData) => ResponseData;
 };
 
 /**

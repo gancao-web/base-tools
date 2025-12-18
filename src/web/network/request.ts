@@ -8,7 +8,13 @@ import {
 } from '../../ts';
 import { getAppConfig } from '../config';
 import type { AppLogInfo } from '../config';
-import type { ChunkCallback, RequestConfigBase, RequestData, RequestTask } from './request.d';
+import type {
+  ChunkCallback,
+  RequestConfigBase,
+  RequestData,
+  RequestTask,
+  ResponseData,
+} from './request.d';
 
 export * from './request.d';
 
@@ -362,7 +368,7 @@ async function handleStreamResponse(response: Response, chunkCallback: ChunkCall
  * 解析响应数据
  */
 async function parseResponse(response: Response, responseType: string) {
-  let resData: unknown;
+  let resData: ResponseData;
   if (responseType === 'arraybuffer') {
     resData = await response.arrayBuffer();
   } else if (responseType === 'text') {
