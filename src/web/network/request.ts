@@ -21,6 +21,23 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * @param config 请求配置
  * @returns Promise<T> & { task?: RequestTask }
  * @example
+ * // 在入口文件完成配置 (确保请求失败有toast提示,登录过期能够触发重新登录,log有日志输出)
+ * setBaseToolsConfig({
+ * toast: ({ msg, status }) => (status === 'fail' ? message.error(msg) : message.success(msg)),
+ * showLoading: () => message.loading('加载中...'),
+ * hideLoading: () => message.destroy(),
+ * toLogin: () => reLogin(),
+ * log(level, data) {
+ *   if (data.name === 'request') {
+ *     sendLog('request', data); // 请求日志
+ *   } else if (level === 'error') {
+ *     sendLog('error', data); // 错误日志
+ *   } else {
+ *     sendLog('action', data); // 操作日志
+ *   }
+ * },
+ * });
+ *
  * // 封装项目的基础请求
  * export function requestApi<T>(config: RequestConfig) {
  *    return request<T>({
@@ -225,22 +242,23 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
           appConfig.toLogin?.(); // 放在后面,确保reject执行后再跳转登录
         } else {
           // 业务错误
-          if (toastError && msg) appConfig.toast?.(msg);
+          if (toastError && msg) appConfig.toast?.({ status: 'fail', msg });
           reject(res);
         }
       } catch (e) {
+        const status = 'fail';
         const isAbortError = e instanceof DOMException && e.name === 'AbortError'; // 取消请求不视为错误
 
         if (isAbortError && isTimeout) {
-          if (toastError) appConfig.toast?.('请求超时');
+          if (toastError) appConfig.toast?.({ status, msg: '请求超时' });
           const timeoutError = new Error('Request Timeout');
-          logRequestInfo({ status: 'fail', config: logConfig, startTime, e: timeoutError });
+          logRequestInfo({ status, config: logConfig, startTime, e: timeoutError });
           reject(timeoutError);
           return;
         }
 
-        if (!isAbortError && toastError) appConfig.toast?.('网络请求失败');
-        logRequestInfo({ status: 'fail', config: logConfig, startTime, e });
+        if (!isAbortError && toastError) appConfig.toast?.({ status, msg: '网络请求失败' });
+        logRequestInfo({ status, config: logConfig, startTime, e });
         reject(e);
       } finally {
         if (timeoutId) clearTimeout(timeoutId);

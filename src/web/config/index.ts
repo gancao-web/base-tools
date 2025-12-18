@@ -1,6 +1,6 @@
 export type AppConfig = {
   /** 全局 Toast 提示 */
-  toast?: (msg: string) => void;
+  toast?: (option: { msg: string; status: 'success' | 'fail' }) => void;
   /** 显示全局 Loading */
   showLoading?: () => void;
   /** 隐藏全局 Loading */
@@ -45,7 +45,23 @@ export function getAppConfig() {
 
 /**
  * 初始化应用配置 (在入口文件设置)
+ * @example
+ * setBaseToolsConfig({
+ * toast: ({ msg, status }) => (status === 'fail' ? message.error(msg) : message.success(msg)),
+ * showLoading: () => message.loading('加载中...'),
+ * hideLoading: () => message.destroy(),
+ * toLogin: () => reLogin(),
+ * log(level, data) {
+ *   if (data.name === 'request') {
+ *     sendLog('request', data); // 请求日志
+ *   } else if (level === 'error') {
+ *     sendLog('error', data); // 错误日志
+ *   } else {
+ *     sendLog('action', data); // 操作日志
+ *   }
+ * },
+ * });
  */
-export function setAppConfig(newConfig: AppConfig) {
+export function setBaseToolsConfig(newConfig: AppConfig) {
   Object.assign(appConfig, newConfig);
 }
