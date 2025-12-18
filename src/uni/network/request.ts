@@ -158,11 +158,14 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     const cacheKey = isCache ? JSON.stringify({ url, data: fillData }) : '';
     if (isCache) {
       const cached = requestCache.get(cacheKey);
-      if (cached && cached.expire > startTime) {
-        const { res } = cached;
-        logRequestInfo({ status: 'success', config: logConfig, fromCache: true, startTime, res });
-        resolve(getResult(res, resKey));
-        return;
+      if (cached) {
+        if (cached.expire > startTime) {
+          const { res } = cached;
+          logRequestInfo({ status: 'success', config: logConfig, fromCache: true, startTime, res });
+          resolve(getResult(res, resKey)); // 返回缓存数据
+          return;
+        }
+        requestCache.delete(cacheKey); // 删除过期缓存
       }
     }
 

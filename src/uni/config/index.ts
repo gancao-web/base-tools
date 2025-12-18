@@ -104,7 +104,7 @@ export function getAppConfig() {
 }
 
 /**
- * 初始化应用配置, 建议在入口文件先设置配置
+ * 初始化应用配置 (在入口文件设置)
  * @example
  * setAppConfig({
  *   pathHome: '/pages/tabbar/home/index',
