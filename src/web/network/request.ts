@@ -20,6 +20,55 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * 基于 fetch API 封装，支持流式请求
  * @param config 请求配置
  * @returns Promise<T> & { task?: RequestTask }
+ * @example
+ * // 封装项目的基础请求
+ * export function requestApi<T>(config: RequestConfig) {
+ *    return request<T>({
+ *      header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
+ *      // responseInterceptor: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
+ *      resKey: 'data',
+ *      msgKey: 'message',
+ *      codeKey: 'status',
+ *      successCode: [1],
+ *      reloginCode: [-10],
+ *      ...config,
+ *    });
+ * }
+ *
+ * // 1. 基于上面 requestApi 的普通接口
+ * export function apiGoodList(data: { page: number, size: number }) {
+ *   return requestApi<GoodItem[]>({ url: '/goods/list', data, resKey: 'data.list' });
+ * }
+ *
+ * const goodList = await apiGoodList({ page:1, size:10 });
+ *
+ * // 2. 参数泛型的写法
+ * export function apiGoodList(config: RequestConfig<{ page: number, size: number }>) {
+ *   return requestApi<GoodItem[]>({ url: '/goods/list', resKey: 'data.list', ...config });
+ * }
+ *
+ * const goodList = await apiGoodList({ data: { page:1, size:10 }, showLoading: false });
+ *
+ * // 3. 基于上面 requestApi 的流式接口
+ * export function apiChatStream(data: { question: string }) {
+ *   return requestApi<T>({
+ *     url: '/sse/chatStream',
+ *     data,
+ *     resKey: false,
+ *     showLoading: false,
+ *     responseType: 'arraybuffer',
+ *     enableChunked: true,
+ *   });
+ * }
+ *
+ * const { task } = apiChatStream({question: '你好'}); // 发起流式请求
+ *
+ * task.onChunkReceived((res) => {
+ *   console.log('ArrayBuffer', res.data); // 接收流式数据
+ * });
+ *
+ * task.offChunkReceived(); // 取消监听,中断流式接收 (调用时机:流式结束,组件销毁,页面关闭)
+ * task.abort(); // 取消请求 (若流式传输中,会中断流并抛出异常)
  */
 export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
   // 1. 初始化控制对象
@@ -66,9 +115,12 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       const isArrayData = !isObjectData && Array.isArray(data);
 
       // 2.1 参数处理
+      // 参数: 过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 、 0 这些有效值)
       const fillData = isObjectData ? pickBy(data, (val) => val !== undefined) : data;
 
+      // 请求头: 过滤空值 (undefined 、null 、"" 、false 、0), 因为服务器端接收到的都是字符串
       const fillHeader = (header ? pickBy(header, (val) => !!val) : {}) as Record<string, string>;
+
       if (!isGet && fillData && (isObjectData || isArrayData) && !fillHeader['Content-Type']) {
         fillHeader['Content-Type'] = 'application/json';
       }
@@ -108,11 +160,13 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       }
 
       // 2.5 UI 反馈
-      const appCfg = getAppConfig();
-      if (showLoading && appCfg.showLoading) appCfg.showLoading();
+      const appConfig = getAppConfig();
+      if (showLoading) appConfig.showLoading?.();
 
       // 2.6 设置超时
+      let isTimeout = false;
       const timeoutId = setTimeout(() => {
+        isTimeout = true;
         controller.abort();
       }, timeout);
 
@@ -126,13 +180,13 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         });
 
         if (!response.ok) {
-          if (showLoading && appCfg.hideLoading) appCfg.hideLoading();
+          if (showLoading) appConfig.hideLoading?.();
           throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
         }
 
         // 2.8 处理流式响应
         if (enableChunked) {
-          if (showLoading && appCfg.hideLoading) appCfg.hideLoading();
+          if (showLoading) appConfig.hideLoading?.();
 
           const res = await handleStreamResponse(response, chunkCallback);
 
@@ -146,44 +200,46 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         const resData = await parseResponse(response, responseType);
 
         // 隐藏 Loading
-        if (showLoading && appCfg.hideLoading) appCfg.hideLoading();
+        if (showLoading) appConfig.hideLoading?.();
 
         // 响应拦截
-        const finalRes = responseInterceptor ? responseInterceptor(resData) : resData;
+        const res = responseInterceptor ? responseInterceptor(resData) : resData;
 
         // 2.10 业务状态码解析
-        const code = getObjectValue(finalRes, codeKey);
-        const scode = successKey ? getObjectValue(finalRes, successKey) : code;
-        const msg = getObjectValue(finalRes, msgKey);
+        const code = getObjectValue(res, codeKey);
+        const scode = successKey ? getObjectValue(res, successKey) : code;
+        const msg = getObjectValue(res, msgKey);
         const isSuccess = successCode.includes(scode);
         const isRelogin = reloginCode.includes(code);
 
-        logRequestInfo({ status: 'success', config: logConfig, startTime, res: finalRes });
+        logRequestInfo({ status: 'success', config: logConfig, startTime, res });
 
         // 2.11 结果处理
         if (isSuccess) {
           // 业务正常
-          if (isCache) {
-            requestCache.set(cacheKey, { res: finalRes, expire: Date.now() + cacheTime });
-          }
-          resolve(getResult(finalRes, resKey) as T);
+          if (isCache) requestCache.set(cacheKey, { res, expire: Date.now() + cacheTime });
+          resolve(getResult(res, resKey) as T);
         } else if (isRelogin) {
           // 登录失效
-          reject(finalRes);
-          if (appCfg.toLogin) appCfg.toLogin(); // 放在后面,确保reject执行后再跳转登录
+          reject(res);
+          appConfig.toLogin?.(); // 放在后面,确保reject执行后再跳转登录
         } else {
           // 业务错误
-          if (toastError && appCfg.toast) appCfg.toast(String(msg || 'Request Error'));
-          reject(finalRes);
+          if (toastError && msg) appConfig.toast?.(msg);
+          reject(res);
         }
-      } catch (e: unknown) {
-        // 忽略 AbortError (取消请求不视为错误，或者根据需求处理)
-        if (e instanceof DOMException && e.name === 'AbortError') {
-          // console.warn('Request aborted');
-        } else {
-          if (toastError && appCfg.toast) appCfg.toast('网络请求失败');
+      } catch (e) {
+        const isAbortError = e instanceof DOMException && e.name === 'AbortError'; // 取消请求不视为错误
+
+        if (isAbortError && isTimeout) {
+          if (toastError) appConfig.toast?.('请求超时');
+          const timeoutError = new Error('Request Timeout');
+          logRequestInfo({ status: 'fail', config: logConfig, startTime, e: timeoutError });
+          reject(timeoutError);
+          return;
         }
 
+        if (!isAbortError && toastError) appConfig.toast?.('网络请求失败');
         logRequestInfo({ status: 'fail', config: logConfig, startTime, e });
         reject(e);
       } finally {
@@ -236,7 +292,7 @@ function logRequestInfo(options: {
   };
 
   if (status === 'success') {
-    info.res = cloneDeep(res);
+    info.res = cloneDeep(res); // 深拷贝,避免外部修改对象,造成输出不一致
     log('info', info);
   } else {
     info.e = e;
@@ -268,10 +324,7 @@ function checkCache(cacheKey: string) {
 /**
  * 处理流式响应
  */
-async function handleStreamResponse(
-  response: Response,
-  chunkCallback: ((response: { data: ArrayBuffer }) => void) | null,
-) {
+async function handleStreamResponse(response: Response, chunkCallback: ChunkCallback | null) {
   if (!response.body) throw new Error('Response body is null');
 
   const reader = response.body.getReader();
