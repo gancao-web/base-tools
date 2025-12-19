@@ -1,4 +1,4 @@
-import { getAppConfig, promisifyUniApi } from '../index';
+import { getBaseToolsConfig, promisifyUniApi } from '../index';
 
 /**
  * 打开另一个小程序
@@ -72,7 +72,7 @@ export async function authorize(
   content: string,
   option?: Omit<UniApp.ShowModalOptions, 'content'>,
 ) {
-  const { log } = getAppConfig();
+  const { log } = getBaseToolsConfig();
 
   const setting = await getSetting();
 

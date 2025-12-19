@@ -46,9 +46,9 @@ import { useCountDown } from '@base-web-kits/base-tools-react';
 import { useResizeObserver } from '@base-web-kits/base-tools-vue';
 
 // Uni 模块
-import { setAppConfig, chooseMedia, toPayWx } from '@base-web-kits/base-tools-uni';
+import { setBaseToolsConfig, chooseMedia, toPayWx } from '@base-web-kits/base-tools-uni';
 
-setAppConfig({
+setBaseToolsConfig({
   pathHome: '/pages/tabbar/home/index',
   pathLogin: '/pages/login/index',
   pathWebview: '/pages/webview/index',

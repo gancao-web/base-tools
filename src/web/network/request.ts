@@ -6,7 +6,7 @@ import {
   pickBy,
   toDayjs,
 } from '../../ts';
-import { getAppConfig } from '../config';
+import { getBaseToolsConfig } from '../config';
 import type { AppLogInfo } from '../config';
 
 /** 请求方法类型 */
@@ -289,7 +289,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       }
 
       // 2.5 UI 反馈
-      const appConfig = getAppConfig();
+      const appConfig = getBaseToolsConfig();
       if (showLoading) appConfig.showLoading?.();
 
       // 2.6 设置超时
@@ -397,7 +397,7 @@ function logRequestInfo(options: {
   res?: unknown;
   e?: unknown;
 }) {
-  const { log } = getAppConfig();
+  const { log } = getBaseToolsConfig();
   const { isLog = true } = options.config;
 
   if (!log || !isLog) return;

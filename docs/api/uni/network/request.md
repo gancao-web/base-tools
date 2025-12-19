@@ -2,7 +2,7 @@
 
 基础请求 (返回promise和task对象)。
 
-> 需在入口文件初始化应用配置 `setAppConfig({ pathLogin, log })`
+> 需在入口文件初始化应用配置 `setBaseToolsConfig({ pathLogin, log })`
 
 ## 示例
 

@@ -39,7 +39,7 @@ const appConfig: AppConfig = {};
 /**
  * 获取应用配置
  */
-export function getAppConfig() {
+export function getBaseToolsConfig() {
   return appConfig;
 }
 

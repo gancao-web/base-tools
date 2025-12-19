@@ -1,4 +1,4 @@
-import { getAppConfig } from '../index';
+import { getBaseToolsConfig } from '../index';
 
 const cache = {
   lastUrl: '', // 最近一次打开的页面
@@ -7,7 +7,7 @@ const cache = {
 
 /**
  * 打开界面
- * - 需在入口文件初始化应用配置 setAppConfig({onBeforeHref, pathWebview, isTabBar})
+ * - 需在入口文件初始化应用配置 setBaseToolsConfig({onBeforeHref, pathWebview, isTabBar})
  * @param url 页面路径,包含参数
  * @param config 配置项
  * @param config.checkLogin 是否校验登录 (未登录则自动跳登, 触发toLogin回调)
@@ -25,7 +25,7 @@ export function href(
 ) {
   if (!url) return;
 
-  const { onBeforeHref, pathWebview, isTabBar } = getAppConfig();
+  const { onBeforeHref, pathWebview, isTabBar } = getBaseToolsConfig();
 
   // 页面跳转前的回调 (返回false,则阻止跳转)
   if (onBeforeHref && onBeforeHref(url) === false) return;
@@ -67,11 +67,11 @@ export function href(
 
 /**
  * 检查用户是否登录 (如果未登录, 默认自动跳登, 触发toLogin回调)
- * - 需在入口文件初始化应用配置 setAppConfig({ isLogin, pathLogin })
+ * - 需在入口文件初始化应用配置 setBaseToolsConfig({ isLogin, pathLogin })
  * @param autoLogin 是否自动跳登, 触发toLogin回调
  */
 export function checkLogin(autoLogin = true) {
-  const { isLogin, pathLogin } = getAppConfig();
+  const { isLogin, pathLogin } = getBaseToolsConfig();
   if (isLogin()) return true;
   if (autoLogin) href(pathLogin);
   return false;
@@ -79,25 +79,25 @@ export function checkLogin(autoLogin = true) {
 
 /**
  * 跳首页
- * - 需在入口文件初始化应用配置 setAppConfig({ pathHome })
+ * - 需在入口文件初始化应用配置 setBaseToolsConfig({ pathHome })
  */
 export function toHome() {
-  const { pathHome } = getAppConfig();
+  const { pathHome } = getBaseToolsConfig();
   href(pathHome);
 }
 
 /**
  * 跳登录页
- * - 需在入口文件初始化应用配置 setAppConfig({ pathLogin })
+ * - 需在入口文件初始化应用配置 setBaseToolsConfig({ pathLogin })
  */
 export function toLogin() {
-  const { pathLogin } = getAppConfig();
+  const { pathLogin } = getBaseToolsConfig();
   href(pathLogin);
 }
 
 /**
  * 返回 (长度不够, 直接跳首页)
- * - 需在入口文件初始化应用配置 setAppConfig({ pathHome })
+ * - 需在入口文件初始化应用配置 setBaseToolsConfig({ pathHome })
  * @param delta 返回页数,默认1
  */
 export function back(delta = 1) {

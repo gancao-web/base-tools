@@ -1,5 +1,5 @@
 import { cloneDeep, getObjectValue, isPlainObject, pickBy, toDayjs } from '../../ts';
-import { getAppConfig } from '../config';
+import { getBaseToolsConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformOs } from '../system';
 import { toast } from '../ui';
@@ -65,7 +65,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
 
 /**
  * 基础请求 (返回promise和task对象)
- * - 需在入口文件初始化应用配置 setAppConfig({ pathLogin, log })
+ * - 需在入口文件初始化应用配置 setBaseToolsConfig({ pathLogin, log })
  * @param config 请求配置
  * @returns Promise<T> & { task?: UniApp.RequestTask }
  * @example
@@ -242,7 +242,7 @@ function logRequestInfo(options: {
   res?: unknown;
   e?: unknown;
 }) {
-  const { log } = getAppConfig();
+  const { log } = getBaseToolsConfig();
   const { isLog = true } = options.config;
 
   if (!log || !isLog) return;
