@@ -23,6 +23,17 @@ export function getDeviceInfo() {
 }
 
 /**
+ * 获取微信 APP 基础信息
+ */
+export function getAppBaseInfo() {
+  if (uni.canIUse('getAppBaseInfo')) {
+    return uni.getAppBaseInfo();
+  } else {
+    return uni.getSystemInfoSync();
+  }
+}
+
+/**
  * 屏幕宽度
  */
 export function getWindowWidth() {
@@ -70,13 +81,12 @@ export function getPlatformOs() {
  * @returns 'app' | 'web' | 'mp-weixin' | 'mp-alipay' | 'mp-baidu' | 'mp-toutiao' | 'mp-lark' | 'mp-jd' | 'mp-kuaishou' | 'mp-xhs' | ...
  */
 export function getPlatformUni() {
-  // #ifdef MP-WEIXIN
-  return 'mp-weixin'; // 避免微信小程序使用getSystemInfoSync
-  // #endif
-
-  // #ifndef MP-WEIXIN
-  return uni.getSystemInfoSync().uniPlatform;
-  // #endif
+  const baseInfo = getAppBaseInfo();
+  if ('uniPlatform' in baseInfo) {
+    return baseInfo.uniPlatform;
+  } else {
+    return uni.getSystemInfoSync().uniPlatform;
+  }
 }
 
 /**

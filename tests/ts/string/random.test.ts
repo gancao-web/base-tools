@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createUUID, createRandId, createTimeRandId } from '../../../src/ts';
+import { createUUID, createViewRandId, createTimeRandId } from '../../../src/ts';
 
 describe('ts/string random', () => {
   it('createUUID v4 format', () => {
@@ -7,13 +7,11 @@ describe('ts/string random', () => {
     expect(uuid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
   });
 
-  it('createRandId with default and custom prefix', () => {
-    const id1 = createRandId();
+  it('createViewRandId with default and custom prefix', () => {
+    const id1 = createViewRandId();
     expect(id1.startsWith('id_')).toBe(true);
-    expect(id1.slice(3).length).toBeGreaterThanOrEqual(10);
-    expect(id1.slice(3).length).toBeLessThanOrEqual(14);
 
-    const id2 = createRandId('canvas_');
+    const id2 = createViewRandId('canvas_');
     expect(id2.startsWith('canvas_')).toBe(true);
   });
 

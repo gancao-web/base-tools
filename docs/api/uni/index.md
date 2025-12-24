@@ -5,9 +5,9 @@
 **使用**
 
 ```ts
-import { setAppConfig } from '@base-web-kits/base-tools-uni';
+import { setBaseToolsConfig } from '@base-web-kits/base-tools-uni';
 
-setAppConfig({
+setBaseToolsConfig({
   pathHome: '/pages/tabbar/home/index',
   pathLogin: '/pages/login/index',
   pathWebview: '/pages/webview/index',

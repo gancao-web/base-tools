@@ -2,7 +2,7 @@
 
 检查用户是否登录，未登录则自动跳转到登录页
 
-- 需在入口文件初始化应用配置 `setAppConfig({ isLogin, pathLogin })`
+- 需在入口文件初始化应用配置 `setBaseToolsConfig({ isLogin, pathLogin })`
 - 当 `autoLogin` 为 `true` 时，未登录会自动跳转到登录页
 - 当 `autoLogin` 为 `false` 时，只返回登录状态，不执行跳转
 

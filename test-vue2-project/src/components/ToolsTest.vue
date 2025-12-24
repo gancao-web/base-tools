@@ -27,7 +27,12 @@
 <script>
 import { ref, reactive, computed } from 'vue';
 import { toDayjs, uniq } from '@base-web-kits/base-tools-ts';
-import { setLocalStorage, getLocalStorage, removeLocalStorage, isMobile } from '@base-web-kits/base-tools-web';
+import {
+  setLocalStorage,
+  getLocalStorage,
+  removeLocalStorage,
+  isMobile,
+} from '@base-web-kits/base-tools-web';
 
 export default {
   name: 'ToolsTest',
@@ -53,8 +58,7 @@ export default {
         const testArray = [1, 2, 3, 4, 2];
         const uniqStr = uniq(testArray).toString();
 
-        tsResult.value = `Lodash 测试成功!\n` +
-          `uniq: ${uniqStr}`;
+        tsResult.value = `Lodash 测试成功!\n` + `uniq: ${uniqStr}`;
       } catch (error) {
         tsResult.value = `❌ Lodash测试出错: ${error.message}`;
       }
@@ -89,7 +93,7 @@ export default {
       try {
         const state = reactive({
           count: 0,
-          message: 'Hello Vue 2'
+          message: 'Hello Vue 2',
         });
 
         const doubled = computed(() => state.count * 2);
@@ -97,7 +101,8 @@ export default {
         // 修改状态
         state.count = 5;
 
-        vueResult.value = `Vue 2 响应式测试成功!\n` +
+        vueResult.value =
+          `Vue 2 响应式测试成功!\n` +
           `reactive: ${state.count}\n` +
           `computed: ${doubled.value}\n` +
           `default value: ${state.message}`;
@@ -114,9 +119,9 @@ export default {
       testLodash,
       testStorage,
       testDevice,
-      testReactivity
+      testReactivity,
     };
-  }
+  },
 };
 </script>
 
