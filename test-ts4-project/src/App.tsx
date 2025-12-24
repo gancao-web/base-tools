@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { setLocalStorage, getLocalStorage } from '@base-web-kits/base-tools-web';
-import { createRandId, toDayjs, uniq } from '@base-web-kits/base-tools-ts';
+import { createViewRandId, toDayjs, uniq } from '@base-web-kits/base-tools-ts';
 import './App.css';
 
 function App() {
@@ -11,7 +11,7 @@ function App() {
 
     try {
       // 测试 base-tools-ts 的功能
-      results.push(`✅ Random ID: ${createRandId()}`);
+      results.push(`✅ Random ID: ${createViewRandId()}`);
 
       // 测试 toDayjs
       const now = new Date();

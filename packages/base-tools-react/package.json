@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-react",
-  "version": "1.0.2",
+  "version": "1.1.1",
   "sideEffects": false,
   "description": "Independent React utilities package built from src/react.",
   "keywords": [

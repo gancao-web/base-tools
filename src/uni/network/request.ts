@@ -1,5 +1,5 @@
 import { cloneDeep, getObjectValue, isPlainObject, pickBy, toDayjs } from '../../ts';
-import { getAppConfig } from '../config';
+import { getBaseToolsConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformOs } from '../system';
 import { toast } from '../ui';
@@ -65,7 +65,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
 
 /**
  * 基础请求 (返回promise和task对象)
- * - 需在入口文件初始化应用配置 setAppConfig({ pathLogin, log })
+ * - 需在入口文件初始化应用配置 setBaseToolsConfig({ pathLogin, log })
  * @param config 请求配置
  * @returns Promise<T> & { task?: UniApp.RequestTask }
  * @example
@@ -158,11 +158,14 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     const cacheKey = isCache ? JSON.stringify({ url, data: fillData }) : '';
     if (isCache) {
       const cached = requestCache.get(cacheKey);
-      if (cached && cached.expire > startTime) {
-        const { res } = cached;
-        logRequestInfo({ status: 'success', config: logConfig, fromCache: true, startTime, res });
-        resolve(getResult(res, resKey));
-        return;
+      if (cached) {
+        if (cached.expire > startTime) {
+          const { res } = cached;
+          logRequestInfo({ status: 'success', config: logConfig, fromCache: true, startTime, res });
+          resolve(getResult(res, resKey)); // 返回缓存数据
+          return;
+        }
+        requestCache.delete(cacheKey); // 删除过期缓存
       }
     }
 
@@ -181,7 +184,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         // 响应拦截
         const res = responseInterceptor ? responseInterceptor(xhr.data) : xhr.data;
 
-        // 解析数据 (分块传输会先不断执行task.onChunkReceived回调,流式传输完毕才执行success回调)
+        // 解析数据 (分块传输会先不断执行task.onProgressUpdate回调,流式传输完毕才执行success回调)
         const code = enableChunked ? '' : getObjectValue(res, codeKey);
         const scode = enableChunked ? '' : successKey ? getObjectValue(res, successKey) : code;
         const msg = enableChunked ? '' : getObjectValue(res, msgKey);
@@ -239,7 +242,7 @@ function logRequestInfo(options: {
   res?: unknown;
   e?: unknown;
 }) {
-  const { log } = getAppConfig();
+  const { log } = getBaseToolsConfig();
   const { isLog = true } = options.config;
 
   if (!log || !isLog) return;

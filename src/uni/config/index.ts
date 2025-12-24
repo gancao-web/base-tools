@@ -99,14 +99,14 @@ const appConfig: AppConfig = {
 /**
  * 获取应用配置
  */
-export function getAppConfig() {
+export function getBaseToolsConfig() {
   return appConfig;
 }
 
 /**
- * 初始化应用配置, 建议在入口文件先设置配置
+ * 初始化应用配置 (在入口文件设置)
  * @example
- * setAppConfig({
+ * setBaseToolsConfig({
  *   pathHome: '/pages/tabbar/home/index',
  *   pathLogin: '/pages/login/index',
  *   pathWebview: '/pages/webview/index',
@@ -118,6 +118,6 @@ export function getAppConfig() {
  *   // log: (level, data) => console[level](data),
  * });
  */
-export function setAppConfig(newConfig: AppConfig) {
+export function setBaseToolsConfig(newConfig: AppConfig) {
   Object.assign(appConfig, newConfig);
 }

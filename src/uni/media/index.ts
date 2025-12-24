@@ -1,4 +1,4 @@
-import { downloadFile, getAppConfig, authorize, promisifyUniApi } from '../index';
+import { downloadFile, getBaseToolsConfig, authorize, promisifyUniApi } from '../index';
 import type { UniApiConfig } from '../index';
 
 const cache = {
@@ -15,7 +15,7 @@ const cache = {
  */
 export async function chooseMedia(option: UniApp.ChooseMediaOption) {
   if (cache.isChooseMedia) {
-    const { log } = getAppConfig();
+    const { log } = getBaseToolsConfig();
     const desc = 'Choosing media, please wait..';
     log?.('error', { name: 'chooseMedia', status: 'fail', desc, option });
     throw new Error(desc);

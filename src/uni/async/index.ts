@@ -1,4 +1,4 @@
-import { getAppConfig, toast } from '../index';
+import { getBaseToolsConfig, toast } from '../index';
 
 type UniCallbacks<Res, Err> = {
   success?: (res: Res) => void;
@@ -37,7 +37,7 @@ export type UniApiConfig<Res = unknown, Err = unknown> = {
 export function promisifyUniApi<Option, Res, Err>(uniApi: UniApi<Option, Res, Err>) {
   return (option?: OmitOption<Option>, config: UniApiConfig<Res, Err> = {}) => {
     const { showLoading = false, toastSuccess = false, toastError = true, showLog = true } = config;
-    const { log } = getAppConfig();
+    const { log } = getBaseToolsConfig();
 
     if (showLoading) {
       const title = typeof showLoading === 'string' ? showLoading : undefined;

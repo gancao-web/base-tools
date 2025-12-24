@@ -1,5 +1,5 @@
 <script setup>
-import ToolsTest from './components/ToolsTest.vue'
+import ToolsTest from './components/ToolsTest.vue';
 </script>
 
 <template>
