@@ -124,6 +124,19 @@ interface RequestTask {
 }
 ```
 
+## 兼容
+
+现代环境（PC/移动）：可放心使用 Fetch，无需 polyfill。  
+需兼容老旧系统（如 IE、Android 4.x）：引入 whatwg-fetch 即可
+
+```ts
+// 1. 安装:
+npm i whatwg-fetch
+
+// 2.在入口文件引入即可：
+import 'whatwg-fetch';
+```
+
 ## 版本
 
 - 1.1.1 新增
