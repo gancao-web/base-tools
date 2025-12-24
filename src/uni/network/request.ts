@@ -184,7 +184,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         // 响应拦截
         const res = responseInterceptor ? responseInterceptor(xhr.data) : xhr.data;
 
-        // 解析数据 (分块传输会先不断执行task.onChunkReceived回调,流式传输完毕才执行success回调)
+        // 解析数据 (分块传输会先不断执行task.onProgressUpdate回调,流式传输完毕才执行success回调)
         const code = enableChunked ? '' : getObjectValue(res, codeKey);
         const scode = enableChunked ? '' : successKey ? getObjectValue(res, successKey) : code;
         const msg = enableChunked ? '' : getObjectValue(res, msgKey);

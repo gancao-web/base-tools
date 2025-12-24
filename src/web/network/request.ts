@@ -113,7 +113,7 @@ export interface RequestTask {
   abort: () => void;
 
   /** 监听流式数据块接收事件 */
-  onChunkReceived: (callback: ChunkCallback) => void;
+  onProgressUpdate: (callback: ChunkCallback) => void;
 
   /** 取消监听流式数据块接收事件 */
   offChunkReceived: () => void;
@@ -192,7 +192,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  *
  * const { task } = apiChatStream({question: '你好'}); // 发起流式请求
  *
- * task.onChunkReceived((res) => {
+ * task.onProgressUpdate((res) => {
  *   console.log('ArrayBuffer', res.data); // 接收流式数据
  * });
  *
@@ -208,7 +208,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
   // 构造 Task 对象
   const task: RequestTask = {
     abort: () => controller.abort(),
-    onChunkReceived: (cb) => {
+    onProgressUpdate: (cb) => {
       chunkCallback = cb;
     },
     offChunkReceived: () => {
@@ -250,7 +250,13 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       // 请求头: 过滤空值 (undefined 、null 、"" 、false 、0), 因为服务器端接收到的都是字符串
       const fillHeader = (header ? pickBy(header, (val) => !!val) : {}) as Record<string, string>;
 
-      if (!isGet && fillData && (isObjectData || isArrayData) && !fillHeader['Content-Type']) {
+      // 获取 Content-Type (忽略大小写)
+      const contentTypeKey = Object.keys(fillHeader).find(
+        (k) => k.toLowerCase() === 'content-type',
+      );
+      const contentType = contentTypeKey ? fillHeader[contentTypeKey].toLowerCase() : '';
+
+      if (!isGet && fillData && (isObjectData || isArrayData) && !contentType) {
         fillHeader['Content-Type'] = 'application/json';
       }
 
@@ -258,12 +264,23 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       const fillUrl =
         isGet && isObjectData ? appendUrlParam(url, fillData as Record<string, unknown>) : url;
 
-      const fillBody =
-        !isGet && fillData
-          ? isObjectData || isArrayData
-            ? JSON.stringify(fillData)
-            : (fillData as BodyInit)
-          : undefined;
+      let fillBody: BodyInit | null | undefined;
+
+      if (!isGet && fillData) {
+        if (isObjectData && contentType.includes('application/x-www-form-urlencoded')) {
+          // application/x-www-form-urlencoded: 转换为 URLSearchParams
+          fillBody = toSearchParams(fillData as Record<string, unknown>);
+        } else if (isObjectData && contentType.includes('multipart/form-data')) {
+          // multipart/form-data: 转换为 FormData
+          fillBody = toFormData(fillData as Record<string, unknown>);
+          // 删除 Content-Type, 让 fetch 自动生成 boundary
+          if (contentTypeKey) delete fillHeader[contentTypeKey];
+        } else if (isObjectData || isArrayData) {
+          fillBody = JSON.stringify(fillData);
+        } else {
+          fillBody = fillData as BodyInit;
+        }
+      }
 
       // 2.3 日志与缓存配置
       const logConfig = { ...config, data: fillData, header: fillHeader, url: fillUrl };
@@ -488,4 +505,50 @@ async function parseResponse(response: Response, responseType: string) {
     }
   }
   return resData;
+}
+
+/**
+ * 转换为 URLSearchParams
+ */
+function toSearchParams(data: Record<string, unknown>) {
+  const params = new URLSearchParams();
+  for (const key in data) {
+    const val = data[key];
+    // undefined 已在 fillData 阶段过滤，此处仅需判断 null
+    // null 在 Form 中会被转为字符串 "null"，通常不符合预期，故过滤
+    if (val === null) continue;
+    if (Array.isArray(val)) {
+      val.forEach((v) => params.append(key, typeof v === 'object' ? JSON.stringify(v) : String(v)));
+    } else {
+      params.append(key, typeof val === 'object' ? JSON.stringify(val) : String(val));
+    }
+  }
+  return params;
+}
+
+/**
+ * 转换为 FormData
+ */
+function toFormData(data: Record<string, unknown>) {
+  const formData = new FormData();
+  for (const key in data) {
+    const val = data[key];
+    // undefined 已在 fillData 阶段过滤，此处仅需判断 null
+    // null 在 Form 中会被转为字符串 "null"，通常不符合预期，故过滤
+    if (val === null) continue;
+    if (Array.isArray(val)) {
+      val.forEach((v) =>
+        formData.append(
+          key,
+          v instanceof Blob ? v : typeof v === 'object' ? JSON.stringify(v) : String(v),
+        ),
+      );
+    } else {
+      formData.append(
+        key,
+        val instanceof Blob ? val : typeof val === 'object' ? JSON.stringify(val) : String(val),
+      );
+    }
+  }
+  return formData;
 }

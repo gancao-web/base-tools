@@ -68,7 +68,7 @@ export function apiChatStream(data: { question: string }) {
 const { task } = apiChatStream({ question: '你好' }); // 发起流式请求
 
 // 监听数据接收
-task.onChunkReceived((res) => {
+task.onProgressUpdate((res) => {
   console.log('ArrayBuffer', res.data); // 接收流式数据
 });
 
@@ -118,7 +118,7 @@ interface RequestTask {
   /** 取消请求 */
   abort: () => void;
   /** 监听流式数据块接收事件 */
-  onChunkReceived: (callback: ChunkCallback) => void;
+  onProgressUpdate: (callback: ChunkCallback) => void;
   /** 取消监听流式数据块接收事件 */
   offChunkReceived: () => void;
 }
