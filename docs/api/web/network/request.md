@@ -123,3 +123,7 @@ interface RequestTask {
   offChunkReceived: () => void;
 }
 ```
+
+## 版本
+
+- 1.1.1 新增
