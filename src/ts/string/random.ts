@@ -18,10 +18,10 @@ export function createUUID() {
  * @param prefix 前缀, 默认 'id_'
  * @returns 随机字符串
  * @example
- * const id = createRandId(); // 'id_0rjuuuqv60xi'
- * const id = createRandId('canvas_'); // 'canvas_v82a7ctm09q'
+ * const id = createViewRandId(); // 'id_0rjuuuqv60xi'
+ * const id = createViewRandId('canvas_'); // 'canvas_v82a7ctm09q'
  */
-export function createRandId(prefix = 'id_') {
+export function createViewRandId(prefix = 'id_') {
   return `${prefix}${Math.random().toString(36).substring(2, 16)}`;
 }
 
