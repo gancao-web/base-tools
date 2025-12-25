@@ -113,7 +113,7 @@ export interface RequestTask {
   abort: () => void;
 
   /** 监听流式数据块接收事件 */
-  onProgressUpdate: (callback: ChunkCallback) => void;
+  onChunkReceived: (callback: ChunkCallback) => void;
 
   /** 取消监听流式数据块接收事件 */
   offChunkReceived: () => void;
@@ -192,7 +192,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  *
  * const { task } = apiChatStream({question: '你好'}); // 发起流式请求
  *
- * task.onProgressUpdate((res) => {
+ * task.onChunkReceived((res) => {
  *   console.log('ArrayBuffer', res.data); // 接收流式数据
  * });
  *
@@ -208,7 +208,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
   // 构造 Task 对象
   const task: RequestTask = {
     abort: () => controller.abort(),
-    onProgressUpdate: (cb) => {
+    onChunkReceived: (cb) => {
       chunkCallback = cb;
     },
     offChunkReceived: () => {

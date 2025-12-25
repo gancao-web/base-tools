@@ -52,7 +52,7 @@ export function apiChatStream(data: { question: string }) {
 
 const { task } = apiChatStream({ question: '你好' }); // 发起流式请求
 
-task.onProgressUpdate((res) => {
+task.onChunkReceived((res) => {
   console.log('ArrayBuffer', res.data); // 接收流式数据
 });
 
