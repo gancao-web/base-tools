@@ -38,11 +38,16 @@
       "miniprogram-api-typings",
       // node 相关的 TypeScript 类型(如NodeJS.Timeout,process.env.NODE_ENV)，需要安装 @types/node
       "node"
-    ]
+    ],
+    // 配置路径别名，方便在项目中导入模块, 仅本地开发时使用
+    "baseUrl": ".",
+    "paths": {
+      "@base-web-kits/base-tools-ts": ["src/ts/index.ts"]
+    }
   },
 
   // 编译/类型检查包含的源码目录
-  "include": ["src"],
+  "include": ["src", "vitest.config.ts"],
 
   // 显式排除无需检查的目录
   "exclude": ["node_modules", "dist"]

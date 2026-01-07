@@ -10,7 +10,7 @@ Web前端团队常用工具库，包含`ts`、`web`、`react`、`vue`、`uni`模
 
 ### 安装
 
-- 按需安装即可,模块之间不相互依赖
+- 按需安装即可
 - 非ts环境和普通h5也能使用,因为所有函数已编译为es5
 
 ```js
@@ -20,14 +20,14 @@ npm i @base-web-kits/base-tools-ts
 // Web 模块
 npm i @base-web-kits/base-tools-web
 
+// Uni 模块
+npm i @base-web-kits/base-tools-uni
+
 // React 模块
 npm i @base-web-kits/base-tools-react
 
 // Vue 模块
 npm i @base-web-kits/base-tools-vue
-
-// Uni 模块
-npm i @base-web-kits/base-tools-uni
 ```
 
 ### 使用

@@ -1,4 +1,4 @@
-import { cloneDeep, getObjectValue, isPlainObject, pickBy, toDayjs } from '../../ts';
+import { cloneDeep, getObjectValue, isPlainObject, pickBy, toDayjs } from '@base-web-kits/base-tools-ts';
 import { getBaseToolsConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformOs } from '../system';
