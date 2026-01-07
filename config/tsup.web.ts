@@ -9,4 +9,5 @@ export default defineConfig({
   splitting: false,
   clean: true,
   tsconfig: 'tsconfig.build.json',
+  external: ['@base-web-kits/base-tools-ts'],
 });

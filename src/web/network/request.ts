@@ -5,7 +5,7 @@ import {
   isPlainObject,
   pickBy,
   toDayjs,
-} from '../../ts';
+} from '@base-web-kits/base-tools-ts';
 import { getBaseToolsConfig } from '../config';
 import type { AppLogInfo } from '../config';
 

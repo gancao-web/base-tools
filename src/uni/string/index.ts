@@ -1,4 +1,4 @@
-import { withUnit } from '../../ts';
+import { withUnit } from '@base-web-kits/base-tools-ts';
 
 /**
  * 给数字添加rpx单位 (支持数字字符串,其他非法字符返回原值)
