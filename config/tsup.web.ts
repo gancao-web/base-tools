@@ -8,6 +8,7 @@ export default defineConfig({
   dts: false,
   splitting: false,
   clean: true,
+  target: 'es2015',
   tsconfig: 'tsconfig.build.json',
   external: ['@base-web-kits/base-tools-ts'],
 });

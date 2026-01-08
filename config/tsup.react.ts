@@ -9,5 +9,6 @@ export default defineConfig({
   splitting: false,
   noExternal: ['ahooks'],
   clean: true,
+  target: 'es2015',
   tsconfig: 'tsconfig.build.json',
 });
