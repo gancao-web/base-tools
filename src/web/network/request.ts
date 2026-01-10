@@ -55,8 +55,8 @@ export type RequestConfigBase<D extends RequestData = RequestData> = {
   url: string;
   /** 请求方法 */
   method?: RequestMethod;
-  /** 请求头 */
-  header?: Record<string, string>;
+  /** 请求头(会自动过滤undefined, null, "", false，但0不会过滤) */
+  header?: Record<string, string | number>;
   /** 请求参数 */
   data?: D;
   /** 超时时间 (毫秒), 默认 60000 */
@@ -247,14 +247,17 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       // 参数: 过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 、 0 这些有效值)
       const fillData = isObjectData ? pickBy(data, (val) => val !== undefined) : data;
 
-      // 请求头: 过滤空值 (undefined 、null 、"" 、false 、0), 因为服务器端接收到的都是字符串
-      const fillHeader = (header ? pickBy(header, (val) => !!val) : {}) as Record<string, string>;
+      // 请求头: 过滤空值 (undefined, null, "", false), 因为服务器端接收到的都是字符串, 0 为有效值不应该被过滤
+      const fillHeader = (header ? pickBy(header, (val) => !!val || val === 0) : {}) as Record<
+        string,
+        string
+      >;
 
       // 获取 Content-Type (忽略大小写)
       const contentTypeKey = Object.keys(fillHeader).find(
         (k) => k.toLowerCase() === 'content-type',
       );
-      const contentType = contentTypeKey ? fillHeader[contentTypeKey].toLowerCase() : '';
+      const contentType = contentTypeKey ? String(fillHeader[contentTypeKey]).toLowerCase() : '';
 
       if (!isGet && fillData && (isObjectData || isArrayData) && !contentType) {
         fillHeader['Content-Type'] = 'application/json';
