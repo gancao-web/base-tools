@@ -87,7 +87,7 @@ task.abort();
 | --- | --- | --- | --- | --- |
 | url | `string` | 是 | - | 接口地址 |
 | method | `RequestMethod` | 否 | `'GET'` | 请求方法 (`'GET' \| 'POST' \| 'PUT' \| 'DELETE'` 等) |
-| header | `Record<string, string>` | 否 | - | 请求头 (会自动过滤undefined, null, "", false，但0不会过滤) |
+| header | `Record<string, string>` | 否 | - | 请求头 (会自动过滤undefined, null, "";不过滤0和false; 数字和布尔值会自动转换为字符串) |
 | data | `D` | 否 | - | 请求参数 |
 | timeout | `number` | 否 | `60000` | 超时时间 (毫秒) |
 | resKey | `string \| false` | 是 | - | 接口返回响应数据的字段，支持 "a[0].b.c" 格式，false 返回完整响应 |
