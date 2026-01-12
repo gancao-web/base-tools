@@ -25,6 +25,7 @@ export default defineConfig([
     sourcemap: true,
     dts: false,
     splitting: false,
+    noExternal: ['@base-web-kits/base-tools-ts'],
     clean: false,
     target: 'es2015',
     tsconfig: 'tsconfig.build.json',
