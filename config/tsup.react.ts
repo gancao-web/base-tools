@@ -7,6 +7,7 @@ export default defineConfig({
   sourcemap: true,
   dts: false,
   splitting: false,
+  noExternal: ['ahooks'],
   clean: true,
   target: 'es2015',
   tsconfig: 'tsconfig.build.json',

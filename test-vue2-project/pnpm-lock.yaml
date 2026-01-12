@@ -70,6 +70,11 @@ packages:
 
   '@base-web-kits/base-tools-web@file:../packages/base-tools-web':
     resolution: {directory: ../packages/base-tools-web, type: directory}
+    peerDependencies:
+      axios: '>=1.0.0'
+    peerDependenciesMeta:
+      axios:
+        optional: true
 
   '@esbuild/android-arm@0.15.18':
     resolution: {integrity: sha512-5GT+kcs2WVGjVs7+boataCkO5Fg0y4kCjzkB5bAip7H4jfnOS3dA6KPiww9W1OEKTKeAcUVhdZGvgI65OXmUnw==}

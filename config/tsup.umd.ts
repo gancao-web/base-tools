@@ -10,7 +10,7 @@ export default defineConfig([
     sourcemap: true,
     dts: false,
     splitting: false,
-    noExternal: ['es-toolkit'],
+    noExternal: ['es-toolkit', 'bignumber.js', 'dayjs', 'mitt'],
     clean: false,
     target: 'es2015',
     tsconfig: 'tsconfig.build.json',
