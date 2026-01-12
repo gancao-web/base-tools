@@ -10,10 +10,10 @@ importers:
     dependencies:
       '@base-web-kits/base-tools-ts':
         specifier: file:../packages/base-tools-ts
-        version: file:../packages/base-tools-ts
+        version: file:../packages/base-tools-ts(dayjs@1.11.19)
       '@base-web-kits/base-tools-vue':
         specifier: file:../packages/base-tools-vue
-        version: file:../packages/base-tools-vue(vue@2.7.16)
+        version: file:../packages/base-tools-vue(@vueuse/core@14.1.0(vue@2.7.16))(vue@2.7.16)
       '@base-web-kits/base-tools-web':
         specifier: file:../packages/base-tools-web
         version: file:../packages/base-tools-web
@@ -57,21 +57,24 @@ packages:
     resolution: {integrity: sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA==}
     engines: {node: '>=6.9.0'}
 
-  '@base-web-kits/base-tools-ts@1.1.5':
-    resolution: {integrity: sha512-Jsnf/vAJN+V2MYZRhmTXNGw5VYEShGkORcBLzGsQOQ/nxUr1zw367m0RBSX4vWRC9uMMGoQeRFQZnM8iS5vygQ==}
+  '@base-web-kits/base-tools-ts@1.1.10':
+    resolution: {integrity: sha512-j0mnkGWc+LllhGuc/eftijS+/niaMP2WLI/9IAvHVMAy4CjPasLoPxi36ShE0vpOThpOMXxzrAbhUB4A3viFgg==}
 
   '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts':
     resolution: {directory: ../packages/base-tools-ts, type: directory}
+    peerDependencies:
+      dayjs: ^1.0.0
 
   '@base-web-kits/base-tools-vue@file:../packages/base-tools-vue':
     resolution: {directory: ../packages/base-tools-vue, type: directory}
     peerDependencies:
+      '@vueuse/core': ^14.0.0
       vue: '>=3.4'
 
   '@base-web-kits/base-tools-web@file:../packages/base-tools-web':
     resolution: {directory: ../packages/base-tools-web, type: directory}
     peerDependencies:
-      axios: '>=1.0.0'
+      axios: '>=0.18.0'
     peerDependenciesMeta:
       axios:
         optional: true
@@ -417,28 +420,28 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@base-web-kits/base-tools-ts@1.1.5':
+  '@base-web-kits/base-tools-ts@1.1.10':
     dependencies:
       bignumber.js: 9.3.1
       dayjs: 1.11.19
       es-toolkit: 1.42.0
       mitt: 3.0.1
 
-  '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts':
+  '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts(dayjs@1.11.19)':
     dependencies:
       bignumber.js: 9.3.1
       dayjs: 1.11.19
       es-toolkit: 1.42.0
       mitt: 3.0.1
 
-  '@base-web-kits/base-tools-vue@file:../packages/base-tools-vue(vue@2.7.16)':
+  '@base-web-kits/base-tools-vue@file:../packages/base-tools-vue(@vueuse/core@14.1.0(vue@2.7.16))(vue@2.7.16)':
     dependencies:
       '@vueuse/core': 14.1.0(vue@2.7.16)
       vue: 2.7.16
 
   '@base-web-kits/base-tools-web@file:../packages/base-tools-web':
     dependencies:
-      '@base-web-kits/base-tools-ts': 1.1.5
+      '@base-web-kits/base-tools-ts': 1.1.10
 
   '@esbuild/android-arm@0.15.18':
     optional: true

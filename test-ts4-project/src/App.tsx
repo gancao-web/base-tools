@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { setLocalStorage, getLocalStorage } from '@base-web-kits/base-tools-web';
 import { createViewRandId, toDayjs, uniq } from '@base-web-kits/base-tools-ts';
+import { useBoolean } from '@base-web-kits/base-tools-react';
 import './App.css';
 
 function App() {
   const [testResults, setTestResults] = useState<string[]>([]);
+  const [state, { toggle }] = useBoolean(false);
 
   useEffect(() => {
     const results: string[] = [];
@@ -27,6 +29,9 @@ function App() {
       setLocalStorage('test-key', 'test-value-123');
       const storedValue = getLocalStorage('test-key');
       results.push(`✅ LocalStorage: ${storedValue}`);
+
+      // 测试 ahooks
+      results.push(`✅ ahooks: useBoolean default=${state}`);
 
       results.push('🎉 所有功能测试通过！');
     } catch (error) {
