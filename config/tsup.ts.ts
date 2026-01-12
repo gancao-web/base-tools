@@ -7,7 +7,6 @@ export default defineConfig({
   sourcemap: true,
   dts: false,
   splitting: false,
-  noExternal: ['es-toolkit'],
   clean: true,
   target: 'es2015',
   tsconfig: 'tsconfig.build.json',

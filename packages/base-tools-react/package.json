@@ -28,6 +28,7 @@
     "ahooks": "^3.9.6"
   },
   "peerDependencies": {
+    "ahooks": "^3.0.0",
     "react": ">=18"
   },
   "publishConfig": {

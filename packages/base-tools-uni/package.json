@@ -25,7 +25,7 @@
     "src"
   ],
   "dependencies": {
-    "@base-web-kits/base-tools-ts": "^1.1.5"
+    "@base-web-kits/base-tools-ts": "^1.1.10"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"

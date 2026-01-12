@@ -30,6 +30,9 @@
     "dayjs": "^1.11.19",
     "mitt": "^3.0.1"
   },
+  "peerDependencies": {
+    "dayjs": "^1.0.0"
+  },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   }

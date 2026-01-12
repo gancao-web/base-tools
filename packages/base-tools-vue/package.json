@@ -28,6 +28,7 @@
     "@vueuse/core": "^14.0.0"
   },
   "peerDependencies": {
+    "@vueuse/core": "^14.0.0",
     "vue": ">=3.4"
   },
   "publishConfig": {

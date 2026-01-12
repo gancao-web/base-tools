@@ -25,10 +25,10 @@
     "src"
   ],
   "dependencies": {
-    "@base-web-kits/base-tools-ts": "^1.1.5"
+    "@base-web-kits/base-tools-ts": "^1.1.10"
   },
   "peerDependencies": {
-    "axios": ">=1.0.0"
+    "axios": ">=0.18.0"
   },
   "peerDependenciesMeta": {
     "axios": {
