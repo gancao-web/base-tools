@@ -2,7 +2,7 @@
 
 - re-export 全量 vueuse
 - 文档: https://vueuse.org/
-- 目的: 从工具库统一vueuse版本，避免项目多个版本冲突
+- 目的: 提供hooks能力,收敛依赖版本
 - 版本: `^14.0.0`
 
 ## 版本

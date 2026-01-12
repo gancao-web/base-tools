@@ -20,6 +20,7 @@
       <h2>Vue 2 组合式API测试</h2>
       <button @click="testReactivity">测试响应式</button>
       <div class="result">{{ vueResult }}</div>
+      <div class="result">VueUse Storage: {{ storageState }}</div>
     </div>
   </div>
 </template>
@@ -27,6 +28,7 @@
 <script>
 import { ref, reactive, computed } from 'vue';
 import { toDayjs, uniq } from '@base-web-kits/base-tools-ts';
+import { useStorage } from '@base-web-kits/base-tools-vue';
 import {
   setLocalStorage,
   getLocalStorage,
@@ -40,6 +42,9 @@ export default {
     const tsResult = ref('点击按钮测试 TS 工具...');
     const webResult = ref('点击按钮测试 Web 工具...');
     const vueResult = ref('点击按钮测试 Vue 功能...');
+
+    // 测试 useStorage
+    const storageState = useStorage('vue-use-storage-test', 'hello');
 
     // 测试 toDayjs
     const testToDayjs = () => {
