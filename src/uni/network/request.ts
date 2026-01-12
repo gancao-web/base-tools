@@ -1,4 +1,10 @@
-import { cloneDeep, getObjectValue, isPlainObject, pickBy, toDayjs } from '@base-web-kits/base-tools-ts';
+import {
+  cloneDeep,
+  getObjectValue,
+  isPlainObject,
+  pickBy,
+  toDayjs,
+} from '@base-web-kits/base-tools-ts';
 import { getBaseToolsConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformOs } from '../system';
@@ -144,8 +150,9 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     // 参数: 过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 这些有效值)
     const fillData = isPlainObject(data) ? pickBy(data, (val) => val !== undefined) : data;
 
-    // 请求头: 过滤空值 (undefined, null, "", false), 因为服务器端接收到的都是字符串
-    const fillHeader = header ? pickBy(header, (val) => !!val || val === 0) : {};
+    // 请求头: 过滤空值 (undefined, null, ""), 不过滤0和false
+    const emptyValue = [undefined, null, ''];
+    const fillHeader = header ? pickBy(header, (val) => !emptyValue.includes(val)) : {};
 
     // 日志输出的config
     const logConfig = { ...config, data: fillData, header: fillHeader };
