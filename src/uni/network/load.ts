@@ -22,7 +22,12 @@ export async function downloadFile(path: string, option?: { cacheFile?: boolean 
     return cache.downloadFiles[url];
   }
 
-  const { tempFilePath } = await promisifyUniApi(uni.downloadFile)({ url }, option);
+  const { tempFilePath } = await promisifyUniApi<
+    UniApp.DownloadFileOption,
+    UniApp.DownloadSuccessData,
+    UniApp.GeneralCallbackResult,
+    UniApp.DownloadTask
+  >(uni.downloadFile)({ url }, option);
 
   if (cacheFile) cache.downloadFiles[url] = tempFilePath;
 
@@ -42,4 +47,23 @@ export function loadFontFace(option: Omit<UniApp.LoadFontFaceOptions, 'source'> 
     source: `url(${option.url})`,
     ...option,
   });
+}
+
+/**
+ * 上传文件
+ * @param option https://uniapp.dcloud.net.cn/api/request/network-file.html
+ * @example
+ * const promise = uploadFile({ url: 'https://xx', filePath: 'xx'});
+ * promise.task.onProgressUpdate((res) => {
+ *   console.log('progress', res);
+ * });
+ * await promise;
+ */
+export function uploadFile(option: UniApp.UploadFileOption) {
+  return promisifyUniApi<
+    UniApp.UploadFileOption,
+    UniApp.UploadFileSuccessCallbackResult,
+    UniApp.GeneralCallbackResult,
+    UniApp.UploadTask
+  >(uni.uploadFile)(option);
 }

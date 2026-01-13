@@ -6,7 +6,7 @@ type UniCallbacks<Res, Err> = {
   complete?: () => void;
 };
 
-type UniApi<Option, Res, Err> = (option: Option & UniCallbacks<Res, Err>) => void;
+type UniApi<Option, Res, Err, Task> = (option: Option & UniCallbacks<Res, Err>) => Task | void;
 
 type OmitOption<T> = Omit<T, 'success' | 'fail' | 'complete'>;
 
@@ -32,10 +32,16 @@ export type UniApiConfig<Res = unknown, Err = unknown> = {
  * @returns Promise 形式的 uni api (默认提示异常和输出日志,不显示进度条和操作成功: promise(option, {showLoading: false, toastSuccess: false, toastError: true, showLog: true}))
  * @example
  * const promise = promisifyUniApi(uni.downloadFile);
+ * promise.task.onProgressUpdate((res) => {
+ *   console.log('progress', res);
+ * });
  * await promise({ url: 'xx' }, {showLoading: '下载中', toastSuccess: '下载成功'});
  */
-export function promisifyUniApi<Option, Res, Err>(uniApi: UniApi<Option, Res, Err>) {
+export function promisifyUniApi<Option, Res, Err, Task = void>(
+  uniApi: UniApi<Option, Res, Err, Task>,
+) {
   return (option?: OmitOption<Option>, config: UniApiConfig<Res, Err> = {}) => {
+    const temp: { task?: Task } = {};
     const { showLoading = false, toastSuccess = false, toastError = true, showLog = true } = config;
     const { log } = getBaseToolsConfig();
 
@@ -44,8 +50,8 @@ export function promisifyUniApi<Option, Res, Err>(uniApi: UniApi<Option, Res, Er
       uni.showLoading({ title, mask: true });
     }
 
-    return new Promise<Res>((resolve, reject) => {
-      uniApi({
+    const promise: Promise<Res> & { task?: Task } = new Promise<Res>((resolve, reject) => {
+      temp.task = uniApi({
         ...(option as Option),
         success(res) {
           if (showLoading) uni.hideLoading();
@@ -64,7 +70,11 @@ export function promisifyUniApi<Option, Res, Err>(uniApi: UniApi<Option, Res, Er
           if (msg)
             toast(typeof msg === 'string' ? msg : `${uniApi.name} fail: ${JSON.stringify(e)}`);
         },
-      });
+      }) as Task | undefined;
     });
+
+    promise.task = temp.task;
+
+    return promise;
   };
 }
