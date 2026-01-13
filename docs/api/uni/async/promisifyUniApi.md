@@ -48,6 +48,24 @@ await saveImagePromise(
     showLog: true,
   },
 );
+
+// 获取task对象 - 方式1
+const downloadPromise = promisifyUniApi(uni.downloadFile);
+downloadPromise.task.onProgressUpdate((res) => {
+  console.log('progress', res);
+});
+await downloadPromise({ url: 'xx' }, { showLoading: '下载中', toastSuccess: '下载成功' });
+
+// 获取task对象 - 方式2
+const downloadPromise = promisifyUniApi(uni.downloadFile);
+await downloadPromise(
+  { url: 'xx' },
+  {
+    onTaskInit: (task) => {
+      task.onProgressUpdate((res) => console.log('progress', res));
+    },
+  },
+);
 ```
 
 ## 参数
@@ -63,6 +81,7 @@ await saveImagePromise(
     - `toastSuccess` - 操作成功的toast提示，默认 `false`（支持函数返回自定义文本）
     - `toastError` - 是否显示操作失败的详细错误信息，默认 `true`（支持函数判断是否显示）
     - `showLog` - 是否显示日志，默认 `true`
+    - `onTaskInit` - 初始化task对象时的回调函数，默认 `undefined`（支持自定义task事件监听）
 
 ## 版本
 

@@ -38,7 +38,10 @@ export async function chooseMedia(option: UniApp.ChooseMediaOption) {
  * @example
  * await saveImageToPhotosAlbum('xx');
  */
-export async function saveImageToPhotosAlbum(filePath: string, config: UniApiConfig = {}) {
+export async function saveImageToPhotosAlbum(
+  filePath: string,
+  config: Omit<UniApiConfig, 'onTaskInit'> = {},
+) {
   await authorize('scope.writePhotosAlbum', "请开启'添加到相册'的权限");
 
   if (filePath.startsWith('http')) {

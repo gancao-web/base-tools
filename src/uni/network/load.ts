@@ -1,4 +1,4 @@
-import { getFileUrl, promisifyUniApi } from '../index';
+import { getBaseToolsConfig, getFileUrl, promisifyUniApi } from '../index';
 import type { UniApiConfig } from '../index';
 
 const cache = {
@@ -13,13 +13,24 @@ const cache = {
  * @example
  * const tempFilePath = await downloadFile('xx');
  * const tempFilePath = await downloadFile('xx', {showLoading = '下载中...', toastSuccess = '下载成功', toastError = '下载失败'});
+ * const tempFilePath = await downloadFile('xx', {onTaskInit}); // 获取task对象,用于监听下载进度
  */
-export async function downloadFile(path: string, option?: { cacheFile?: boolean } & UniApiConfig) {
+export async function downloadFile(
+  path: string,
+  option?: { cacheFile?: boolean } & UniApiConfig<
+    UniApp.DownloadSuccessData,
+    UniApp.GeneralCallbackResult,
+    UniApp.DownloadTask
+  >,
+) {
   const { cacheFile = true } = option || {};
   const url = getFileUrl(path);
 
   if (cacheFile && cache.downloadFiles[url]) {
-    return cache.downloadFiles[url];
+    const res = cache.downloadFiles[url];
+    const { log } = getBaseToolsConfig();
+    log?.('info', { name: 'downloadFile', status: 'success', option, res, fromCache: true });
+    return res;
   }
 
   const { tempFilePath } = await promisifyUniApi<

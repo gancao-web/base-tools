@@ -13,7 +13,7 @@ type OmitOption<T> = Omit<T, 'success' | 'fail' | 'complete'>;
 /**
  * uni api 的调用配置
  */
-export type UniApiConfig<Res = unknown, Err = unknown> = {
+export type UniApiConfig<Res = unknown, Err = unknown, Task = void> = {
   /** 是否显示加载提示, 默认 false. (支持字符串,自定义文本) */
   showLoading?: boolean | string;
 
@@ -25,24 +25,38 @@ export type UniApiConfig<Res = unknown, Err = unknown> = {
 
   /** 是否显示日志, 默认 true */
   showLog?: boolean;
+
+  /** task对象初始化的回调 (如uni.uploadFile或uni.downloadFile的task对象) */
+  onTaskInit?: (task: Task) => void;
 };
 
 /**
  * 把 uni api 包装为 Promise 形式
  * @returns Promise 形式的 uni api (默认提示异常和输出日志,不显示进度条和操作成功: promise(option, {showLoading: false, toastSuccess: false, toastError: true, showLog: true}))
  * @example
+ * // 常规promise使用
+ * await promisifyUniApi(uni.loadFontFace)(option);
+ *
+ * // 获取task对象 - 方式1
  * const promise = promisifyUniApi(uni.downloadFile);
  * promise.task.onProgressUpdate((res) => {
  *   console.log('progress', res);
  * });
  * await promise({ url: 'xx' }, {showLoading: '下载中', toastSuccess: '下载成功'});
+ *
+ * // 获取task对象 - 方式2
+ * await promisifyUniApi(uni.downloadFile)({ url: 'xx' }, { onTaskInit });
  */
-export function promisifyUniApi<Option, Res, Err, Task = void>(
-  uniApi: UniApi<Option, Res, Err, Task>,
-) {
-  return (option?: OmitOption<Option>, config: UniApiConfig<Res, Err> = {}) => {
+export function promisifyUniApi<Option, Res, Err, Task>(uniApi: UniApi<Option, Res, Err, Task>) {
+  return (option?: OmitOption<Option>, config: UniApiConfig<Res, Err, Task> = {}) => {
     const temp: { task?: Task } = {};
-    const { showLoading = false, toastSuccess = false, toastError = true, showLog = true } = config;
+    const {
+      showLoading = false,
+      toastSuccess = false,
+      toastError = true,
+      showLog = true,
+      onTaskInit,
+    } = config;
     const { log } = getBaseToolsConfig();
 
     if (showLoading) {
@@ -71,6 +85,8 @@ export function promisifyUniApi<Option, Res, Err, Task = void>(
             toast(typeof msg === 'string' ? msg : `${uniApi.name} fail: ${JSON.stringify(e)}`);
         },
       }) as Task | undefined;
+
+      if (onTaskInit && temp.task) onTaskInit(temp.task);
     });
 
     promise.task = temp.task;
