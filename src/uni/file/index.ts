@@ -40,12 +40,12 @@ export function getIconBg(icon: string) {
  * 打开文档
  * - 支持格式：doc, xls, ppt, pdf, docx, xlsx, pptx
  * - 若是图片,则另用previewImage
- * @param path 完整/相对文件地址
+ * @param url 完整/相对文件地址
  */
-export async function openDocument(path: string) {
-  if (!path) throw new Error('openDocument: path is required');
+export async function openDocument(url: string) {
+  if (!url) return;
 
-  const filePath = await downloadFile(path, { showLoading: true });
+  const filePath = await downloadFile({ url }, { showLoading: true });
 
   await promisifyUniApi(uni.openDocument)({ filePath, showMenu: true }, { showLoading: true });
 }

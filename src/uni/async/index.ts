@@ -6,14 +6,14 @@ type UniCallbacks<Res, Err> = {
   complete?: () => void;
 };
 
-type UniApi<Option, Res, Err, Task> = (option: Option & UniCallbacks<Res, Err>) => Task | void;
+type UniApi<Option, Res, Err> = (option: Option & UniCallbacks<Res, Err>) => void;
 
 type OmitOption<T> = Omit<T, 'success' | 'fail' | 'complete'>;
 
 /**
  * uni api 的调用配置
  */
-export type UniApiConfig<Res = unknown, Err = unknown, Task = void> = {
+export type UniApiConfig<Res = unknown, Err = unknown, Task = any> = {
   /** 是否显示加载提示, 默认 false. (支持字符串,自定义文本) */
   showLoading?: boolean | string;
 
@@ -26,37 +26,20 @@ export type UniApiConfig<Res = unknown, Err = unknown, Task = void> = {
   /** 是否显示日志, 默认 true */
   showLog?: boolean;
 
-  /** task对象初始化的回调 (如uni.uploadFile或uni.downloadFile的task对象) */
-  onTaskInit?: (task: Task) => void;
+  /** 获取task对象 (如uni.downloadFile和uni.uploadFile返回的task对象) */
+  onTaskReady?: (task: Task) => void;
 };
 
 /**
  * 把 uni api 包装为 Promise 形式
  * @returns Promise 形式的 uni api (默认提示异常和输出日志,不显示进度条和操作成功: promise(option, {showLoading: false, toastSuccess: false, toastError: true, showLog: true}))
  * @example
- * // 常规promise使用
- * await promisifyUniApi(uni.loadFontFace)(option);
- *
- * // 获取task对象 - 方式1
  * const promise = promisifyUniApi(uni.downloadFile);
- * promise.task.onProgressUpdate((res) => {
- *   console.log('progress', res);
- * });
  * await promise({ url: 'xx' }, {showLoading: '下载中', toastSuccess: '下载成功'});
- *
- * // 获取task对象 - 方式2
- * await promisifyUniApi(uni.downloadFile)({ url: 'xx' }, { onTaskInit });
  */
-export function promisifyUniApi<Option, Res, Err, Task>(uniApi: UniApi<Option, Res, Err, Task>) {
+export function promisifyUniApi<Option, Res, Err, Task>(uniApi: UniApi<Option, Res, Err>) {
   return (option?: OmitOption<Option>, config: UniApiConfig<Res, Err, Task> = {}) => {
-    const temp: { task?: Task } = {};
-    const {
-      showLoading = false,
-      toastSuccess = false,
-      toastError = true,
-      showLog = true,
-      onTaskInit,
-    } = config;
+    const { showLoading = false, toastSuccess = false, toastError = true, showLog = true } = config;
     const { log } = getBaseToolsConfig();
 
     if (showLoading) {
@@ -64,8 +47,8 @@ export function promisifyUniApi<Option, Res, Err, Task>(uniApi: UniApi<Option, R
       uni.showLoading({ title, mask: true });
     }
 
-    const promise: Promise<Res> & { task?: Task } = new Promise<Res>((resolve, reject) => {
-      temp.task = uniApi({
+    return new Promise<Res>((resolve, reject) => {
+      const task = uniApi({
         ...(option as Option),
         success(res) {
           if (showLoading) uni.hideLoading();
@@ -84,13 +67,9 @@ export function promisifyUniApi<Option, Res, Err, Task>(uniApi: UniApi<Option, R
           if (msg)
             toast(typeof msg === 'string' ? msg : `${uniApi.name} fail: ${JSON.stringify(e)}`);
         },
-      }) as Task | undefined;
+      });
 
-      if (onTaskInit && temp.task) onTaskInit(temp.task);
+      if (config.onTaskReady && task) config.onTaskReady(task);
     });
-
-    promise.task = temp.task;
-
-    return promise;
   };
 }

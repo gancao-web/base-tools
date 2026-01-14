@@ -38,14 +38,14 @@ export async function chooseMedia(option: UniApp.ChooseMediaOption) {
  * @example
  * await saveImageToPhotosAlbum('xx');
  */
-export async function saveImageToPhotosAlbum(
-  filePath: string,
-  config: Omit<UniApiConfig, 'onTaskInit'> = {},
-) {
+export async function saveImageToPhotosAlbum(filePath: string, config: UniApiConfig) {
   await authorize('scope.writePhotosAlbum', "请开启'添加到相册'的权限");
 
   if (filePath.startsWith('http')) {
-    filePath = await downloadFile(filePath, { showLoading: true, ...config, toastSuccess: false });
+    filePath = await downloadFile(
+      { url: filePath },
+      { showLoading: true, ...config, toastSuccess: false },
+    );
   }
 
   await promisifyUniApi(uni.saveImageToPhotosAlbum)(

@@ -11,20 +11,21 @@ const cache = {
  * @param option 选项文档: http://uniapp.dcloud.io/api/request/network-file?id=downloadfile
  * @param option.cacheFile 多次下载相同地址,是否优先取已下载的缓存文件, 默认值为 true (程序退出,缓存消失)
  * @example
- * const tempFilePath = await downloadFile('xx');
- * const tempFilePath = await downloadFile('xx', {showLoading = '下载中...', toastSuccess = '下载成功', toastError = '下载失败'});
- * const tempFilePath = await downloadFile('xx', {onTaskInit}); // 获取task对象,用于监听下载进度
+ * const tempFilePath = await downloadFile({ url: 'xx' });
+ * const tempFilePath = await downloadFile({ url: 'xx' }, {showLoading = '下载中...', toastSuccess = '下载成功', toastError = '下载失败'});
+ * const tempFilePath = await downloadFile({ url: 'xx' }, {onTaskReady}); // 获取task对象,用于监听下载进度
  */
 export async function downloadFile(
-  path: string,
-  option?: { cacheFile?: boolean } & UniApiConfig<
+  option: UniApp.DownloadFileOption & { cacheFile?: boolean },
+  config?: UniApiConfig<
     UniApp.DownloadSuccessData,
     UniApp.GeneralCallbackResult,
     UniApp.DownloadTask
   >,
 ) {
-  const { cacheFile = true } = option || {};
-  const url = getFileUrl(path);
+  const { cacheFile = true, url } = option;
+  const fillUrl = getFileUrl(url);
+  const fillOption = { ...option, url: fillUrl };
 
   if (cacheFile && cache.downloadFiles[url]) {
     const res = cache.downloadFiles[url];
@@ -38,7 +39,7 @@ export async function downloadFile(
     UniApp.DownloadSuccessData,
     UniApp.GeneralCallbackResult,
     UniApp.DownloadTask
-  >(uni.downloadFile)({ url }, option);
+  >(uni.downloadFile)(fillOption, config);
 
   if (cacheFile) cache.downloadFiles[url] = tempFilePath;
 
@@ -52,29 +53,43 @@ export async function downloadFile(
  * @example
  * await loadFontFace({ family: 'xx', url: 'https://xx.ttf'});
  */
-export function loadFontFace(option: Omit<UniApp.LoadFontFaceOptions, 'source'> & { url: string }) {
-  return promisifyUniApi(uni.loadFontFace)({
-    global: true,
-    source: `url(${option.url})`,
-    ...option,
-  });
+export function loadFontFace(
+  option: Omit<UniApp.LoadFontFaceOptions, 'source'> & { url: string },
+  config?: UniApiConfig,
+) {
+  return promisifyUniApi(uni.loadFontFace)(
+    { global: true, source: `url(${option.url})`, ...option },
+    config,
+  );
 }
 
 /**
  * 上传文件
- * @param option https://uniapp.dcloud.net.cn/api/request/network-file.html
+ * @param option 选项文档: https://uniapp.dcloud.net.cn/api/request/network-file.html
  * @example
- * const promise = uploadFile({ url: 'https://xx', filePath: 'xx'});
- * promise.task.onProgressUpdate((res) => {
- *   console.log('progress', res);
+ * // 上传
+ * await uploadFile({ url: 'https://xx', filePath: 'xx'});
+ *
+ * // 监听上传进度
+ * await uploadFile({ url: 'https://xx', filePath: 'xx'}, {
+ *   onTaskReady: (task) =>
+ *     task.onProgressUpdate((res) => {
+ *       console.log('progress', res);
+ *     }),
  * });
- * await promise;
  */
-export function uploadFile(option: UniApp.UploadFileOption) {
+export function uploadFile(
+  option: UniApp.UploadFileOption,
+  config?: UniApiConfig<
+    UniApp.UploadFileSuccessCallbackResult,
+    UniApp.GeneralCallbackResult,
+    UniApp.UploadTask
+  >,
+) {
   return promisifyUniApi<
     UniApp.UploadFileOption,
     UniApp.UploadFileSuccessCallbackResult,
     UniApp.GeneralCallbackResult,
     UniApp.UploadTask
-  >(uni.uploadFile)(option);
+  >(uni.uploadFile)(option, config);
 }

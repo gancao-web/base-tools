@@ -28,6 +28,8 @@ export default [
     ],
   },
   js.configs.recommended,
+  // 其他推荐配置
+  ...tseslint.configs.recommended,
   {
     files: ['**/*.{ts,js,mjs}'],
     languageOptions: {
@@ -156,8 +158,6 @@ export default [
   },
   // 禁用与 Prettier 冲突的规则
   eslintConfigPrettier,
-  // 其他推荐配置
-  ...tseslint.configs.recommended,
   // Node.js 脚本文件的特殊配置
   {
     files: ['scripts/**/*.{js,mjs}'],
