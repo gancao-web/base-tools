@@ -48,6 +48,16 @@ await saveImagePromise(
     showLog: true,
   },
 );
+
+// 获取task对象
+await promisifyUniApi(uni.downloadFile)(
+  { url: 'xx' },
+  {
+    onTaskReady: (task) => {
+      task.onProgressUpdate((res) => console.log('progress', res));
+    },
+  },
+);
 ```
 
 ## 参数
@@ -63,7 +73,9 @@ await saveImagePromise(
     - `toastSuccess` - 操作成功的toast提示，默认 `false`（支持函数返回自定义文本）
     - `toastError` - 是否显示操作失败的详细错误信息，默认 `true`（支持函数判断是否显示）
     - `showLog` - 是否显示日志，默认 `true`
+    - `onTaskReady` - 初始化task对象时的回调函数，默认 `undefined`（支持自定义task事件监听）
 
 ## 版本
 
+- 1.1.13 新增onTaskReady字段
 - 1.0.0 新增
