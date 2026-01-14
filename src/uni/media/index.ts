@@ -23,7 +23,7 @@ export async function chooseMedia(option: UniApp.ChooseMediaOption) {
 
   cache.isChooseMedia = true;
   try {
-    const { tempFiles } = await promisifyUniApi(uni.chooseMedia)(option, {
+    const { tempFiles } = await promisifyUniApi(uni.chooseMedia, 'chooseMedia')(option, {
       toastError: (e) => !e.errMsg.includes('cancel'),
     });
     return tempFiles;

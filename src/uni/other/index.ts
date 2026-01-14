@@ -24,7 +24,7 @@ export function openOfficialAccountProfile(option: UniApp.OpenOfficialAccountPro
  * await openOfficialAccountArticle({ url });
  */
 export function openOfficialAccountArticle(option: UniApp.OpenOfficialAccountArticleOption) {
-  return promisifyUniApi(uni.openOfficialAccountArticle)(option);
+  return promisifyUniApi(uni.openOfficialAccountArticle, 'openOfficialAccountArticle')(option);
 }
 
 /**
@@ -33,7 +33,7 @@ export function openOfficialAccountArticle(option: UniApp.OpenOfficialAccountArt
  * const setting = await getSetting();
  */
 export function getSetting(options?: UniApp.GetSettingOptions) {
-  return promisifyUniApi(uni.getSetting)(options);
+  return promisifyUniApi(uni.getSetting, 'getSetting')(options);
 }
 
 /**
