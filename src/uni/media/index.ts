@@ -10,8 +10,8 @@ const cache = {
  * @param option 选项文档 https://uniapp.dcloud.net.cn/api/media/video.html
  * @example
  * const tempFiles = await chooseMedia({ count: 3 }); // 选择图片和视频
- * const tempFiles = await chooseMedia({ count: 2, mediaType: 'image' }); // 选择图片/拍照
- * const tempFiles = await chooseMedia({ count: 1, mediaType: 'video' }); // 选择视频/录像
+ * const tempFiles = await chooseMedia({ count: 2, mediaType: ['image'] }); // 选择图片/拍照
+ * const tempFiles = await chooseMedia({ count: 1, mediaType: ['video'] }); // 选择视频/录像
  */
 export async function chooseMedia(option: UniApp.ChooseMediaOption) {
   if (cache.isChooseMedia) {

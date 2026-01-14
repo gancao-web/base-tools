@@ -7,8 +7,17 @@
 ```ts
 import { chooseMedia } from '@base-web-kits/base-tools-uni';
 
+// 选择图片和视频
 const tempFiles = await chooseMedia({ count: 3 });
 console.log('tempFiles:', tempFiles);
+
+// 选择图片/拍照
+const tempFiles2 = await chooseMedia({ count: 2, mediaType: ['image'] });
+console.log('tempFiles2:', tempFiles2);
+
+// 选择视频/录像
+const tempFiles3 = await chooseMedia({ count: 1, mediaType: ['video'] });
+console.log('tempFiles3:', tempFiles3);
 ```
 
 ## 版本
