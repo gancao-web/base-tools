@@ -6,7 +6,7 @@ import { getBaseToolsConfig, promisifyUniApi } from '../index';
  * await navigateToMiniProgram({ appId: 'wx1234567890' });
  */
 export function navigateToMiniProgram(option: UniApp.NavigateToMiniProgramOptions) {
-  return promisifyUniApi(uni.navigateToMiniProgram)(option);
+  return promisifyUniApi(uni.navigateToMiniProgram, 'navigateToMiniProgram')(option);
 }
 
 /**
@@ -15,7 +15,7 @@ export function navigateToMiniProgram(option: UniApp.NavigateToMiniProgramOption
  * await openOfficialAccountProfile({ username });
  */
 export function openOfficialAccountProfile(option: UniApp.OpenOfficialAccountProfileOption) {
-  return promisifyUniApi(uni.openOfficialAccountProfile)(option);
+  return promisifyUniApi(uni.openOfficialAccountProfile, 'openOfficialAccountProfile')(option);
 }
 
 /**
@@ -48,7 +48,10 @@ export async function requestSubscribeMessage(ids: string | string[]) {
 
   const tmplIds = typeof ids === 'string' ? ids.split(',') : ids;
 
-  const res = await promisifyUniApi(uni.requestSubscribeMessage)({ tmplIds });
+  const res = await promisifyUniApi(
+    uni.requestSubscribeMessage,
+    'requestSubscribeMessage',
+  )({ tmplIds });
   const result = JSON.stringify(res);
   if (result.includes('accept')) {
     return result;

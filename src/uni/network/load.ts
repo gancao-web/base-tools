@@ -39,7 +39,7 @@ export async function downloadFile(
     UniApp.DownloadSuccessData,
     UniApp.GeneralCallbackResult,
     UniApp.DownloadTask
-  >(uni.downloadFile)(fillOption, config);
+  >(uni.downloadFile, 'downloadFile')(fillOption, config);
 
   if (cacheFile) cache.downloadFiles[url] = tempFilePath;
 

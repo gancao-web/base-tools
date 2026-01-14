@@ -47,5 +47,8 @@ export async function openDocument(url: string) {
 
   const filePath = await downloadFile({ url }, { showLoading: true });
 
-  await promisifyUniApi(uni.openDocument)({ filePath, showMenu: true }, { showLoading: true });
+  await promisifyUniApi(uni.openDocument, 'openDocument')(
+    { filePath, showMenu: true },
+    { showLoading: true },
+  );
 }

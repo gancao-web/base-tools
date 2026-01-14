@@ -28,7 +28,7 @@ export function toast(msg: string, duration = 1000) {
  * await showModal({ content: '确定要删除吗？' });
  */
 export async function showModal(option: UniApp.ShowModalOptions) {
-  const res = await promisifyUniApi(uni.showModal)(option);
+  const res = await promisifyUniApi(uni.showModal, 'showModal')(option);
   if (res.confirm) return;
   throw res;
 }

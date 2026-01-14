@@ -48,7 +48,7 @@ export async function saveImageToPhotosAlbum(filePath: string, config: UniApiCon
     );
   }
 
-  await promisifyUniApi(uni.saveImageToPhotosAlbum)(
+  await promisifyUniApi(uni.saveImageToPhotosAlbum, 'saveImageToPhotosAlbum')(
     { filePath },
     { toastSuccess: '保存成功', showLoading: true, ...config },
   );
