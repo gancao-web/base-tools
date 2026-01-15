@@ -49,7 +49,7 @@ export function promisifyUniApi<Option, Res, Err, Task>(
     const fname = apiName || 'promisifyUniApi'; // uniApi.name得到的值都是'promiseApi'，不如默认'promisifyUniApi'
 
     if (showLoading) {
-      const title = typeof showLoading === 'string' ? showLoading : undefined;
+      const title = typeof showLoading === 'string' ? showLoading : '';
       uni.showLoading({ title, mask: true });
     }
 
