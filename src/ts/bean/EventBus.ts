@@ -4,16 +4,7 @@ type Events = Record<EventType, unknown>;
 
 /**
  * 总线式发布订阅
- * @example
- * const emitter = new EventBus(); // 支持链式调用
- * emitter.on('xx', fn); // 订阅事件 xx
- * emitter.once('xx', fn); // 订阅事件 xx 一次
- * emitter.emit('xx', any); // 发布事件 xx，参数任意
- * emitter.off('xx'); // 移除事件 xx 下全部监听
- * emitter.off('xx', fn); // 移除事件 xx 下指定监听
- * emitter.clear(); // 移除所有事件
- *
- * @example 类型约束
+ * @example 创建实例调用 (支持类型约束)
  * type T = { a: number; b: string };
  * const emitter = new EventBus<{ xx: T; yy: void }>();
  * const fn = (arg: T) => {}
@@ -59,3 +50,15 @@ export class EventBus<T extends Events = Events> {
     return this;
   }
 }
+
+/**
+ * 全局事件总线
+ * @example 静态调用 (支持链式)
+ * EventBus.on('xx', fn); // 订阅事件 xx
+ * EventBus.once('xx', fn); // 订阅事件 xx 一次
+ * EventBus.emit('xx', any); // 发布事件 xx，参数任意
+ * EventBus.off('xx'); // 移除事件 xx 下全部监听
+ * EventBus.off('xx', fn); // 移除事件 xx 下指定监听
+ * EventBus.clear(); // 移除所有事件
+ */
+export default new EventBus();
