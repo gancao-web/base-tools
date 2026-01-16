@@ -3,7 +3,6 @@ import {
   cloneDeep,
   getObjectValue,
   isPlainObject,
-  pickBy,
   toDayjs,
 } from '@base-web-kits/base-tools-ts';
 import { getBaseToolsConfig } from '../config';
@@ -244,14 +243,11 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       const isArrayData = !isObjectData && Array.isArray(data);
 
       // 2.1 参数处理
-      // 参数: 过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 、 0 这些有效值)
-      const fillData = isObjectData ? pickBy(data, (val) => val !== undefined) : data;
+      // 参数过滤 undefined
+      const fillData = isObjectData ? filterRequestData(data) : data;
 
-      // 请求头: 过滤空值 (undefined, null, ""), 不过滤0和false
-      const emptyValue: unknown[] = [undefined, null, ''];
-      const fillHeader = (
-        header ? pickBy(header, (val) => !emptyValue.includes(val)) : {}
-      ) as Record<string, string>;
+      // 请求头过滤空值 (undefined, null, "")
+      const fillHeader = filterRequestHeader(header);
 
       // 获取 Content-Type (忽略大小写)
       const contentTypeKey = Object.keys(fillHeader).find(
@@ -404,6 +400,30 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
   promise.task = task;
 
   return promise;
+}
+
+/**
+ * 参数过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 、 0 这些有效值)
+ */
+export function filterRequestData(data: Record<string, any>) {
+  const res: Record<string, any> = {};
+  Object.entries(data).forEach(([k, v]) => {
+    if (v !== undefined) res[k] = v;
+  });
+  return res;
+}
+
+/**
+ * 请求头过滤空值 (undefined, null, ""), 不过滤0和false
+ */
+export function filterRequestHeader(header: RequestConfigBase['header']) {
+  const newHeader: Record<string, string> = {};
+  if (header) {
+    Object.entries(header).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') newHeader[k] = String(v);
+    });
+  }
+  return newHeader;
 }
 
 /**
