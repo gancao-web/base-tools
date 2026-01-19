@@ -1,4 +1,4 @@
-import { promisifyWebApi } from '../async';
+import { enhanceWebApi } from '../async';
 import type { WebApiConfig } from '../async';
 
 /**
@@ -141,12 +141,6 @@ function upload<T>(option: UploadFileOption, config?: UploadConfig) {
  *     task.onProgressUpdate((res) => console.log('上传进度:', res.progress)),
  * });
  */
-export function uploadFile<T = any>(
-  option: UploadFileOption,
-  config?: UploadConfig & WebApiConfig<T, UploadFail>,
-) {
-  return promisifyWebApi<UploadFileOption, T, UploadFail, UploadConfig>(upload, 'uploadFile')(
-    option,
-    config,
-  );
+export function uploadFile(option: UploadFileOption, config?: UploadConfig & WebApiConfig) {
+  return enhanceWebApi(upload, 'uploadFile')(option, config);
 }

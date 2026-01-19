@@ -1,11 +1,14 @@
 import { getBaseToolsConfig } from '../index';
 
-type WebApi<Option, Res, Config = unknown> = (option: Option, config?: Config) => Promise<Res>;
+type WebApi<Option = any, Res = any, Config = any> = (
+  option: Option,
+  config?: Config,
+) => Promise<Res>;
 
 /**
  * web api 的调用配置
  */
-export type WebApiConfig<Res, Err> = {
+export type WebApiConfig<Res = any, Err = any> = {
   /** 是否显示加载提示, 默认 false. (支持字符串,自定义文本) */
   showLoading?: boolean | string;
 
@@ -20,15 +23,15 @@ export type WebApiConfig<Res, Err> = {
 };
 
 /**
- * 拓展 web api, 使其支持loading,toast,log,任务对象等能力
+ * 拓展 web api, 使其支持loading,toast,log能力
  * @param webApi web api
- * @param apiName web api 名称 (可选, 用于日志输出, 默认'promisifyWebApi')
+ * @param apiName web api 名称 (可选, 用于日志输出, 默认'enhanceWebApi')
  * @return 注入拓展能力的promise (默认提示异常和输出日志,不显示进度条和操作成功)
  * @example
- * const promise = promisifyWebApi(downloadFile, 'downloadFile');
+ * const promise = enhanceWebApi(downloadFile, 'downloadFile');
  * await promise({ url: 'xx' }, {showLoading: '下载中', toastSuccess: '下载成功'});
  */
-export function promisifyWebApi<Option, Res, Err, Config = unknown>(
+export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
   webApi: WebApi<Option, Res, Config>,
   apiName?: string,
 ) {
@@ -46,7 +49,7 @@ export function promisifyWebApi<Option, Res, Err, Config = unknown>(
       showLoading: showLoadingFn,
       hideLoading: hideLoadingFn,
     } = getBaseToolsConfig();
-    const fname = apiName || 'promisifyWebApi'; // webApi.name经过打包后取不到原函数名，不如默认'promisifyWebApi'
+    const fname = apiName || 'enhanceWebApi'; // webApi.name经过打包后取不到原函数名，不如默认'enhanceWebApi'
 
     if (showLoading) {
       const title = typeof showLoading === 'string' ? showLoading : '';
