@@ -79,8 +79,8 @@ export type RequestConfigBase<D extends RequestData = RequestData> = {
   /** 登录过期状态码 */
   reloginCode: (number | string)[];
 
-  /** 是否显示进度条 (默认true) */
-  showLoading?: boolean;
+  /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
+  showLoading?: boolean | string;
 
   /** 是否提示接口异常 (默认true) */
   toastError?: boolean;
@@ -135,7 +135,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * // 在入口文件完成配置 (确保请求失败有toast提示,登录过期能够触发重新登录,log有日志输出)
  * setBaseToolsConfig({
  * toast: ({ msg, status }) => (status === 'fail' ? message.error(msg) : message.success(msg)),
- * showLoading: () => message.loading('加载中...'),
+ * showLoading: ({ title }) => message.loading(title || '加载中...'),
  * hideLoading: () => message.destroy(),
  * toLogin: () => reLogin(),
  * log(level, data) {
@@ -306,7 +306,8 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 
       // 2.5 UI 反馈
       const appConfig = getBaseToolsConfig();
-      if (showLoading) appConfig.showLoading?.();
+      if (showLoading)
+        appConfig.showLoading?.(typeof showLoading === 'string' ? { title: showLoading } : {});
 
       // 2.6 设置超时
       let isTimeout = false;

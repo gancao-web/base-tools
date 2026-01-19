@@ -45,8 +45,8 @@ export type RequestConfigBase<D extends RequestData = RequestData> = Omit<
   /** 登录过期状态码 */
   reloginCode: (number | string)[];
 
-  /** 是否显示进度条 (默认true) */
-  showLoading?: boolean;
+  /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
+  showLoading?: boolean | string;
 
   /** 是否提示接口异常 (默认true) */
   toastError?: boolean;
@@ -177,7 +177,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     }
 
     // 显示进度条
-    if (showLoading) uni.showLoading();
+    if (showLoading) uni.showLoading(typeof showLoading === 'string' ? { title: showLoading } : {});
 
     // 发送请求
     temp.task = uni.request({

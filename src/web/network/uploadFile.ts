@@ -1,3 +1,6 @@
+import { promisifyWebApi } from '../async';
+import type { WebApiConfig } from '../async';
+
 /**
  * 上传文件的选项
  */
@@ -39,7 +42,7 @@ export type UploadTask = {
   abort: () => void;
 };
 
-export type ApiConfig = {
+export type UploadConfig = {
   /** 获取task对象 */
   onTaskReady?: (task: UploadTask) => void;
 };
@@ -49,21 +52,7 @@ export type UploadFail = {
   status: number;
 };
 
-/**
- * 上传文件
- * @param option 上传文件的选项
- * @param config 配置项
- * @example
- * // 上传
- * await uploadFile({ url: 'https://xx', file: file});
- *
- * // 监听上传进度
- * await uploadFile({ url: 'https://xx', file: file}, {
- *   onTaskReady: (task) =>
- *     task.onProgressUpdate((res) => console.log('上传进度:', res.progress)),
- * });
- */
-export function uploadFile<T>(option: UploadFileOption, config?: ApiConfig) {
+function upload<T>(option: UploadFileOption, config?: UploadConfig) {
   return new Promise<T>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const { url, file, name = 'file', header, formData, timeout = 0 } = option;
@@ -129,11 +118,35 @@ export function uploadFile<T>(option: UploadFileOption, config?: ApiConfig) {
     data.append(name, file);
     if (formData) {
       Object.entries(formData).forEach(([k, v]) => {
-        if (v !== undefined) data.append(k, String(v));
+        if (v !== undefined && v !== null) data.append(k, String(v));
       });
     }
 
     // 发送请求
     xhr.send(data);
   });
+}
+
+/**
+ * 上传文件
+ * @param option 上传文件的选项
+ * @param config 配置项
+ * @example
+ * // 上传
+ * await uploadFile({ url: 'https://xx', file: file});
+ *
+ * // 监听上传进度
+ * await uploadFile({ url: 'https://xx', file: file}, {
+ *   onTaskReady: (task) =>
+ *     task.onProgressUpdate((res) => console.log('上传进度:', res.progress)),
+ * });
+ */
+export function uploadFile<T = any>(
+  option: UploadFileOption,
+  config?: UploadConfig & WebApiConfig<T, UploadFail>,
+) {
+  return promisifyWebApi<UploadFileOption, T, UploadFail, UploadConfig>(upload, 'uploadFile')(
+    option,
+    config,
+  );
 }
