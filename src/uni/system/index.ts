@@ -96,5 +96,8 @@ export function getPlatformUni() {
  * @param toastSuccess 复制成功的toast提示, 默认'复制成功'
  */
 export function copyText(text: string, toastSuccess = '复制成功') {
-  return promisifyUniApi(uni.setClipboardData)({ data: text, showToast: false }, { toastSuccess });
+  return promisifyUniApi(uni.setClipboardData, 'setClipboardData')(
+    { data: text, showToast: false },
+    { toastSuccess },
+  );
 }

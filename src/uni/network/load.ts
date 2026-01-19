@@ -39,7 +39,7 @@ export async function downloadFile(
     UniApp.DownloadSuccessData,
     UniApp.GeneralCallbackResult,
     UniApp.DownloadTask
-  >(uni.downloadFile)(fillOption, config);
+  >(uni.downloadFile, 'downloadFile')(fillOption, config);
 
   if (cacheFile) cache.downloadFiles[url] = tempFilePath;
 
@@ -57,7 +57,7 @@ export function loadFontFace(
   option: Omit<UniApp.LoadFontFaceOptions, 'source'> & { url: string },
   config?: UniApiConfig,
 ) {
-  return promisifyUniApi(uni.loadFontFace)(
+  return promisifyUniApi(uni.loadFontFace, 'loadFontFace')(
     { global: true, source: `url(${option.url})`, ...option },
     config,
   );
@@ -91,5 +91,5 @@ export function uploadFile(
     UniApp.UploadFileSuccessCallbackResult,
     UniApp.GeneralCallbackResult,
     UniApp.UploadTask
-  >(uni.uploadFile)(option, config);
+  >(uni.uploadFile, 'uploadFile')(option, config);
 }

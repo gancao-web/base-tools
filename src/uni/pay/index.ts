@@ -14,7 +14,7 @@ export function toPayWx(option: {
   signType: string;
   paySign: string;
 }) {
-  return promisifyUniApi(uni.requestPayment)(
+  return promisifyUniApi(uni.requestPayment, 'requestPayment')(
     { provider: 'wxpay', orderInfo: {}, ...option },
     {
       toastError: (e) => !e.errMsg.includes('cancel'),

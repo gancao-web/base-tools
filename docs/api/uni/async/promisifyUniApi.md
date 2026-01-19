@@ -8,11 +8,11 @@
 import { promisifyUniApi } from '@base-web-kits/base-tools-uni';
 
 // 基本用法
-const downloadPromise = promisifyUniApi(uni.downloadFile);
+const downloadPromise = promisifyUniApi(uni.downloadFile, 'downloadFile');
 const result = await downloadPromise({ url: 'https://example.com/file.pdf' });
 
 // 带加载提示和成功提示
-const uploadPromise = promisifyUniApi(uni.uploadFile);
+const uploadPromise = promisifyUniApi(uni.uploadFile, 'uploadFile');
 await uploadPromise(
   {
     url: 'https://api.example.com/upload',
@@ -26,7 +26,7 @@ await uploadPromise(
 );
 
 // 自定义错误处理
-const requestPromise = promisifyUniApi(uni.request);
+const requestPromise = promisifyUniApi(uni.request, 'request');
 await requestPromise(
   { url: 'https://api.example.com/data' },
   {
@@ -38,7 +38,7 @@ await requestPromise(
 );
 
 // 完全自定义配置
-const saveImagePromise = promisifyUniApi(uni.saveImageToPhotosAlbum);
+const saveImagePromise = promisifyUniApi(uni.saveImageToPhotosAlbum, 'saveImageToPhotosAlbum');
 await saveImagePromise(
   { filePath: tempFilePath },
   {
@@ -50,7 +50,7 @@ await saveImagePromise(
 );
 
 // 获取task对象
-await promisifyUniApi(uni.downloadFile)(
+await promisifyUniApi(uni.downloadFile, 'downloadFile')(
   { url: 'xx' },
   {
     onTaskReady: (task) => {
@@ -63,6 +63,7 @@ await promisifyUniApi(uni.downloadFile)(
 ## 参数
 
 - `uniApi` - 需要包装的uni API函数（必需）
+- `apiName` - uni API 名称，用于日志输出（可选，推荐传入以保证日志准确性, 否则默认'promisifyUniApi'）
 
 ## 返回值
 

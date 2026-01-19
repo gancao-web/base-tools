@@ -32,18 +32,24 @@ export type UniApiConfig<Res = unknown, Err = unknown, Task = any> = {
 
 /**
  * 把 uni api 包装为 Promise 形式
+ * @param uniApi uni api
+ * @param apiName uni api 名称 (可选, 用于日志输出, 默认'promisifyUniApi')
  * @returns Promise 形式的 uni api (默认提示异常和输出日志,不显示进度条和操作成功: promise(option, {showLoading: false, toastSuccess: false, toastError: true, showLog: true}))
  * @example
- * const promise = promisifyUniApi(uni.downloadFile);
+ * const promise = promisifyUniApi(uni.downloadFile, 'downloadFile');
  * await promise({ url: 'xx' }, {showLoading: '下载中', toastSuccess: '下载成功'});
  */
-export function promisifyUniApi<Option, Res, Err, Task>(uniApi: UniApi<Option, Res, Err>) {
+export function promisifyUniApi<Option, Res, Err, Task>(
+  uniApi: UniApi<Option, Res, Err>,
+  apiName?: string,
+) {
   return (option?: OmitOption<Option>, config: UniApiConfig<Res, Err, Task> = {}) => {
     const { showLoading = false, toastSuccess = false, toastError = true, showLog = true } = config;
     const { log } = getBaseToolsConfig();
+    const fname = apiName || 'promisifyUniApi'; // uniApi.name得到的值都是'promiseApi'，不如默认'promisifyUniApi'
 
     if (showLoading) {
-      const title = typeof showLoading === 'string' ? showLoading : undefined;
+      const title = typeof showLoading === 'string' ? showLoading : '';
       uni.showLoading({ title, mask: true });
     }
 
@@ -52,7 +58,7 @@ export function promisifyUniApi<Option, Res, Err, Task>(uniApi: UniApi<Option, R
         ...(option as Option),
         success(res) {
           if (showLoading) uni.hideLoading();
-          if (showLog) log?.('info', { name: uniApi.name, status: 'success', option, res });
+          if (showLog) log?.('info', { name: fname, status: 'success', option, res });
           resolve(res);
 
           const msg = typeof toastSuccess === 'function' ? toastSuccess(res) : toastSuccess;
@@ -60,12 +66,11 @@ export function promisifyUniApi<Option, Res, Err, Task>(uniApi: UniApi<Option, R
         },
         fail(e) {
           if (showLoading) uni.hideLoading();
-          if (showLog) log?.('error', { name: uniApi.name, status: 'fail', option, e });
+          if (showLog) log?.('error', { name: fname, status: 'fail', option, e });
           reject(e);
 
           const msg = typeof toastError === 'function' ? toastError(e) : toastError;
-          if (msg)
-            toast(typeof msg === 'string' ? msg : `${uniApi.name} fail: ${JSON.stringify(e)}`);
+          if (msg) toast(typeof msg === 'string' ? msg : `${fname} fail: ${JSON.stringify(e)}`);
         },
       });
 
