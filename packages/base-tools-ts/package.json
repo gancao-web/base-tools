@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-ts",
-  "version": "1.1.18-alpha.0",
+  "version": "1.2.0-alpha.0",
   "sideEffects": false,
   "description": "Independent TS utilities package built from src/ts.",
   "keywords": [

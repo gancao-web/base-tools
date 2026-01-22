@@ -55,7 +55,7 @@ export type RequestConfigBase<D extends RequestData = RequestData> = Omit<
   isLog?: boolean;
 
   /** 额外输出的日志数据 */
-  extraLog?: Record<string, unknown>;
+  logExtra?: Record<string, unknown>;
 
   /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
   cacheTime?: number;
@@ -125,11 +125,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * task.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已经成功)
  */
 export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
-  // 请求对象
-  const temp: { task?: UniApp.RequestTask } = {};
-
-  // 创建promise
-  const promise: Promise<T> & { task?: UniApp.RequestTask } = new Promise((resolve, reject) => {
+  return new Promise<T>((resolve, reject) => {
     const {
       url,
       data,
@@ -180,7 +176,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     if (showLoading) uni.showLoading(typeof showLoading === 'string' ? { title: showLoading } : {});
 
     // 发送请求
-    temp.task = uni.request({
+    uni.request({
       ...config,
       data: fillData,
       header: fillHeader,
@@ -225,17 +221,13 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         if (showLoading) uni.hideLoading();
         // 请求异常
         if (toastError) toast('请求失败,请检查网络');
-        reject(e);
         // 上报日志
         logRequestInfo({ status: 'fail', config: logConfig, startTime, e });
+        // 失败回调
+        reject(e);
       },
     });
   });
-
-  // 将 task 挂载到 Promise 上
-  promise.task = temp.task;
-
-  return promise;
 }
 
 /**
@@ -255,7 +247,7 @@ function logRequestInfo(options: {
   if (!log || !isLog) return;
 
   const { config, res, fromCache = false, startTime, status, e } = options;
-  const { url, data, header, method, extraLog } = config;
+  const { url, data, header, method, logExtra } = config;
   const endTime = Date.now();
   const fmt = 'YYYY-MM-DD HH:mm:ss.SSS';
 
@@ -270,7 +262,7 @@ function logRequestInfo(options: {
     startTime: toDayjs(startTime).format(fmt),
     endTime: toDayjs(endTime).format(fmt),
     duration: endTime - startTime,
-    ...extraLog,
+    ...logExtra,
   };
 
   if (status === 'success') {

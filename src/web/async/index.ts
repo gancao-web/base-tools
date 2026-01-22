@@ -1,4 +1,6 @@
+import { cloneDeep } from '@base-web-kits/base-tools-ts';
 import { getBaseToolsConfig } from '../index';
+import type { AppLogInfo } from '../index';
 
 type WebApi<Option = any, Res = any, Config = any> = (
   option: Option,
@@ -20,6 +22,12 @@ export type WebApiConfig<Res = any, Err = any> = {
 
   /** 是否显示日志, 默认 true */
   showLog?: boolean;
+
+  /** 处理成功res, 如解密操作 (返回值在成功日志中输出'resFilter'字段) */
+  resFilter?: (res: Res) => Res;
+
+  /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
+  logExtra?: Record<string, unknown>;
 };
 
 /**
@@ -42,7 +50,10 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
       toastSuccess = false,
       toastError = true,
       showLog = true,
+      resFilter,
+      logExtra,
     } = finalConfig;
+
     const {
       log,
       toast,
@@ -60,15 +71,30 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
       webApi(option, finalConfig)
         .then((res) => {
           if (showLoading) hideLoadingFn?.();
-          if (showLog) log?.('info', { name: fname, status: 'success', option, res });
-          resolve(res);
 
-          const msg = typeof toastSuccess === 'function' ? toastSuccess(res) : toastSuccess;
+          const finalRes = resFilter ? resFilter(res) : res;
+
+          if (showLog) {
+            const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
+
+            if (resFilter) {
+              logData.res = res; // 输出原始数据
+              logData.resFilter = cloneDeep(finalRes); // 深拷贝处理后数据,避免外部修改对象,造成输出不一致
+            } else {
+              logData.res = cloneDeep(res); // 深拷贝原始数据,避免外部修改对象,造成输出不一致
+            }
+
+            log?.('info', logData);
+          }
+
+          resolve(finalRes);
+
+          const msg = typeof toastSuccess === 'function' ? toastSuccess(finalRes) : toastSuccess;
           if (msg) toast?.({ msg, status: 'success' });
         })
         .catch((e) => {
           if (showLoading) hideLoadingFn?.();
-          if (showLog) log?.('error', { name: fname, status: 'fail', option, e });
+          if (showLog) log?.('error', { name: fname, status: 'fail', option, e, ...logExtra });
 
           const msg = typeof toastError === 'function' ? toastError(e) : toastError;
           if (msg) {

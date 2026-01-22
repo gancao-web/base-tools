@@ -1,18 +1,21 @@
-# promisifyUniApi
+# enhanceUniApi
 
-将uni API包装为Promise形式，提供统一的错误处理和用户反馈
+增强uni api
+
+- 将uni api包装为Promise形式
+- 提供统一的错误处理和用户反馈
 
 ## 示例
 
 ```ts
-import { promisifyUniApi } from '@base-web-kits/base-tools-uni';
+import { enhanceUniApi } from '@base-web-kits/base-tools-uni';
 
 // 基本用法
-const downloadPromise = promisifyUniApi(uni.downloadFile, 'downloadFile');
+const downloadPromise = enhanceUniApi(uni.downloadFile, 'downloadFile');
 const result = await downloadPromise({ url: 'https://example.com/file.pdf' });
 
 // 带加载提示和成功提示
-const uploadPromise = promisifyUniApi(uni.uploadFile, 'uploadFile');
+const uploadPromise = enhanceUniApi(uni.uploadFile, 'uploadFile');
 await uploadPromise(
   {
     url: 'https://api.example.com/upload',
@@ -26,7 +29,7 @@ await uploadPromise(
 );
 
 // 自定义错误处理
-const requestPromise = promisifyUniApi(uni.request, 'request');
+const requestPromise = enhanceUniApi(uni.request, 'request');
 await requestPromise(
   { url: 'https://api.example.com/data' },
   {
@@ -38,7 +41,7 @@ await requestPromise(
 );
 
 // 完全自定义配置
-const saveImagePromise = promisifyUniApi(uni.saveImageToPhotosAlbum, 'saveImageToPhotosAlbum');
+const saveImagePromise = enhanceUniApi(uni.saveImageToPhotosAlbum, 'saveImageToPhotosAlbum');
 await saveImagePromise(
   { filePath: tempFilePath },
   {
@@ -50,7 +53,7 @@ await saveImagePromise(
 );
 
 // 获取task对象
-await promisifyUniApi(uni.downloadFile, 'downloadFile')(
+await enhanceUniApi(uni.downloadFile, 'downloadFile')(
   { url: 'xx' },
   {
     onTaskReady: (task) => {
@@ -63,7 +66,7 @@ await promisifyUniApi(uni.downloadFile, 'downloadFile')(
 ## 参数
 
 - `uniApi` - 需要包装的uni API函数（必需）
-- `apiName` - uni API 名称，用于日志输出（可选，推荐传入以保证日志准确性, 否则默认'promisifyUniApi'）
+- `apiName` - uni API 名称，用于日志输出（可选，推荐传入以保证日志准确性, 否则默认'enhanceUniApi'）
 
 ## 返回值
 
@@ -74,9 +77,10 @@ await promisifyUniApi(uni.downloadFile, 'downloadFile')(
     - `toastSuccess` - 操作成功的toast提示，默认 `false`（支持函数返回自定义文本）
     - `toastError` - 是否显示操作失败的详细错误信息，默认 `true`（支持函数判断是否显示）
     - `showLog` - 是否显示日志，默认 `true`
+    - `resFilter` - 处理成功res, 如解密操作 (返回值在成功日志中输出'resFilter'字段)
+    - `logExtra` - 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name')
     - `onTaskReady` - 初始化task对象时的回调函数，默认 `undefined`（支持自定义task事件监听）
 
 ## 版本
 
-- 1.1.13 新增onTaskReady字段
-- 1.0.0 新增
+- 1.2.0 新增

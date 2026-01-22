@@ -6,10 +6,8 @@ const WK = {
 
 /**
  * 写入 localStorage（自动 JSON 序列化）
- * 当 `value` 为 `null` 或 `undefined` 时，会移除该键。
- * 支持保存：对象、数组、字符串、数字、布尔值。
  * @param key 键名
- * @param value 任意可序列化的值
+ * @param value 任意可序列化的值：对象、数组、字符串、数字、布尔值。(`null` 或 `undefined` 会自动移除该键)
  * @param days 过期天数（从当前时间起算）
  * @example
  * setLocalStorage('user', { id: 1, name: 'Alice' }); // 对象

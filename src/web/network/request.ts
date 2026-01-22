@@ -52,12 +52,16 @@ export type RequestConfig<D extends RequestData = RequestData> = Partial<Request
 export type RequestConfigBase<D extends RequestData = RequestData> = {
   /** 接口地址 */
   url: string;
+
   /** 请求方法 */
   method?: RequestMethod;
+
   /** 请求头(会自动过滤undefined, null, "";不过滤0和false; 数字和布尔值会自动转换为字符串) */
   header?: Record<string, string | number | boolean | null | undefined>;
+
   /** 请求参数 */
   data?: D;
+
   /** 超时时间 (毫秒), 默认 60000 */
   timeout?: number;
 
@@ -88,8 +92,8 @@ export type RequestConfigBase<D extends RequestData = RequestData> = {
   /** 是否输出日志 (默认true) */
   isLog?: boolean;
 
-  /** 额外输出的日志数据 */
-  extraLog?: Record<string, unknown>;
+  /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
+  logExtra?: Record<string, unknown>;
 
   /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
   cacheTime?: number;
@@ -444,7 +448,7 @@ function logRequestInfo(options: {
   if (!log || !isLog) return;
 
   const { config, res, fromCache = false, startTime, status, e } = options;
-  const { url, data, header, method, extraLog } = config;
+  const { url, data, header, method, logExtra } = config;
   const endTime = Date.now();
   const fmt = 'YYYY-MM-DD HH:mm:ss.SSS';
 
@@ -459,7 +463,7 @@ function logRequestInfo(options: {
     startTime: toDayjs(startTime).format(fmt),
     endTime: toDayjs(endTime).format(fmt),
     duration: endTime - startTime,
-    ...extraLog,
+    ...logExtra,
   };
 
   if (status === 'success') {
