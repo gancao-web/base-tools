@@ -61,7 +61,7 @@ export type RequestConfigBase<D extends RequestData = RequestData> = Omit<
   cacheTime?: number;
 
   /** 响应拦截 */
-  responseInterceptor?: (
+  transformResponse?: (
     data: UniApp.RequestSuccessCallbackResult['data'],
   ) => UniApp.RequestSuccessCallbackResult['data'];
 };
@@ -78,7 +78,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * export function requestApi<T>(config: RequestConfig) {
  *    return request<T>({
  *      header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
- *      // responseInterceptor: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
+ *      // transformResponse: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
  *      resKey: 'data',
  *      msgKey: 'message',
  *      codeKey: 'status',
@@ -139,7 +139,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       toastError = true,
       enableChunked,
       cacheTime,
-      responseInterceptor,
+      transformResponse,
     } = config;
 
     // 参数: 过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 这些有效值)
@@ -184,7 +184,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         if (showLoading) uni.hideLoading();
 
         // 响应拦截
-        const res = responseInterceptor ? responseInterceptor(xhr.data) : xhr.data;
+        const res = transformResponse ? transformResponse(xhr.data) : xhr.data;
 
         // 解析数据 (分块传输会先不断执行task.onChunkReceived回调,流式传输完毕才执行success回调)
         const code = enableChunked ? '' : getObjectValue(res, codeKey);

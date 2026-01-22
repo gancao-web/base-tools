@@ -28,7 +28,7 @@ setBaseToolsConfig({
 export function requestApi<T>(config: RequestConfig) {
   return request<T>({
     header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
-    // responseInterceptor: (res) => res, // 响应拦截 (可选)
+    // transformResponse: (res) => res, // 响应拦截 (可选)
     resKey: 'data',
     msgKey: 'message',
     codeKey: 'status',
@@ -103,7 +103,7 @@ task.abort();
 | cacheTime | `number` | 否 | `0` | 响应数据的缓存时间 (毫秒)，仅成功时缓存，内存缓存 |
 | enableChunked | `boolean` | 否 | `false` | 是否开启流式传输 (如 SSE) |
 | responseType | `'text' \| 'arraybuffer' \| 'json'` | 否 | `'json'` | 响应类型 |
-| responseInterceptor | `(data: unknown) => unknown` | 否 | - | 响应拦截函数 |
+| transformResponse | `(data: unknown) => unknown` | 否 | - | 响应拦截函数 |
 
 **返回值**
 

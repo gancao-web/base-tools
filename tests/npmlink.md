@@ -4,9 +4,9 @@
 
 ```
 // 链接本地包 (强制覆盖已安装的包)
-pnpm link D:\web\base-tools\packages\base-tools-uni
+pnpm link D:\web\base-tools\packages\base-tools-uni D:\web\base-tools\packages\base-tools-ts D:\web\base-tools\packages\base-tools-web
 
 // 取消链接
-pnpm unlink @base-web-kits/base-tools-uni
+pnpm unlink @base-web-kits/base-tools-uni @base-web-kits/base-tools-ts @base-web-kits/base-tools-web
 pnpm install
 ```

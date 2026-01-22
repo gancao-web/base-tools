@@ -105,7 +105,7 @@ export type RequestConfigBase<D extends RequestData = RequestData> = {
   responseType?: 'text' | 'arraybuffer' | 'json';
 
   /** 响应拦截 */
-  responseInterceptor?: (data: ResponseData) => ResponseData;
+  transformResponse?: (data: ResponseData) => ResponseData;
 
   /** 获取task对象, 用于取消请求或监听流式数据 */
   onTaskReady?: (task: RequestTask) => void;
@@ -159,7 +159,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * export function requestApi<T>(config: RequestConfig) {
  *    return request<T>({
  *      header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
- *      // responseInterceptor: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
+ *      // transformResponse: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
  *      resKey: 'data',
  *      msgKey: 'message',
  *      codeKey: 'status',
@@ -220,7 +220,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     toastError = true,
     enableChunked = false,
     cacheTime,
-    responseInterceptor,
+    transformResponse,
     responseType = 'json',
     timeout = 60000,
     onTaskReady,
@@ -357,7 +357,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         if (showLoading) appConfig.hideLoading?.();
 
         // 响应拦截
-        const res = responseInterceptor ? responseInterceptor(resData) : resData;
+        const res = transformResponse ? transformResponse(resData) : resData;
 
         // 2.10 业务状态码解析
         const code = getObjectValue(res, codeKey);

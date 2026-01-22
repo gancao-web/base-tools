@@ -28,8 +28,8 @@ export type UniApiConfig<Res = any, Err = any, Task = any> = {
   /** 是否显示日志, 默认 true */
   showLog?: boolean;
 
-  /** 处理成功res, 如解密操作 (返回值在成功日志中输出'resFilter'字段) */
-  resFilter?: (res: Res) => Res;
+  /** 处理成功res, 如解密操作 (返回值在成功日志中输出'transformResponse'字段) */
+  transformResponse?: (res: Res) => Res;
 
   /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
   logExtra?: Record<string, unknown>;
@@ -57,7 +57,7 @@ export function enhanceUniApi<Option, Res, Err, Task>(
       toastSuccess = false,
       toastError = true,
       showLog = true,
-      resFilter,
+      transformResponse,
       logExtra,
     } = config;
 
@@ -75,14 +75,14 @@ export function enhanceUniApi<Option, Res, Err, Task>(
         success(res) {
           if (showLoading) uni.hideLoading();
 
-          const finalRes = resFilter ? resFilter(res) : res;
+          const finalRes = transformResponse ? transformResponse(res) : res;
 
           if (showLog) {
             const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
 
-            if (resFilter) {
+            if (transformResponse) {
               logData.res = res; // 输出原始数据
-              logData.resFilter = cloneDeep(finalRes); // 深拷贝处理后数据,避免外部修改对象,造成输出不一致
+              logData.transformResponse = cloneDeep(finalRes); // 深拷贝处理后数据,避免外部修改对象,造成输出不一致
             } else {
               logData.res = cloneDeep(res); // 深拷贝原始数据,避免外部修改对象,造成输出不一致
             }
