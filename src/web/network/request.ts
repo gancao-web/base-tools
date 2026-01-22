@@ -106,6 +106,9 @@ export type RequestConfigBase<D extends RequestData = RequestData> = {
 
   /** 响应拦截 */
   responseInterceptor?: (data: ResponseData) => ResponseData;
+
+  /** 获取task对象, 用于取消请求或监听流式数据 */
+  onTaskReady?: (task: RequestTask) => void;
 };
 
 /**
@@ -134,7 +137,6 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * 基础请求 (返回 Promise 和 Task 对象)
  * 基于 fetch API 封装，支持流式请求
  * @param config 请求配置
- * @returns Promise<T> & { task?: RequestTask }
  * @example
  * // 在入口文件完成配置 (确保请求失败有toast提示,登录过期能够触发重新登录,log有日志输出)
  * setBaseToolsConfig({
@@ -203,6 +205,27 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * task.abort(); // 取消请求 (若流式传输中,会中断流并抛出异常)
  */
 export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
+  const {
+    url,
+    data,
+    header,
+    method = 'GET',
+    resKey,
+    msgKey,
+    codeKey,
+    successKey,
+    successCode,
+    reloginCode,
+    showLoading = true,
+    toastError = true,
+    enableChunked = false,
+    cacheTime,
+    responseInterceptor,
+    responseType = 'json',
+    timeout = 60000,
+    onTaskReady,
+  } = config;
+
   // 1. 初始化控制对象
   const controller = new AbortController();
   const signal = controller.signal;
@@ -218,30 +241,11 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       chunkCallback = null;
     },
   };
+  onTaskReady?.(task);
 
   // 2. 创建 Promise
-  const promise = new Promise<T>((resolve, reject) => {
+  return new Promise<T>((resolve, reject) => {
     const execute = async () => {
-      const {
-        url,
-        data,
-        header,
-        method = 'GET',
-        resKey,
-        msgKey,
-        codeKey,
-        successKey,
-        successCode,
-        reloginCode,
-        showLoading = true,
-        toastError = true,
-        enableChunked = false,
-        cacheTime,
-        responseInterceptor,
-        responseType = 'json',
-        timeout = 60000,
-      } = config;
-
       const isGet = method === 'GET';
       const isObjectData = isPlainObject(data);
       const isArrayData = !isObjectData && Array.isArray(data);
@@ -399,12 +403,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     };
 
     execute();
-  }) as Promise<T> & { task?: RequestTask };
-
-  // 3. 挂载 Task
-  promise.task = task;
-
-  return promise;
+  });
 }
 
 /**

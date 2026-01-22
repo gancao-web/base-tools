@@ -73,7 +73,6 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * 基础请求 (返回promise和task对象)
  * - 需在入口文件初始化应用配置 setBaseToolsConfig({ pathLogin, log })
  * @param config 请求配置
- * @returns Promise<T> & { task?: UniApp.RequestTask }
  * @example
  * // 封装项目的基础请求
  * export function requestApi<T>(config: RequestConfig) {
