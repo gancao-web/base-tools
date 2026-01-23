@@ -1,4 +1,4 @@
-import { getBaseToolsConfig, promisifyUniApi, downloadFile } from '../index';
+import { getBaseToolsConfig, enhanceUniApi, downloadFile } from '../index';
 
 /**
  * 拼接完整的文件地址
@@ -47,5 +47,8 @@ export async function openDocument(url: string) {
 
   const filePath = await downloadFile({ url }, { showLoading: true });
 
-  await promisifyUniApi(uni.openDocument)({ filePath, showMenu: true }, { showLoading: true });
+  await enhanceUniApi(uni.openDocument, 'openDocument')(
+    { filePath, showMenu: true },
+    { showLoading: true },
+  );
 }

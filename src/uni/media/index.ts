@@ -1,4 +1,4 @@
-import { downloadFile, getBaseToolsConfig, authorize, promisifyUniApi } from '../index';
+import { downloadFile, getBaseToolsConfig, authorize, enhanceUniApi } from '../index';
 import type { UniApiConfig } from '../index';
 
 const cache = {
@@ -10,8 +10,8 @@ const cache = {
  * @param option 选项文档 https://uniapp.dcloud.net.cn/api/media/video.html
  * @example
  * const tempFiles = await chooseMedia({ count: 3 }); // 选择图片和视频
- * const tempFiles = await chooseMedia({ count: 2, mediaType: 'image' }); // 选择图片/拍照
- * const tempFiles = await chooseMedia({ count: 1, mediaType: 'video' }); // 选择视频/录像
+ * const tempFiles = await chooseMedia({ count: 2, mediaType: ['image'] }); // 选择图片/拍照
+ * const tempFiles = await chooseMedia({ count: 1, mediaType: ['video'] }); // 选择视频/录像
  */
 export async function chooseMedia(option: UniApp.ChooseMediaOption) {
   if (cache.isChooseMedia) {
@@ -23,7 +23,7 @@ export async function chooseMedia(option: UniApp.ChooseMediaOption) {
 
   cache.isChooseMedia = true;
   try {
-    const { tempFiles } = await promisifyUniApi(uni.chooseMedia)(option, {
+    const { tempFiles } = await enhanceUniApi(uni.chooseMedia, 'chooseMedia')(option, {
       toastError: (e) => !e.errMsg.includes('cancel'),
     });
     return tempFiles;
@@ -48,7 +48,7 @@ export async function saveImageToPhotosAlbum(filePath: string, config: UniApiCon
     );
   }
 
-  await promisifyUniApi(uni.saveImageToPhotosAlbum)(
+  await enhanceUniApi(uni.saveImageToPhotosAlbum, 'saveImageToPhotosAlbum')(
     { filePath },
     { toastSuccess: '保存成功', showLoading: true, ...config },
   );

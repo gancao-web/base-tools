@@ -1,4 +1,4 @@
-import { getBaseToolsConfig, promisifyUniApi } from '../index';
+import { getBaseToolsConfig, enhanceUniApi } from '../index';
 
 /**
  * 打开另一个小程序
@@ -6,7 +6,7 @@ import { getBaseToolsConfig, promisifyUniApi } from '../index';
  * await navigateToMiniProgram({ appId: 'wx1234567890' });
  */
 export function navigateToMiniProgram(option: UniApp.NavigateToMiniProgramOptions) {
-  return promisifyUniApi(uni.navigateToMiniProgram)(option);
+  return enhanceUniApi(uni.navigateToMiniProgram, 'navigateToMiniProgram')(option);
 }
 
 /**
@@ -15,7 +15,7 @@ export function navigateToMiniProgram(option: UniApp.NavigateToMiniProgramOption
  * await openOfficialAccountProfile({ username });
  */
 export function openOfficialAccountProfile(option: UniApp.OpenOfficialAccountProfileOption) {
-  return promisifyUniApi(uni.openOfficialAccountProfile)(option);
+  return enhanceUniApi(uni.openOfficialAccountProfile, 'openOfficialAccountProfile')(option);
 }
 
 /**
@@ -24,7 +24,7 @@ export function openOfficialAccountProfile(option: UniApp.OpenOfficialAccountPro
  * await openOfficialAccountArticle({ url });
  */
 export function openOfficialAccountArticle(option: UniApp.OpenOfficialAccountArticleOption) {
-  return promisifyUniApi(uni.openOfficialAccountArticle)(option);
+  return enhanceUniApi(uni.openOfficialAccountArticle, 'openOfficialAccountArticle')(option);
 }
 
 /**
@@ -33,7 +33,7 @@ export function openOfficialAccountArticle(option: UniApp.OpenOfficialAccountArt
  * const setting = await getSetting();
  */
 export function getSetting(options?: UniApp.GetSettingOptions) {
-  return promisifyUniApi(uni.getSetting)(options);
+  return enhanceUniApi(uni.getSetting, 'getSetting')(options);
 }
 
 /**
@@ -48,7 +48,10 @@ export async function requestSubscribeMessage(ids: string | string[]) {
 
   const tmplIds = typeof ids === 'string' ? ids.split(',') : ids;
 
-  const res = await promisifyUniApi(uni.requestSubscribeMessage)({ tmplIds });
+  const res = await enhanceUniApi(
+    uni.requestSubscribeMessage,
+    'requestSubscribeMessage',
+  )({ tmplIds });
   const result = JSON.stringify(res);
   if (result.includes('accept')) {
     return result;

@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools",
-  "version": "1.1.13",
+  "version": "1.2.0",
   "type": "module",
   "sideEffects": false,
   "scripts": {
@@ -28,7 +28,10 @@
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "tag": "node scripts/tag-release.mjs"
+    "tag": "node scripts/tag-release.mjs",
+    "update:es-toolkit": "npx tsx scripts/update-es-toolkit-exports.ts",
+    "update:ahooks": "npx tsx scripts/update-ahooks-exports.ts",
+    "update:vueuse": "npx tsx scripts/update-vueuse-exports.ts"
   },
   "exports": {
     "./ts": {
@@ -111,12 +114,12 @@
     ]
   },
   "dependencies": {
-    "@vueuse/core": "^14.0.0",
-    "ahooks": "^3.9.6",
+    "@vueuse/core": "14.1.0",
+    "ahooks": "3.9.6",
     "axios": "^1.13.1",
     "bignumber.js": "^9.1.2",
     "dayjs": "^1.11.19",
-    "es-toolkit": "^1.42.0",
+    "es-toolkit": "1.44.0",
     "mitt": "^3.0.1"
   },
   "typesVersions": {

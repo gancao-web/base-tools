@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-react",
-  "version": "1.1.13",
+  "version": "1.2.0",
   "sideEffects": false,
   "description": "Independent React utilities package built from src/react.",
   "keywords": [
@@ -28,7 +28,6 @@
     "ahooks": "^3.9.6"
   },
   "peerDependencies": {
-    "ahooks": "^3.0.0",
     "react": ">=18"
   },
   "publishConfig": {
