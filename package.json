@@ -29,7 +29,9 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "tag": "node scripts/tag-release.mjs",
-    "update:es-toolkit": "npx tsx scripts/update-es-toolkit-exports.ts"
+    "update:es-toolkit": "npx tsx scripts/update-es-toolkit-exports.ts",
+    "update:ahooks": "npx tsx scripts/update-ahooks-exports.ts",
+    "update:vueuse": "npx tsx scripts/update-vueuse-exports.ts"
   },
   "exports": {
     "./ts": {
@@ -117,7 +119,7 @@
     "axios": "^1.13.1",
     "bignumber.js": "^9.1.2",
     "dayjs": "^1.11.19",
-    "es-toolkit": "^1.42.0",
+    "es-toolkit": "1.44.0",
     "mitt": "^3.0.1"
   },
   "typesVersions": {

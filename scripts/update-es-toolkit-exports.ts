@@ -21,8 +21,8 @@ const content = `/**
  * 文档: https://es-toolkit.dev/
  * 目的: 提供常用工具,收敛依赖版本
  *
- * NOTE: 此文件由 scripts/update-es-toolkit-exports.ts 生成
- * 请勿手动修改，如需更新请运行: npm run update:es-toolkit
+ * 注意: 此文件由 scripts/update-es-toolkit-exports.ts 生成, 请勿手动修改.
+ * 如需更新, 请先升级es-toolkit, 然后运行: npm run update:es-toolkit
  */
 export {
 ${keys.map((key) => `  ${key},`).join('\n')}
