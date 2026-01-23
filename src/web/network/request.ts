@@ -83,29 +83,29 @@ export type RequestConfigBase<D extends RequestData = RequestData> = {
   /** 登录过期状态码 */
   reloginCode: (number | string)[];
 
-  /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
-  showLoading?: boolean | string;
-
-  /** 是否提示接口异常 (默认true) */
-  toastError?: boolean;
-
-  /** 是否输出日志 (默认true) */
-  isLog?: boolean;
-
-  /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
-  logExtra?: Record<string, unknown>;
-
-  /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
-  cacheTime?: number;
-
   /** 是否开启流式传输 (如 SSE) */
   enableChunked?: boolean;
 
   /** 响应类型 (默认 json, enableChunked为true时忽略) */
   responseType?: 'text' | 'arraybuffer' | 'json';
 
+  /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
+  cacheTime?: number;
+
+  /** 是否提示接口异常 (默认true) */
+  toastError?: boolean;
+
+  /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
+  showLoading?: boolean | string;
+
+  /** 是否输出日志 (默认true) */
+  showLog?: boolean;
+
+  /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
+  logExtra?: Record<string, unknown>;
+
   /** 响应拦截 */
-  transformResponse?: (data: ResponseData) => ResponseData;
+  resMap?: (data: ResponseData) => ResponseData;
 
   /** 获取task对象, 用于取消请求或监听流式数据 */
   onTaskReady?: (task: RequestTask) => void;
@@ -159,7 +159,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * export function requestApi<T>(config: RequestConfig) {
  *    return request<T>({
  *      header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
- *      // transformResponse: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
+ *      // resMap: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
  *      resKey: 'data',
  *      msgKey: 'message',
  *      codeKey: 'status',
@@ -181,28 +181,34 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  *   return requestApi<GoodItem[]>({ url: '/goods/list', resKey: 'data.list', ...config });
  * }
  *
- * const goodList = await apiGoodList({ data: { page:1, size:10 }, showLoading: false });
+ * const goodList = await apiGoodList({ data: { page:1, size:10 } });
  *
  * // 3. 基于上面 requestApi 的流式接口
- * export function apiChatStream(data: { question: string }) {
- *   return requestApi<T>({
+ * export function apiChatStream(config: RequestConfig) {
+ *   return requestApi({
+ *     ...config,
  *     url: '/sse/chatStream',
- *     data,
  *     resKey: false,
  *     showLoading: false,
- *     responseType: 'arraybuffer',
- *     enableChunked: true,
+ *     responseType: 'arraybuffer', // 流式响应类型
+ *     enableChunked: true, // 开启分块传输
  *   });
  * }
  *
- * const { task } = apiChatStream({question: '你好'}); // 发起流式请求
+ * // 流式监听
+ * const onTaskReady = (task: RequestTask) => {
+ *    task.onChunkReceived((res) => {
+ *      console.log('ArrayBuffer', res.data);
+ *    });
+ * }
  *
- * task.onChunkReceived((res) => {
- *   console.log('ArrayBuffer', res.data); // 接收流式数据
- * });
+ * // 流式发起
+ * const data: ChatData = { content: '你好', conversationId: 123 };
+ * await apiChatStream({ data, onTaskReady });
  *
- * task.offChunkReceived(); // 取消监听,中断流式接收 (调用时机:流式结束,组件销毁,页面关闭)
- * task.abort(); // 取消请求 (若流式传输中,会中断流并抛出异常)
+ * // 流式取消 (在组件销毁或页面关闭时调用)
+ * task?.offChunkReceived(); // 取消监听,中断流式接收
+ * task?.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已成功)
  */
 export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
   const {
@@ -220,7 +226,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     toastError = true,
     enableChunked = false,
     cacheTime,
-    transformResponse,
+    resMap,
     responseType = 'json',
     timeout = 60000,
     onTaskReady,
@@ -357,7 +363,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         if (showLoading) appConfig.hideLoading?.();
 
         // 响应拦截
-        const res = transformResponse ? transformResponse(resData) : resData;
+        const res = resMap ? resMap(resData) : resData;
 
         // 2.10 业务状态码解析
         const code = getObjectValue(res, codeKey);
@@ -442,9 +448,9 @@ function logRequestInfo(options: {
   e?: unknown;
 }) {
   const { log } = getBaseToolsConfig();
-  const { isLog = true } = options.config;
+  const { showLog = true } = options.config;
 
-  if (!log || !isLog) return;
+  if (!log || !showLog) return;
 
   const { config, res, fromCache = false, startTime, status, e } = options;
   const { url, data, header, method, logExtra } = config;

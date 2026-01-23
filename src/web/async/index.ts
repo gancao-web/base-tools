@@ -23,8 +23,8 @@ export type WebApiConfig<Res = any, Err = any> = {
   /** 是否显示日志, 默认 true */
   showLog?: boolean;
 
-  /** 成功响应数据的处理, 如解密操作 (返回值在成功日志中输出'transformResponse'字段) */
-  transformResponse?: (res: any) => Res;
+  /** 成功响应数据的处理, 如解密操作 (返回值在成功日志中输出'resMap'字段) */
+  resMap?: (res: any) => Res;
 
   /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
   logExtra?: Record<string, unknown>;
@@ -50,7 +50,7 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
       toastSuccess = false,
       toastError = true,
       showLog = true,
-      transformResponse,
+      resMap,
       logExtra,
     } = finalConfig;
 
@@ -72,14 +72,14 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
         .then((res) => {
           if (showLoading) hideLoadingFn?.();
 
-          const finalRes = transformResponse ? transformResponse(res) : res;
+          const finalRes = resMap ? resMap(res) : res;
 
           if (showLog) {
             const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
 
-            if (transformResponse) {
+            if (resMap) {
               logData.res = res; // 输出原始数据
-              logData.transformResponse = cloneDeep(finalRes); // 深拷贝处理后数据,避免外部修改对象,造成输出不一致
+              logData.resMap = cloneDeep(finalRes); // 深拷贝处理后数据,避免外部修改对象,造成输出不一致
             } else {
               logData.res = cloneDeep(res); // 深拷贝原始数据,避免外部修改对象,造成输出不一致
             }

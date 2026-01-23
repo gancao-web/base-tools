@@ -14,7 +14,7 @@ import type { RequestData, RequestConfig } from '@base-web-kits/base-tools-uni';
 export function requestApi<T>(config: RequestConfig) {
   return request<T>({
     header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
-    // transformResponse: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
+    // resMap: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
     resKey: 'data',
     msgKey: 'message',
     codeKey: 'status',
@@ -31,33 +31,39 @@ export function apiGoodList(data: { page: number; size: number }) {
 
 const goodList = await apiGoodList({ page: 1, size: 10 });
 
-// 2. 参数泛型的写法
+// 2. 参数支持泛型
 export function apiGoodList(config: RequestConfig<{ page: number; size: number }>) {
   return requestApi<GoodItem[]>({ url: '/goods/list', resKey: 'data.list', ...config });
 }
 
-const goodList = await apiGoodList({ data: { page: 1, size: 10 }, showLoading: false });
+const goodList = await apiGoodList({ data: { page: 1, size: 10 } });
 
 // 3. 基于上面 requestApi 的流式接口
-export function apiChatStream(data: { question: string }) {
-  return requestApi<T>({
+export function apiChatStream(config: RequestConfig) {
+  return requestApi({
+    ...config,
     url: '/sse/chatStream',
-    data,
     resKey: false,
     showLoading: false,
-    responseType: 'arraybuffer',
-    enableChunked: true,
+    responseType: 'arraybuffer', // 流式响应类型
+    enableChunked: true, // 开启分块传输
   });
 }
 
-const { task } = apiChatStream({ question: '你好' }); // 发起流式请求
-
-task.onChunkReceived((res) => {
-  console.log('ArrayBuffer', res.data); // 接收流式数据
-});
-
-task.offChunkReceived(); // 取消监听,中断流式接收 (调用时机:流式结束,组件销毁,页面关闭)
-task.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已经成功)
+// 流式监听
+const onTaskReady = (task: RequestTask) => {
+   task.onChunkReceived((res) => {
+     console.log('ArrayBuffer', res.data);
+   });
+}
+ *
+// 流式发起
+const data: ChatData = { content: '你好', conversationId: 123 };
+await apiChatStream({ data, onTaskReady });
+ *
+// 流式取消 (在组件销毁或页面关闭时调用)
+task?.offChunkReceived(); // 取消监听,中断流式接收
+task?.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已成功)
 ```
 
 ### RequestConfig
@@ -70,10 +76,10 @@ task.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求
 - `successKey?: string` - 接口返回成功状态码的字段, 支持"a[0].b.c"的格式 (默认取 codeKey)
 - `successCode: (number | string)[]` - 成功状态码列表
 - `reloginCode: (number | string)[]` - 登录过期状态码列表
-- `transformResponse?: (data: any) => any` - 响应拦截，可预处理响应数据 (如解密)
+- `resMap?: (data: any) => any` - 响应拦截，可预处理响应数据 (如解密)
 - `showLoading?: boolean` - 是否显示进度条，默认 `true`
 - `toastError?: boolean` - 是否提示接口异常，默认 `true`
-- `isLog?: boolean` - 是否输出日志，默认 `true`
+- `showLog?: boolean` - 是否输出日志，默认 `true`
 - `cacheTime?: number` - 缓存时间，默认 `0` 不缓存 (单位毫秒)
 - `extraLog?: Record<string, unknown>` - 额外输出的日志数据
 

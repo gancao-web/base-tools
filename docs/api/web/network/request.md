@@ -28,7 +28,7 @@ setBaseToolsConfig({
 export function requestApi<T>(config: RequestConfig) {
   return request<T>({
     header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
-    // transformResponse: (res) => res, // 响应拦截 (可选)
+    // resMap: (res) => res, // 响应拦截 (可选)
     resKey: 'data',
     msgKey: 'message',
     codeKey: 'status',
@@ -51,7 +51,7 @@ export function apiGoodList(config: RequestConfig<{ page: number; size: number }
 }
 
 // 调用
-const goodList = await apiGoodList({ data: { page: 1, size: 10 }, showLoading: false });
+const goodList = await apiGoodList({ data: { page: 1, size: 10 } });
 
 // 4. 基于上面 requestApi 流式请求 (SSE)
 export function apiChatStream(data: { question: string }) {
@@ -98,12 +98,12 @@ task.abort();
 | reloginCode | `(number \| string)[]` | 是 | - | 登录过期状态码列表 |
 | showLoading | `boolean` | 否 | `true` | 是否显示进度条 |
 | toastError | `boolean` | 否 | `true` | 是否提示接口异常 |
-| isLog | `boolean` | 否 | `true` | 是否输出日志 |
+| showLog | `boolean` | 否 | `true` | 是否输出日志 |
 | extraLog | `Record<string, unknown>` | 否 | - | 额外输出的日志数据 |
 | cacheTime | `number` | 否 | `0` | 响应数据的缓存时间 (毫秒)，仅成功时缓存，内存缓存 |
 | enableChunked | `boolean` | 否 | `false` | 是否开启流式传输 (如 SSE) |
 | responseType | `'text' \| 'arraybuffer' \| 'json'` | 否 | `'json'` | 响应类型 |
-| transformResponse | `(data: unknown) => unknown` | 否 | - | 响应拦截函数 |
+| resMap | `(data: unknown) => unknown` | 否 | - | 响应拦截函数 |
 
 **返回值**
 

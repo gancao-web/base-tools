@@ -45,25 +45,28 @@ export type RequestConfigBase<D extends RequestData = RequestData> = Omit<
   /** 登录过期状态码 */
   reloginCode: (number | string)[];
 
-  /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
-  showLoading?: boolean | string;
+  /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
+  cacheTime?: number;
 
   /** 是否提示接口异常 (默认true) */
   toastError?: boolean;
 
+  /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
+  showLoading?: boolean | string;
+
   /** 是否输出日志 (默认true) */
-  isLog?: boolean;
+  showLog?: boolean;
 
   /** 额外输出的日志数据 */
   logExtra?: Record<string, unknown>;
 
-  /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
-  cacheTime?: number;
-
   /** 响应拦截 */
-  transformResponse?: (
+  resMap?: (
     data: UniApp.RequestSuccessCallbackResult['data'],
   ) => UniApp.RequestSuccessCallbackResult['data'];
+
+  /** 获取task对象, 用于取消请求和监听流式响应 */
+  onTaskReady?: (task: UniApp.RequestTask) => void;
 };
 
 /** 请求缓存 */
@@ -77,14 +80,14 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * // 封装项目的基础请求
  * export function requestApi<T>(config: RequestConfig) {
  *    return request<T>({
- *      header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
- *      // transformResponse: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
+ *      header: { token: 'xx', version: 'xx', tid: 'xx' },
  *      resKey: 'data',
  *      msgKey: 'message',
  *      codeKey: 'status',
  *      successCode: [1],
  *      reloginCode: [-10],
  *      ...config,
+ *      url: `${HOST}${config.url}`,
  *    });
  * }
  *
@@ -95,33 +98,39 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  *
  * const goodList = await apiGoodList({ page:1, size:10 });
  *
- * // 2. 参数泛型的写法
+ * // 2. 支持参数泛型
  * export function apiGoodList(config: RequestConfig<{ page: number, size: number }>) {
  *   return requestApi<GoodItem[]>({ url: '/goods/list', resKey: 'data.list', ...config });
  * }
  *
- * const goodList = await apiGoodList({ data: { page:1, size:10 }, showLoading: false });
+ * const goodList = await apiGoodList({ data: { page:1, size:10 } });
  *
  * // 3. 基于上面 requestApi 的流式接口
- * export function apiChatStream(data: { question: string }) {
- *   return requestApi<T>({
+ * export function apiChatStream(config: RequestConfig) {
+ *   return requestApi({
+ *     ...config,
  *     url: '/sse/chatStream',
- *     data,
  *     resKey: false,
  *     showLoading: false,
- *     responseType: 'arraybuffer',
- *     enableChunked: true,
+ *     responseType: 'arraybuffer', // 流式响应类型
+ *     enableChunked: true, // 开启分块传输
  *   });
  * }
  *
- * const { task } = apiChatStream({question: '你好'}); // 发起流式请求
+ * // 流式监听
+ * const onTaskReady = (task: RequestTask) => {
+ *    task.onChunkReceived((res) => {
+ *      console.log('ArrayBuffer', res.data);
+ *    });
+ * }
  *
- * task.onChunkReceived((res) => {
- *   console.log('ArrayBuffer', res.data); // 接收流式数据
- * });
+ * // 流式发起
+ * const data: ChatData = { content: '你好', conversationId: 123 };
+ * await apiChatStream({ data, onTaskReady });
  *
- * task.offChunkReceived(); // 取消监听,中断流式接收 (调用时机:流式结束,组件销毁,页面关闭)
- * task.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已经成功)
+ * // 流式取消 (在组件销毁或页面关闭时调用)
+ * task?.offChunkReceived(); // 取消监听,中断流式接收
+ * task?.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已成功)
  */
 export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
   return new Promise<T>((resolve, reject) => {
@@ -139,7 +148,8 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       toastError = true,
       enableChunked,
       cacheTime,
-      transformResponse,
+      resMap,
+      onTaskReady,
     } = config;
 
     // 参数: 过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 这些有效值)
@@ -175,7 +185,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     if (showLoading) uni.showLoading(typeof showLoading === 'string' ? { title: showLoading } : {});
 
     // 发送请求
-    uni.request({
+    const task = uni.request({
       ...config,
       data: fillData,
       header: fillHeader,
@@ -184,7 +194,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         if (showLoading) uni.hideLoading();
 
         // 响应拦截
-        const res = transformResponse ? transformResponse(xhr.data) : xhr.data;
+        const res = resMap ? resMap(xhr.data) : xhr.data;
 
         // 解析数据 (分块传输会先不断执行task.onChunkReceived回调,流式传输完毕才执行success回调)
         const code = enableChunked ? '' : getObjectValue(res, codeKey);
@@ -226,6 +236,9 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         reject(e);
       },
     });
+
+    // task对象初始化完毕
+    onTaskReady?.(task);
   });
 }
 
@@ -241,9 +254,9 @@ function logRequestInfo(options: {
   e?: unknown;
 }) {
   const { log } = getBaseToolsConfig();
-  const { isLog = true } = options.config;
+  const { showLog = true } = options.config;
 
-  if (!log || !isLog) return;
+  if (!log || !showLog) return;
 
   const { config, res, fromCache = false, startTime, status, e } = options;
   const { url, data, header, method, logExtra } = config;
