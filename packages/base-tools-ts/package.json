@@ -25,7 +25,7 @@
     "src"
   ],
   "dependencies": {
-    "es-toolkit": "^1.42.0",
+    "es-toolkit": "^1.44.0",
     "bignumber.js": "^9.1.2",
     "dayjs": "^1.11.19",
     "mitt": "^3.0.1"
