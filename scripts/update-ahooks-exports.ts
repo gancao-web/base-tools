@@ -26,7 +26,6 @@ const content = `/**
  * 注意: 此文件由 scripts/update-ahooks-exports.ts 生成, 请勿手动修改.
  * 如需更新, 请先升级ahooks, 然后运行: npm run update:ahooks
  */
-
 export {
 ${keys.map((key) => `  ${key},`).join('\n')}
 } from 'ahooks';
