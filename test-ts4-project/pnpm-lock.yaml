@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@base-web-kits/base-tools-react':
         specifier: file:../packages/base-tools-react
-        version: file:../packages/base-tools-react(ahooks@3.9.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
+        version: file:../packages/base-tools-react(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@base-web-kits/base-tools-ts':
         specifier: file:../packages/base-tools-ts
         version: file:../packages/base-tools-ts(dayjs@1.11.19)
@@ -159,7 +159,6 @@ packages:
   '@base-web-kits/base-tools-react@file:../packages/base-tools-react':
     resolution: {directory: ../packages/base-tools-react, type: directory}
     peerDependencies:
-      ahooks: ^3.0.0
       react: '>=18'
 
   '@base-web-kits/base-tools-ts@1.1.11':
@@ -869,7 +868,7 @@ packages:
     engines: {node: '>=0.10.0'}
 
   resize-observer-polyfill@1.5.1:
-    resolution: {integrity: sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==}
+    resolution: {integrity: sha1-DpAg3T0hAkRY1OvSfiPkAmmBBGQ=}
 
   rollup@3.29.5:
     resolution: {integrity: sha512-GVsDdsbJzzy4S/v3dqWPJ7EfvZJfCHiDqe80IyrF59LYuP+e6U1LJoUqeuqRbwAWoMNoXivMNeNAOf5E22VA1w==}
@@ -1094,10 +1093,12 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@base-web-kits/base-tools-react@file:../packages/base-tools-react(ahooks@3.9.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)':
+  '@base-web-kits/base-tools-react@file:../packages/base-tools-react(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       ahooks: 3.9.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react: 18.2.0
+    transitivePeerDependencies:
+      - react-dom
 
   '@base-web-kits/base-tools-ts@1.1.11(dayjs@1.11.19)':
     dependencies:

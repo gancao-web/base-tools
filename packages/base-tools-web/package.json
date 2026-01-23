@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-web",
-  "version": "1.2.0-alpha.0",
+  "version": "1.2.0",
   "sideEffects": false,
   "description": "Independent Web utilities package built from src/web.",
   "keywords": [
@@ -25,7 +25,7 @@
     "src"
   ],
   "dependencies": {
-    "@base-web-kits/base-tools-ts": "^1.1.11"
+    "@base-web-kits/base-tools-ts": "^1.2.0"
   },
   "peerDependencies": {
     "axios": ">=0.18.0"
