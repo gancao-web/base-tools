@@ -9,7 +9,6 @@
   "dependencies": {
     "@base-web-kits/base-tools-ts": "file:../packages/base-tools-ts",
     "@base-web-kits/base-tools-web": "file:../packages/base-tools-web",
-    "@base-web-kits/base-tools-vue": "file:../packages/base-tools-vue",
     "vue": "^2.7.7"
   },
   "devDependencies": {

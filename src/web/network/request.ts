@@ -52,12 +52,16 @@ export type RequestConfig<D extends RequestData = RequestData> = Partial<Request
 export type RequestConfigBase<D extends RequestData = RequestData> = {
   /** 接口地址 */
   url: string;
+
   /** 请求方法 */
   method?: RequestMethod;
+
   /** 请求头(会自动过滤undefined, null, "";不过滤0和false; 数字和布尔值会自动转换为字符串) */
   header?: Record<string, string | number | boolean | null | undefined>;
+
   /** 请求参数 */
   data?: D;
+
   /** 超时时间 (毫秒), 默认 60000 */
   timeout?: number;
 
@@ -79,29 +83,32 @@ export type RequestConfigBase<D extends RequestData = RequestData> = {
   /** 登录过期状态码 */
   reloginCode: (number | string)[];
 
-  /** 是否显示进度条 (默认true) */
-  showLoading?: boolean;
-
-  /** 是否提示接口异常 (默认true) */
-  toastError?: boolean;
-
-  /** 是否输出日志 (默认true) */
-  isLog?: boolean;
-
-  /** 额外输出的日志数据 */
-  extraLog?: Record<string, unknown>;
-
-  /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
-  cacheTime?: number;
-
   /** 是否开启流式传输 (如 SSE) */
   enableChunked?: boolean;
 
   /** 响应类型 (默认 json, enableChunked为true时忽略) */
   responseType?: 'text' | 'arraybuffer' | 'json';
 
+  /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
+  cacheTime?: number;
+
+  /** 是否提示接口异常 (默认true) */
+  toastError?: boolean;
+
+  /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
+  showLoading?: boolean | string;
+
+  /** 是否输出日志 (默认true) */
+  showLog?: boolean;
+
+  /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
+  logExtra?: Record<string, unknown>;
+
   /** 响应拦截 */
-  responseInterceptor?: (data: ResponseData) => ResponseData;
+  resMap?: (data: ResponseData) => ResponseData;
+
+  /** 获取task对象, 用于取消请求或监听流式数据 */
+  onTaskReady?: (task: RequestTask) => void;
 };
 
 /**
@@ -130,12 +137,11 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * 基础请求 (返回 Promise 和 Task 对象)
  * 基于 fetch API 封装，支持流式请求
  * @param config 请求配置
- * @returns Promise<T> & { task?: RequestTask }
  * @example
  * // 在入口文件完成配置 (确保请求失败有toast提示,登录过期能够触发重新登录,log有日志输出)
  * setBaseToolsConfig({
  * toast: ({ msg, status }) => (status === 'fail' ? message.error(msg) : message.success(msg)),
- * showLoading: () => message.loading('加载中...'),
+ * showLoading: ({ title }) => message.loading(title || '加载中...'),
  * hideLoading: () => message.destroy(),
  * toLogin: () => reLogin(),
  * log(level, data) {
@@ -153,7 +159,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * export function requestApi<T>(config: RequestConfig) {
  *    return request<T>({
  *      header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
- *      // responseInterceptor: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
+ *      // resMap: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
  *      resKey: 'data',
  *      msgKey: 'message',
  *      codeKey: 'status',
@@ -175,30 +181,57 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  *   return requestApi<GoodItem[]>({ url: '/goods/list', resKey: 'data.list', ...config });
  * }
  *
- * const goodList = await apiGoodList({ data: { page:1, size:10 }, showLoading: false });
+ * const goodList = await apiGoodList({ data: { page:1, size:10 } });
  *
  * // 3. 基于上面 requestApi 的流式接口
- * export function apiChatStream(data: { question: string }) {
- *   return requestApi<T>({
+ * export function apiChatStream(config: RequestConfig) {
+ *   return requestApi({
+ *     ...config,
  *     url: '/sse/chatStream',
- *     data,
  *     resKey: false,
  *     showLoading: false,
- *     responseType: 'arraybuffer',
- *     enableChunked: true,
+ *     responseType: 'arraybuffer', // 流式响应类型
+ *     enableChunked: true, // 开启分块传输
  *   });
  * }
  *
- * const { task } = apiChatStream({question: '你好'}); // 发起流式请求
+ * // 流式监听
+ * const onTaskReady = (task: RequestTask) => {
+ *    task.onChunkReceived((res) => {
+ *      console.log('ArrayBuffer', res.data);
+ *    });
+ * }
  *
- * task.onChunkReceived((res) => {
- *   console.log('ArrayBuffer', res.data); // 接收流式数据
- * });
+ * // 流式发起
+ * const data: ChatData = { content: '你好', conversationId: 123 };
+ * await apiChatStream({ data, onTaskReady });
  *
- * task.offChunkReceived(); // 取消监听,中断流式接收 (调用时机:流式结束,组件销毁,页面关闭)
- * task.abort(); // 取消请求 (若流式传输中,会中断流并抛出异常)
+ * // 流式取消 (在组件销毁或页面关闭时调用)
+ * task?.offChunkReceived(); // 取消监听,中断流式接收
+ * task?.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已成功)
  */
 export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
+  const {
+    url,
+    data,
+    header,
+    method = 'GET',
+    resKey,
+    msgKey,
+    codeKey,
+    successKey,
+    successCode,
+    reloginCode,
+    showLoading = true,
+    toastError = true,
+    enableChunked = false,
+    cacheTime,
+    resMap,
+    responseType = 'json',
+    timeout = 60000,
+    onTaskReady,
+  } = config;
+
   // 1. 初始化控制对象
   const controller = new AbortController();
   const signal = controller.signal;
@@ -214,30 +247,11 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       chunkCallback = null;
     },
   };
+  onTaskReady?.(task);
 
   // 2. 创建 Promise
-  const promise = new Promise<T>((resolve, reject) => {
+  return new Promise<T>((resolve, reject) => {
     const execute = async () => {
-      const {
-        url,
-        data,
-        header,
-        method = 'GET',
-        resKey,
-        msgKey,
-        codeKey,
-        successKey,
-        successCode,
-        reloginCode,
-        showLoading = true,
-        toastError = true,
-        enableChunked = false,
-        cacheTime,
-        responseInterceptor,
-        responseType = 'json',
-        timeout = 60000,
-      } = config;
-
       const isGet = method === 'GET';
       const isObjectData = isPlainObject(data);
       const isArrayData = !isObjectData && Array.isArray(data);
@@ -306,7 +320,8 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 
       // 2.5 UI 反馈
       const appConfig = getBaseToolsConfig();
-      if (showLoading) appConfig.showLoading?.();
+      if (showLoading)
+        appConfig.showLoading?.(typeof showLoading === 'string' ? { title: showLoading } : {});
 
       // 2.6 设置超时
       let isTimeout = false;
@@ -348,7 +363,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         if (showLoading) appConfig.hideLoading?.();
 
         // 响应拦截
-        const res = responseInterceptor ? responseInterceptor(resData) : resData;
+        const res = resMap ? resMap(resData) : resData;
 
         // 2.10 业务状态码解析
         const code = getObjectValue(res, codeKey);
@@ -394,12 +409,31 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     };
 
     execute();
-  }) as Promise<T> & { task?: RequestTask };
+  });
+}
 
-  // 3. 挂载 Task
-  promise.task = task;
+/**
+ * 参数过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 、 0 这些有效值)
+ */
+export function filterRequestData(data: Record<string, any>) {
+  const res: Record<string, any> = {};
+  Object.entries(data).forEach(([k, v]) => {
+    if (v !== undefined) res[k] = v;
+  });
+  return res;
+}
 
-  return promise;
+/**
+ * 请求头过滤空值 (undefined, null, ""), 不过滤0和false
+ */
+export function filterRequestHeader(header: RequestConfigBase['header']) {
+  const newHeader: Record<string, string> = {};
+  if (header) {
+    Object.entries(header).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') newHeader[k] = String(v);
+    });
+  }
+  return newHeader;
 }
 
 /**
@@ -438,12 +472,12 @@ function logRequestInfo(options: {
   e?: unknown;
 }) {
   const { log } = getBaseToolsConfig();
-  const { isLog = true } = options.config;
+  const { showLog = true } = options.config;
 
-  if (!log || !isLog) return;
+  if (!log || !showLog) return;
 
   const { config, res, fromCache = false, startTime, status, e } = options;
-  const { url, data, header, method, extraLog } = config;
+  const { url, data, header, method, logExtra } = config;
   const endTime = Date.now();
   const fmt = 'YYYY-MM-DD HH:mm:ss.SSS';
 
@@ -458,7 +492,7 @@ function logRequestInfo(options: {
     startTime: toDayjs(startTime).format(fmt),
     endTime: toDayjs(endTime).format(fmt),
     duration: endTime - startTime,
-    ...extraLog,
+    ...logExtra,
   };
 
   if (status === 'success') {

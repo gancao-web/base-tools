@@ -13,7 +13,7 @@ importers:
         version: file:../packages/base-tools-ts(dayjs@1.11.19)
       '@base-web-kits/base-tools-web':
         specifier: file:../packages/base-tools-web
-        version: file:../packages/base-tools-web
+        version: file:../packages/base-tools-web(dayjs@1.11.19)
     devDependencies:
       '@types/node':
         specifier: ^20.0.0
@@ -27,8 +27,10 @@ importers:
 
 packages:
 
-  '@base-web-kits/base-tools-ts@1.1.10':
-    resolution: {integrity: sha512-j0mnkGWc+LllhGuc/eftijS+/niaMP2WLI/9IAvHVMAy4CjPasLoPxi36ShE0vpOThpOMXxzrAbhUB4A3viFgg==}
+  '@base-web-kits/base-tools-ts@1.1.11':
+    resolution: {integrity: sha512-6aEMR4SBkRB6Qn09mai2vSBcbrbhpNYQX1Rr4jhxHXb4Y1JA7cBkKUzFxnUS56sHCBtx3ZzfGbS84bJK2khXMQ==}
+    peerDependencies:
+      dayjs: ^1.0.0
 
   '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts':
     resolution: {directory: ../packages/base-tools-ts, type: directory}
@@ -317,6 +319,9 @@ packages:
   es-toolkit@1.42.0:
     resolution: {integrity: sha512-SLHIyY7VfDJBM8clz4+T2oquwTQxEzu263AyhVK4jREOAwJ+8eebaa4wM3nlvnAqhDrMm2EsA6hWHaQsMPQ1nA==}
 
+  es-toolkit@1.44.0:
+    resolution: {integrity: sha512-6penXeZalaV88MM3cGkFZZfOoLGWshWWfdy0tWw/RlVVyhvMaWSBTOvXNeiW3e5FwdS5ePW0LGEu17zT139ktg==}
+
   esbuild@0.21.5:
     resolution: {integrity: sha512-mg3OPMV4hXywwpoDxu3Qda5xCKQi+vCTZq8S9J/EpkhB2HzKXq4SNFZE3+NK93JYxc8VMSep+lOUSC/RVKaBqw==}
     engines: {node: '>=12'}
@@ -392,7 +397,7 @@ packages:
 
 snapshots:
 
-  '@base-web-kits/base-tools-ts@1.1.10':
+  '@base-web-kits/base-tools-ts@1.1.11(dayjs@1.11.19)':
     dependencies:
       bignumber.js: 9.3.1
       dayjs: 1.11.19
@@ -403,12 +408,14 @@ snapshots:
     dependencies:
       bignumber.js: 9.3.1
       dayjs: 1.11.19
-      es-toolkit: 1.42.0
+      es-toolkit: 1.44.0
       mitt: 3.0.1
 
-  '@base-web-kits/base-tools-web@file:../packages/base-tools-web':
+  '@base-web-kits/base-tools-web@file:../packages/base-tools-web(dayjs@1.11.19)':
     dependencies:
-      '@base-web-kits/base-tools-ts': 1.1.10
+      '@base-web-kits/base-tools-ts': 1.1.11(dayjs@1.11.19)
+    transitivePeerDependencies:
+      - dayjs
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
@@ -556,6 +563,8 @@ snapshots:
   dayjs@1.11.19: {}
 
   es-toolkit@1.42.0: {}
+
+  es-toolkit@1.44.0: {}
 
   esbuild@0.21.5:
     optionalDependencies:

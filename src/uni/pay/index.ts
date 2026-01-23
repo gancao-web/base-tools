@@ -1,4 +1,4 @@
-import { promisifyUniApi } from '../index';
+import { enhanceUniApi } from '../index';
 
 /**
  * 微信支付
@@ -14,7 +14,7 @@ export function toPayWx(option: {
   signType: string;
   paySign: string;
 }) {
-  return promisifyUniApi(uni.requestPayment, 'requestPayment')(
+  return enhanceUniApi(uni.requestPayment, 'requestPayment')(
     { provider: 'wxpay', orderInfo: {}, ...option },
     {
       toastError: (e) => !e.errMsg.includes('cancel'),

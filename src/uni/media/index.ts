@@ -1,4 +1,4 @@
-import { downloadFile, getBaseToolsConfig, authorize, promisifyUniApi } from '../index';
+import { downloadFile, getBaseToolsConfig, authorize, enhanceUniApi } from '../index';
 import type { UniApiConfig } from '../index';
 
 const cache = {
@@ -23,7 +23,7 @@ export async function chooseMedia(option: UniApp.ChooseMediaOption) {
 
   cache.isChooseMedia = true;
   try {
-    const { tempFiles } = await promisifyUniApi(uni.chooseMedia, 'chooseMedia')(option, {
+    const { tempFiles } = await enhanceUniApi(uni.chooseMedia, 'chooseMedia')(option, {
       toastError: (e) => !e.errMsg.includes('cancel'),
     });
     return tempFiles;
@@ -48,7 +48,7 @@ export async function saveImageToPhotosAlbum(filePath: string, config: UniApiCon
     );
   }
 
-  await promisifyUniApi(uni.saveImageToPhotosAlbum, 'saveImageToPhotosAlbum')(
+  await enhanceUniApi(uni.saveImageToPhotosAlbum, 'saveImageToPhotosAlbum')(
     { filePath },
     { toastSuccess: '保存成功', showLoading: true, ...config },
   );

@@ -2,7 +2,7 @@ export type AppConfig = {
   /** 全局 Toast 提示 */
   toast?: (option: { msg: string; status: 'success' | 'fail' }) => void;
   /** 显示全局 Loading */
-  showLoading?: () => void;
+  showLoading?: (option?: { title?: string }) => void;
   /** 隐藏全局 Loading */
   hideLoading?: () => void;
   /** 跳转登录页的方法 */

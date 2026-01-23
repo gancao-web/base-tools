@@ -1,4 +1,4 @@
-import { promisifyUniApi } from '../index';
+import { enhanceUniApi } from '../index';
 
 /**
  * 窗口信息
@@ -96,7 +96,7 @@ export function getPlatformUni() {
  * @param toastSuccess 复制成功的toast提示, 默认'复制成功'
  */
 export function copyText(text: string, toastSuccess = '复制成功') {
-  return promisifyUniApi(uni.setClipboardData, 'setClipboardData')(
+  return enhanceUniApi(uni.setClipboardData, 'setClipboardData')(
     { data: text, showToast: false },
     { toastSuccess },
   );

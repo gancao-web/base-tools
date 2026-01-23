@@ -1,4 +1,4 @@
-import { getBaseToolsConfig, getFileUrl, promisifyUniApi } from '../index';
+import { getBaseToolsConfig, getFileUrl, enhanceUniApi } from '../index';
 import type { UniApiConfig } from '../index';
 
 const cache = {
@@ -34,7 +34,7 @@ export async function downloadFile(
     return res;
   }
 
-  const { tempFilePath } = await promisifyUniApi<
+  const { tempFilePath } = await enhanceUniApi<
     UniApp.DownloadFileOption,
     UniApp.DownloadSuccessData,
     UniApp.GeneralCallbackResult,
@@ -57,7 +57,7 @@ export function loadFontFace(
   option: Omit<UniApp.LoadFontFaceOptions, 'source'> & { url: string },
   config?: UniApiConfig,
 ) {
-  return promisifyUniApi(uni.loadFontFace, 'loadFontFace')(
+  return enhanceUniApi(uni.loadFontFace, 'loadFontFace')(
     { global: true, source: `url(${option.url})`, ...option },
     config,
   );
@@ -86,7 +86,7 @@ export function uploadFile(
     UniApp.UploadTask
   >,
 ) {
-  return promisifyUniApi<
+  return enhanceUniApi<
     UniApp.UploadFileOption,
     UniApp.UploadFileSuccessCallbackResult,
     UniApp.GeneralCallbackResult,

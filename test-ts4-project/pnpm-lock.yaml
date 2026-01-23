@@ -10,13 +10,13 @@ importers:
     dependencies:
       '@base-web-kits/base-tools-react':
         specifier: file:../packages/base-tools-react
-        version: file:../packages/base-tools-react(ahooks@3.9.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
+        version: file:../packages/base-tools-react(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@base-web-kits/base-tools-ts':
         specifier: file:../packages/base-tools-ts
         version: file:../packages/base-tools-ts(dayjs@1.11.19)
       '@base-web-kits/base-tools-web':
         specifier: file:../packages/base-tools-web
-        version: file:../packages/base-tools-web(axios@1.13.2)
+        version: file:../packages/base-tools-web(axios@1.13.2)(dayjs@1.11.19)
       antd:
         specifier: ^4.24.1
         version: 4.24.16(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -159,11 +159,12 @@ packages:
   '@base-web-kits/base-tools-react@file:../packages/base-tools-react':
     resolution: {directory: ../packages/base-tools-react, type: directory}
     peerDependencies:
-      ahooks: ^3.0.0
       react: '>=18'
 
-  '@base-web-kits/base-tools-ts@1.1.10':
-    resolution: {integrity: sha512-j0mnkGWc+LllhGuc/eftijS+/niaMP2WLI/9IAvHVMAy4CjPasLoPxi36ShE0vpOThpOMXxzrAbhUB4A3viFgg==}
+  '@base-web-kits/base-tools-ts@1.1.11':
+    resolution: {integrity: sha512-6aEMR4SBkRB6Qn09mai2vSBcbrbhpNYQX1Rr4jhxHXb4Y1JA7cBkKUzFxnUS56sHCBtx3ZzfGbS84bJK2khXMQ==}
+    peerDependencies:
+      dayjs: ^1.0.0
 
   '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts':
     resolution: {directory: ../packages/base-tools-ts, type: directory}
@@ -485,6 +486,9 @@ packages:
 
   es-toolkit@1.42.0:
     resolution: {integrity: sha512-SLHIyY7VfDJBM8clz4+T2oquwTQxEzu263AyhVK4jREOAwJ+8eebaa4wM3nlvnAqhDrMm2EsA6hWHaQsMPQ1nA==}
+
+  es-toolkit@1.44.0:
+    resolution: {integrity: sha512-6penXeZalaV88MM3cGkFZZfOoLGWshWWfdy0tWw/RlVVyhvMaWSBTOvXNeiW3e5FwdS5ePW0LGEu17zT139ktg==}
 
   esbuild@0.18.20:
     resolution: {integrity: sha512-ceqxoedUrcayh7Y7ZX6NdbbDzGROiyVBgC4PriJThBKSVPWnnFHZAkfI1lJT8QFkOwH4qOS2SJkS4wvpGl8BpA==}
@@ -864,7 +868,7 @@ packages:
     engines: {node: '>=0.10.0'}
 
   resize-observer-polyfill@1.5.1:
-    resolution: {integrity: sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==}
+    resolution: {integrity: sha1-DpAg3T0hAkRY1OvSfiPkAmmBBGQ=}
 
   rollup@3.29.5:
     resolution: {integrity: sha512-GVsDdsbJzzy4S/v3dqWPJ7EfvZJfCHiDqe80IyrF59LYuP+e6U1LJoUqeuqRbwAWoMNoXivMNeNAOf5E22VA1w==}
@@ -1089,12 +1093,14 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@base-web-kits/base-tools-react@file:../packages/base-tools-react(ahooks@3.9.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)':
+  '@base-web-kits/base-tools-react@file:../packages/base-tools-react(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       ahooks: 3.9.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react: 18.2.0
+    transitivePeerDependencies:
+      - react-dom
 
-  '@base-web-kits/base-tools-ts@1.1.10':
+  '@base-web-kits/base-tools-ts@1.1.11(dayjs@1.11.19)':
     dependencies:
       bignumber.js: 9.3.1
       dayjs: 1.11.19
@@ -1105,14 +1111,16 @@ snapshots:
     dependencies:
       bignumber.js: 9.3.1
       dayjs: 1.11.19
-      es-toolkit: 1.42.0
+      es-toolkit: 1.44.0
       mitt: 3.0.1
 
-  '@base-web-kits/base-tools-web@file:../packages/base-tools-web(axios@1.13.2)':
+  '@base-web-kits/base-tools-web@file:../packages/base-tools-web(axios@1.13.2)(dayjs@1.11.19)':
     dependencies:
-      '@base-web-kits/base-tools-ts': 1.1.10
+      '@base-web-kits/base-tools-ts': 1.1.11(dayjs@1.11.19)
     optionalDependencies:
       axios: 1.13.2
+    transitivePeerDependencies:
+      - dayjs
 
   '@ctrl/tinycolor@3.6.1': {}
 
@@ -1409,6 +1417,8 @@ snapshots:
       hasown: 2.0.2
 
   es-toolkit@1.42.0: {}
+
+  es-toolkit@1.44.0: {}
 
   esbuild@0.18.20:
     optionalDependencies:
