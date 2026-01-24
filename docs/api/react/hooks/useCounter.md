@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+管理计数器的 Hook。
 
 ## 示例
 
 ```ts
 import { useCounter } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const [current, { inc, dec, set, reset }] = useCounter(100, { min: 1, max: 10 });
 ```
 
 ## 来源

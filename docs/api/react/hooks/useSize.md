@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+监听 DOM 尺寸变化。
 
 ## 示例
 
 ```ts
 import { useSize } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const size = useSize(ref);
 ```
 
 ## 来源

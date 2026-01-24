@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+监听网络连接状态。
 
 ## 示例
 
 ```ts
 import { useNetwork } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const networkState = useNetwork();
 ```
 
 ## 来源

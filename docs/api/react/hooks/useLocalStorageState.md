@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+将状态存储在 localStorage 中。
 
 ## 示例
 
 ```ts
 import { useLocalStorageState } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const [message, setMessage] = useLocalStorageState('use-local-storage-state-demo1', {
+  defaultValue: 'Hello~',
+});
 ```
 
 ## 来源

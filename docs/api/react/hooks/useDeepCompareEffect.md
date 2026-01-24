@@ -2,14 +2,19 @@
 
 ## 描述
 
-请参考官方文档。
+用法与 useEffect 一致，但 deps 通过 lodash isEqual 进行深比较。
 
 ## 示例
 
 ```ts
 import { useDeepCompareEffect } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+useDeepCompareEffect(
+  () => {
+    // ...
+  },
+  [deepObject],
+);
 ```
 
 ## 来源

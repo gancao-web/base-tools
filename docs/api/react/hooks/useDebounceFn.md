@@ -2,14 +2,19 @@
 
 ## 描述
 
-请参考官方文档。
+用来处理防抖函数的 Hook。
 
 ## 示例
 
 ```ts
 import { useDebounceFn } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const { run } = useDebounceFn(
+  () => {
+    console.log('click');
+  },
+  { wait: 500 },
+);
 ```
 
 ## 来源

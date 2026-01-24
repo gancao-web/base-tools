@@ -2,14 +2,27 @@
 
 ## 描述
 
-请参考官方文档。
+配置响应式断点。
 
 ## 示例
 
 ```ts
-import { configResponsive } from '@base-web-kits/base-tools-react';
+import { configResponsive, useResponsive } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+configResponsive({
+  small: 0,
+  middle: 800,
+  large: 1200,
+});
+
+const App = () => {
+  const responsive = useResponsive();
+  return (
+    <div>
+      <p>Responsive: {JSON.stringify(responsive)}</p>
+    </div>
+  );
+};
 ```
 
 ## 来源

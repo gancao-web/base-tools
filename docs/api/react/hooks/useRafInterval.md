@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+使用 requestAnimationFrame 实现的定时器。
 
 ## 示例
 
 ```ts
 import { useRafInterval } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+useRafInterval(() => {
+  setCount(count + 1);
+}, 1000);
 ```
 
 ## 来源

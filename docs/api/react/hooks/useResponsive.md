@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+获取响应式信息。
 
 ## 示例
 
 ```ts
 import { useResponsive } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const responsive = useResponsive();
 ```
 
 ## 来源

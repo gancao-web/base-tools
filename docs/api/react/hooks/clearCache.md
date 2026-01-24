@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+清除 useRequest 缓存。
 
 ## 示例
 
 ```ts
 import { clearCache } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+clearCache('key');
+clearCache(['key1', 'key2']);
+clearCache(); // clear all
 ```
 
 ## 来源
