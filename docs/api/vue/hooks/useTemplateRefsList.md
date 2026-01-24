@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+将 v-for 循环中的 refs 绑定到一个数组。
 
 ## 示例
 
 ```ts
 import { useTemplateRefsList } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const refs = useTemplateRefsList<HTMLDivElement>();
+
+// <div v-for="i in 5" :key="i" :ref="refs.set"></div>
 ```
 
 ## 来源

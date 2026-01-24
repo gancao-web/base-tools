@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+开始输入事件钩子。
 
 ## 示例
 
 ```ts
 import { onStartTyping } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+onStartTyping(() => {
+  console.log('started typing');
+});
 ```
 
 ## 来源

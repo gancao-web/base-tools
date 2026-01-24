@@ -2,14 +2,20 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Web Share API。
 
 ## 示例
 
 ```ts
 import { useShare } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { share, isSupported } = useShare();
+
+share({
+  title: 'Hello',
+  text: 'Hello my friend!',
+  url: location.href,
+});
 ```
 
 ## 来源

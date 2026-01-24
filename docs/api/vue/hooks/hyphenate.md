@@ -2,16 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+将驼峰命名转换为连字符命名。
 
 ## 示例
 
 ```ts
 import { hyphenate } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+const str = hyphenate('fooBar'); // 'foo-bar'
+```来源
 
 [VueUse](https://vueuse.org/functions/hyphenate/)

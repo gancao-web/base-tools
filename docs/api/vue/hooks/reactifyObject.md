@@ -2,14 +2,19 @@
 
 ## 描述
 
-请参考官方文档。
+将对象的方法转换为响应式函数。
 
 ## 示例
 
 ```ts
 import { reactifyObject } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const obj = {
+  add(a: number, b: number) {
+    return a + b;
+  },
+};
+const reactiveObj = reactifyObject(obj);
 ```
 
 ## 来源

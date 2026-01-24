@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+创建一个模板 Promise，用于以 Promise 方式调用组件。
 
 ## 示例
 
 ```ts
 import { createTemplatePromise } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const TemplatePromise = createTemplatePromise();
+const result = await TemplatePromise.start();
+``` 示例代码
 ```
 
 ## 来源

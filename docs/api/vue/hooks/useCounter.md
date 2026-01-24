@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+基础计数器。
 
 ## 示例
 
 ```ts
 import { useCounter } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { count, inc, dec, set, reset } = useCounter(0);
 ```
 
 ## 来源

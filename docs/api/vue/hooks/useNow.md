@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的当前时间。
 
 ## 示例
 
 ```ts
 import { useNow } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const now = useNow();
 ```
 
 ## 来源

@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的计数器，随时间增加。
 
 ## 示例
 
 ```ts
 import { useInterval } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const counter = useInterval(1000);
 ```
 
 ## 来源

@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+检测元素是否可见。
 
 ## 示例
 
 ```ts
 import { useElementVisibility } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const target = ref(null);
+const targetIsVisible = useElementVisibility(target);
 ```
 
 ## 来源

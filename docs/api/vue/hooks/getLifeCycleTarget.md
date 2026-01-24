@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+获取生命周期目标。
 
 ## 示例
 
 ```ts
 import { getLifeCycleTarget } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const target = getLifeCycleTarget();
+``` 示例代码
 ```
 
 ## 来源

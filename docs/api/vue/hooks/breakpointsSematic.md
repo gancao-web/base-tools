@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+Semantic UI 断点配置。
 
 ## 示例
 
 ```ts
-import { breakpointsSematic } from '@base-web-kits/base-tools-vue';
+import { breakpointsSematic, useBreakpoints } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const breakpoints = useBreakpoints(breakpointsSematic);
+``` 示例代码
 ```
 
 ## 来源

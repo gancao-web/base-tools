@@ -2,16 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+检查值是否为对象。
 
 ## 示例
 
 ```ts
 import { isObject } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+if (isObject({})) {
+  console.log('is object');
+}
+```来源
 
 [VueUse](https://vueuse.org/functions/isObject/)

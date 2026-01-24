@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Battery Status API。
 
 ## 示例
 
 ```ts
 import { useBattery } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { charging, chargingTime, dischargingTime, level } = useBattery();
 ```
 
 ## 来源

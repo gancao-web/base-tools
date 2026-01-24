@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的文本选择。
 
 ## 示例
 
 ```ts
 import { useTextSelection } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { text, ranges, rects } = useTextSelection();
 ```
 
 ## 来源

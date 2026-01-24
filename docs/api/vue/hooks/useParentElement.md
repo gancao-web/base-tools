@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+获取 ref 的父元素。
 
 ## 示例
 
 ```ts
 import { useParentElement } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const el = ref<HTMLElement | null>(null);
+const parent = useParentElement(el);
 ```
 
 ## 来源

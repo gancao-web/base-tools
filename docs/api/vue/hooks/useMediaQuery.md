@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的媒体查询。
 
 ## 示例
 
 ```ts
 import { useMediaQuery } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const isLargeScreen = useMediaQuery('(min-width: 1024px)');
 ```
 
 ## 来源

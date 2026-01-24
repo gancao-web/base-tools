@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+SSR 友好的宽度检测。
 
 ## 示例
 
 ```ts
 import { useSSRWidth } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const width = useSSRWidth();
 ```
 
 ## 来源

@@ -2,15 +2,18 @@
 
 ## 描述
 
-请参考官方文档。
+创建一个单例 Promise。
 
 ## 示例
 
-```ts
+````ts
 import { createSingletonPromise } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
+const createPromise = createSingletonPromise(async () => {
+  return 'hello';
+});
+``` 示例代码
+````
 
 ## 来源
 

@@ -1,17 +1,16 @@
 # isClient
 
 ## 描述
-
-请参考官方文档。
+检查是否在客户端环境（浏览器）。
 
 ## 示例
 
 ```ts
 import { isClient } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+if (isClient) {
+  console.log('Running in browser');
+}
+```来源
 
 [VueUse](https://vueuse.org/functions/isClient/)

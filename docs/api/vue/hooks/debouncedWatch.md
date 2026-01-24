@@ -2,14 +2,18 @@
 
 ## 描述
 
-请参考官方文档。
+防抖的 watch。
 
 ## 示例
 
 ```ts
 import { debouncedWatch } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const count = ref(0);
+debouncedWatch(count, () => {
+  console.log('changed');
+}, { debounce: 1000 });
 ```
 
 ## 来源

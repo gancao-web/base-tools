@@ -2,14 +2,19 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 DeviceMotion API。
 
 ## 示例
 
 ```ts
 import { useDeviceMotion } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const {
+  acceleration,
+  accelerationIncludingGravity,
+  rotationRate,
+  interval,
+} = useDeviceMotion();
 ```
 
 ## 来源

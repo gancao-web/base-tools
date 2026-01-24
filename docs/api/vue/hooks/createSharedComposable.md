@@ -2,14 +2,18 @@
 
 ## 描述
 
-请参考官方文档。
+创建共享的可组合函数。
 
 ## 示例
 
 ```ts
 import { createSharedComposable } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const useShared = createSharedComposable(() => {
+  const count = ref(0);
+  return { count };
+});
 ```
 
 ## 来源

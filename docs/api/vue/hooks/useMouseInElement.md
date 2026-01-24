@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的元素内鼠标位置。
 
 ## 示例
 
 ```ts
 import { useMouseInElement } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const target = ref(null);
+const { x, y, isOutside } = useMouseInElement(target);
 ```
 
 ## 来源

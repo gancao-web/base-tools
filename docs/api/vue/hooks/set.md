@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Set.add/delete/clear。
 
 ## 示例
 
 ```ts
 import { set } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const count = ref(0);
+set(count, 1);
 ```
 
 ## 来源

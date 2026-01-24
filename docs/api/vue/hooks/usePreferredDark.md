@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 prefers-color-scheme: dark 媒体查询。
 
 ## 示例
 
 ```ts
 import { usePreferredDark } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const isDark = usePreferredDark();
 ```
 
 ## 来源

@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Array.join。
 
 ## 示例
 
 ```ts
 import { useArrayJoin } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const list = ref(['a', 'b', 'c']);
+const str = useArrayJoin(list, ',');
 ```
 
 ## 来源

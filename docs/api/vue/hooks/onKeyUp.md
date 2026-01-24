@@ -2,16 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+按键抬起事件钩子。
 
 ## 示例
 
 ```ts
 import { onKeyUp } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+onKeyUp('Enter', () => {
+  console.log('Enter key up');
+});
+```来源
 
 [VueUse](https://vueuse.org/functions/onKeyUp/)

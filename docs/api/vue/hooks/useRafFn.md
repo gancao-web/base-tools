@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+在每个 requestAnimationFrame 上执行函数。
 
 ## 示例
 
 ```ts
 import { useRafFn } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { pause, resume } = useRafFn(() => {
+  // 每一帧都会执行
+});
 ```
 
 ## 来源

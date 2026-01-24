@@ -2,14 +2,18 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 PerformanceObserver。
 
 ## 示例
 
 ```ts
 import { usePerformanceObserver } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+usePerformanceObserver({
+  entryTypes: ['paint'],
+}, (list) => {
+  // do something
+});
 ```
 
 ## 来源

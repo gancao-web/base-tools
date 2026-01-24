@@ -2,16 +2,20 @@
 
 ## 描述
 
-请参考官方文档。
+异步的 computed。
 
 ## 示例
 
 ```ts
 import { computedAsync } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
-```
-
-## 来源
+const packageName = ref('vue');
+const downloads = computedAsync(async () => {
+  const response = await fetch(`https://api.npmjs.org/downloads/point/last-week/${packageName.value}`);
+  const data = await response.json();
+  return data.downloads;
+}, 0);
+```来源
 
 [VueUse](https://vueuse.org/functions/computedAsync/)

@@ -2,14 +2,20 @@
 
 ## 描述
 
-请参考官方文档。
+注入 script 标签。
 
 ## 示例
 
 ```ts
 import { useScriptTag } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+useScriptTag(
+  'https://player.twitch.tv/js/embed/v1.js',
+  // onLoaded
+  (el: HTMLScriptElement) => {
+    // do something
+  },
+);
 ```
 
 ## 来源

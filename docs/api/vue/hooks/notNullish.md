@@ -2,16 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+检查值是否不为 null 或 undefined。
 
 ## 示例
 
 ```ts
 import { notNullish } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+if (notNullish(value)) {
+  console.log(value);
+}
+```来源
 
 [VueUse](https://vueuse.org/functions/notNullish/)

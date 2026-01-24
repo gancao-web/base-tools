@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+节流的 ref (throttledRef 的别名)。
 
 ## 示例
 
 ```ts
 import { refThrottled } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const source = ref(0);
+const throttled = refThrottled(source, 1000);
 ```
 
 ## 来源

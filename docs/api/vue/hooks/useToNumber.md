@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+将值响应式地转换为数字。
 
 ## 示例
 
 ```ts
 import { useToNumber } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const str = ref('123');
+const num = useToNumber(str); // 123
 ```
 
 ## 来源

@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+创建事件钩子。
 
 ## 示例
 
 ```ts
 import { createEventHook } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const hook = createEventHook<string>();
+hook.on((val) => console.log(val));
+hook.trigger('hello');
+``` 示例代码
 ```
 
 ## 来源

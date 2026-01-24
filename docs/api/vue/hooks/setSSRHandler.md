@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+设置 SSR 处理器。
 
 ## 示例
 
 ```ts
 import { setSSRHandler } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+setSSRHandler('isClient', () => typeof window !== 'undefined');
 ```
 
 ## 来源

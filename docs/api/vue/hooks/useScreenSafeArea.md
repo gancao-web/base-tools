@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的屏幕安全区域。
 
 ## 示例
 
 ```ts
 import { useScreenSafeArea } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { top, right, bottom, left } = useScreenSafeArea();
 ```
 
 ## 来源

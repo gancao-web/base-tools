@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的鼠标按下状态。
 
 ## 示例
 
 ```ts
 import { useMousePressed } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { pressed } = useMousePressed();
 ```
 
 ## 来源

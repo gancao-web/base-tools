@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的设备像素比。
 
 ## 示例
 
 ```ts
 import { useDevicePixelRatio } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { pixelRatio } = useDevicePixelRatio();
 ```
 
 ## 来源

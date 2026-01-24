@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的文本方向 (dir)。
 
 ## 示例
 
 ```ts
 import { useTextDirection } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const dir = useTextDirection(); // 'ltr' | 'rtl' | 'auto'
+dir.value = 'rtl';
 ```
 
 ## 来源

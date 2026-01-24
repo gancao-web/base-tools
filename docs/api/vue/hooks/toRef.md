@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+将值转换为 ref。
 
 ## 示例
 
 ```ts
 import { toRef } from '@base-web-kits/base-tools-vue';
+import { reactive } from 'vue';
 
-// 示例代码
+const state = reactive({ count: 0 });
+const count = toRef(state, 'count');
 ```
 
 ## 来源

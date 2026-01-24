@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Screen Wake Lock API。
 
 ## 示例
 
 ```ts
 import { useWakeLock } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { isSupported, isActive, request, release } = useWakeLock();
 ```
 
 ## 来源

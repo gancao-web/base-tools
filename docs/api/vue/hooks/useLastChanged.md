@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+记录最后一次改变的时间戳。
 
 ## 示例
 
 ```ts
 import { useLastChanged } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const input = ref('');
+const lastChanged = useLastChanged(input);
 ```
 
 ## 来源

@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Web Animations API。
 
 ## 示例
 
 ```ts
 import { useAnimate } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const el = ref(null);
+const { play, pause } = useAnimate(el, { transform: 'rotate(360deg)' }, 1000);
 ```
 
 ## 来源

@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+缓存 ref 值。
 
 ## 示例
 
 ```ts
 import { useCached } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const source = ref(0);
+const cached = useCached(source);
 ```
 
 ## 来源

@@ -2,14 +2,18 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的设备列表。
 
 ## 示例
 
 ```ts
 import { useDevicesList } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const {
+  videoInputs: cameras,
+  audioInputs: microphones,
+  audioOutputs: speakers,
+} = useDevicesList();
 ```
 
 ## 来源

@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Array.find。
 
 ## 示例
 
 ```ts
 import { useArrayFind } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const list = ref([1, 2, 3]);
+const two = useArrayFind(list, i => i === 2);
 ```
 
 ## 来源

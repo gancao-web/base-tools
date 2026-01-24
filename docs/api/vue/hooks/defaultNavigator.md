@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+默认的 navigator 对象（如果存在）。
 
 ## 示例
 
 ```ts
 import { defaultNavigator } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+if (defaultNavigator) {
+  console.log(defaultNavigator.userAgent);
+}
+``` 示例代码
 ```
 
 ## 来源

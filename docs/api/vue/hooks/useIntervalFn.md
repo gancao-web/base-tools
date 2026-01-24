@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+setInterval 的包装器。
 
 ## 示例
 
 ```ts
 import { useIntervalFn } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { pause, resume, isActive } = useIntervalFn(() => {
+  console.log('do something');
+}, 1000);
 ```
 
 ## 来源

@@ -2,14 +2,31 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Web Notification API。
 
 ## 示例
 
 ```ts
 import { useWebNotification } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const {
+  isSupported,
+  notification,
+  show,
+  close,
+  onClick,
+  onShow,
+  onError,
+  onClose,
+} = useWebNotification({
+  title: 'Hello World from VueUse!',
+  dir: 'auto',
+  lang: 'en',
+  renotify: true,
+  tag: 'test',
+});
+
+show();
 ```
 
 ## 来源

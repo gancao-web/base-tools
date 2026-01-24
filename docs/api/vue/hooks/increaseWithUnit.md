@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+增加带单位的数值。
 
 ## 示例
 
 ```ts
 import { increaseWithUnit } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const width = increaseWithUnit('10px', 10); // '20px'
+``` 示例代码
 ```
 
 ## 来源

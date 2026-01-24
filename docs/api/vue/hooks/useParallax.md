@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+创建视差效果。
 
 ## 示例
 
 ```ts
 import { useParallax } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const target = ref(null);
+const { tilt, roll, source } = useParallax(target);
 ```
 
 ## 来源

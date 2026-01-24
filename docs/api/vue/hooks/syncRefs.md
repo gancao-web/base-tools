@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+同步 refs。
 
 ## 示例
 
 ```ts
 import { syncRefs } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const a = ref(0);
+const b = ref(0);
+const stop = syncRefs(a, b);
 ```
 
 ## 来源

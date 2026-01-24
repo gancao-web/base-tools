@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+自定义存储事件名称。
 
 ## 示例
 
 ```ts
 import { customStorageEventName } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+console.log(customStorageEventName);
+``` 示例代码
 ```
 
 ## 来源

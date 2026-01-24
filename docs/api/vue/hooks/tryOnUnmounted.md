@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+安全的 onUnmounted。
 
 ## 示例
 
 ```ts
 import { tryOnUnmounted } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+tryOnUnmounted(() => {
+  console.log('unmounted');
+});
 ```
 
 ## 来源

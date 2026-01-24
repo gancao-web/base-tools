@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+带防抖的 ref 历史记录。
 
 ## 示例
 
 ```ts
 import { useDebouncedRefHistory } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const count = ref(0);
+const { history, undo, redo } = useDebouncedRefHistory(count, { debounce: 1000 });
 ```
 
 ## 来源

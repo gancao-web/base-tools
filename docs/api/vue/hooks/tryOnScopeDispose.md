@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+安全的 onScopeDispose。
 
 ## 示例
 
 ```ts
 import { tryOnScopeDispose } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+tryOnScopeDispose(() => {
+  console.log('disposed');
+});
 ```
 
 ## 来源

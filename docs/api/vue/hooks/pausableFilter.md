@@ -2,14 +2,19 @@
 
 ## 描述
 
-请参考官方文档。
+可暂停的过滤器。
 
 ## 示例
 
 ```ts
 import { pausableFilter } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const isActive = ref(true);
+const filter = pausableFilter((fn) => {
+  if (isActive.value) fn();
+}, isActive);
+``` 示例代码
 ```
 
 ## 来源

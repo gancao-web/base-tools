@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+使对象可解构。
 
 ## 示例
 
 ```ts
 import { makeDestructurable } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const obj = makeDestructurable({ foo: 1, bar: 2 }, [1, 2]);
+const { foo, bar } = obj;
+const [foo2, bar2] = obj;
 ```
 
 ## 来源
