@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+将对象转换为 reactive 对象。
 
 ## 示例
 
 ```ts
 import { toReactive } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const count = ref(0);
+const state = toReactive({ count });
 ```
 
 ## 来源

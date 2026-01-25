@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+急切的 computed。
 
 ## 示例
 
 ```ts
 import { eagerComputed } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const count = ref(0);
+const double = eagerComputed(() => count.value * 2);
 ```
 
 ## 来源

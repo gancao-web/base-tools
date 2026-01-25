@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+受控的 computed (computedWithControl 的别名)。
 
 ## 示例
 
 ```ts
 import { controlledComputed } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const count = ref(0);
+const double = controlledComputed(count, () => count.value * 2);
+``` 示例代码
 ```
 
 ## 来源

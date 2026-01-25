@@ -2,14 +2,22 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 MediaDevices.getUserMedia。
 
 ## 示例
 
 ```ts
 import { useUserMedia } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const video = ref<HTMLVideoElement>();
+const { stream, start, stop, enabled } = useUserMedia({
+  video: true,
+  audio: false,
+});
+
+if (video.value && stream.value)
+  video.value.srcObject = stream.value;
 ```
 
 ## 来源

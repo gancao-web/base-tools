@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+将值响应式地转换为字符串。
 
 ## 示例
 
 ```ts
 import { useToString } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const count = ref(123);
+const str = useToString(count); // '123'
 ```
 
 ## 来源

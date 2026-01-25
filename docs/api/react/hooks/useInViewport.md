@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+监听元素是否在视口内。
 
 ## 示例
 
 ```ts
 import { useInViewport } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const [inViewport, ratio] = useInViewport(ref);
 ```
 
 ## 来源

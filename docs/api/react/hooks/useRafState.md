@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+只在 requestAnimationFrame callback 时更新 state。
 
 ## 示例
 
 ```ts
 import { useRafState } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const [state, setState] = useRafState({ width: 0, height: 0 });
 ```
 
 ## 来源

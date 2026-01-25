@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Speech Synthesis API。
 
 ## 示例
 
 ```ts
 import { useSpeechSynthesis } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { speak, isSupported } = useSpeechSynthesis('Hello, World!');
+
+speak();
 ```
 
 ## 来源

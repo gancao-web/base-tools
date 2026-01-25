@@ -2,14 +2,21 @@
 
 ## 描述
 
-请参考官方文档。
+使用 Web Worker 执行繁重计算的函数。
 
 ## 示例
 
 ```ts
 import { useWebWorkerFn } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { workerFn, workerStatus, workerTerminate } = useWebWorkerFn(
+  (numbers: number[]) => {
+    return numbers.reduce((a, b) => a + b, 0);
+  },
+);
+
+// const result = await workerFn([1, 2, 3]); // 6
+``` 示例代码
 ```
 
 ## 来源

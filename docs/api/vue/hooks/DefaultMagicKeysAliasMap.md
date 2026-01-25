@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+默认的魔术键别名映射。
 
 ## 示例
 
 ```ts
 import { DefaultMagicKeysAliasMap } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+console.log(DefaultMagicKeysAliasMap);
+``` 示例代码
 ```
 
 ## 来源

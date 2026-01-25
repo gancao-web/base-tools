@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+检查 API 是否支持。
 
 ## 示例
 
 ```ts
 import { useSupported } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const isSupported = useSupported(() => 'navigator' in window && 'bluetooth' in navigator);
 ```
 
 ## 来源

@@ -2,16 +2,28 @@
 
 ## 描述
 
-请参考官方文档。
+限制触发次数的 watch。
 
 ## 示例
 
 ```ts
 import { watchAtMost } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
-```
+const count = ref(0);
 
-## 来源
+watchAtMost(
+  count,
+  () => {
+    console.log('Triggered');
+  },
+  { count: 3 },
+);
+
+count.value++; // Triggered (1/3)
+count.value++; // Triggered (2/3)
+count.value++; // Triggered (3/3)
+count.value++; // Ignored
+```来源
 
 [VueUse](https://vueuse.org/functions/watchAtMost/)

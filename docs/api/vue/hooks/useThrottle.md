@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+返回一个节流后的值。
 
 ## 示例
 
 ```ts
 import { useThrottle } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const input = ref('');
+const throttledInput = useThrottle(input, 1000);
 ```
 
 ## 来源

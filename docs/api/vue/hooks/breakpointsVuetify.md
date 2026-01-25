@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+Vuetify 断点配置。
 
 ## 示例
 
 ```ts
-import { breakpointsVuetify } from '@base-web-kits/base-tools-vue';
+import { breakpointsVuetify, useBreakpoints } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const breakpoints = useBreakpoints(breakpointsVuetify);
+``` 示例代码
 ```
 
 ## 来源

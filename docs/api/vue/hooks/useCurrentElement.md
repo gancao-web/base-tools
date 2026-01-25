@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+获取当前组件的根元素。
 
 ## 示例
 
 ```ts
 import { useCurrentElement } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const el = useCurrentElement();
 ```
 
 ## 来源

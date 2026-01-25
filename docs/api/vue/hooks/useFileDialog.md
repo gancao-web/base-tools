@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+打开文件对话框。
 
 ## 示例
 
 ```ts
 import { useFileDialog } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { files, open, reset } = useFileDialog();
 ```
 
 ## 来源

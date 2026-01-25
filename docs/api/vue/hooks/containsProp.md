@@ -2,16 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+检查对象是否包含属性。
 
 ## 示例
 
 ```ts
 import { containsProp } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+const obj = { a: 1 };
+if (containsProp(obj, 'a')) {
+  console.log('contains prop a');
+}
+```来源
 
 [VueUse](https://vueuse.org/functions/containsProp/)

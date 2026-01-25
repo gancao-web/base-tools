@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+安全的 onBeforeUnmount。
 
 ## 示例
 
 ```ts
 import { tryOnBeforeUnmount } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+tryOnBeforeUnmount(() => {
+  console.log('before unmount');
+});
 ```
 
 ## 来源

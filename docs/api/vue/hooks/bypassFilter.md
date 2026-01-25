@@ -2,16 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+绕过过滤器的函数。
 
 ## 示例
 
 ```ts
 import { bypassFilter } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+bypassFilter(() => {
+  console.log('bypassed');
+});
+```来源
 
 [VueUse](https://vueuse.org/functions/bypassFilter/)

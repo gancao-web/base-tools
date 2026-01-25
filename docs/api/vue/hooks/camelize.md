@@ -2,16 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+将连字符命名转换为驼峰命名。
 
 ## 示例
 
 ```ts
 import { camelize } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+const str = camelize('foo-bar'); // 'fooBar'
+```来源
 
 [VueUse](https://vueuse.org/functions/camelize/)

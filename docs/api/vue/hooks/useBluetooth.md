@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Web Bluetooth API。
 
 ## 示例
 
 ```ts
 import { useBluetooth } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { isSupported, isConnected, device, requestDevice, server } = useBluetooth({
+  acceptAllDevices: true,
+});
 ```
 
 ## 来源

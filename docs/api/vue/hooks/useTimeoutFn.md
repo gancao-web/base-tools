@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+setTimeout 的包装器。
 
 ## 示例
 
 ```ts
 import { useTimeoutFn } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { isPending, start, stop } = useTimeoutFn(() => {
+  console.log('Timeout!');
+}, 1000);
 ```
 
 ## 来源

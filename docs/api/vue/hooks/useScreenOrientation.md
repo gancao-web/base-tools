@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Screen Orientation API。
 
 ## 示例
 
 ```ts
 import { useScreenOrientation } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { isSupported, orientation, angle } = useScreenOrientation();
 ```
 
 ## 来源

@@ -2,14 +2,18 @@
 
 ## 描述
 
-请参考官方文档。
+长按事件钩子。
 
 ## 示例
 
 ```ts
 import { onLongPress } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const el = ref(null);
+onLongPress(el, () => {
+  console.log('long pressed');
+});
 ```
 
 ## 来源

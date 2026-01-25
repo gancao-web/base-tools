@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 prefers-reduced-transparency 媒体查询。
 
 ## 示例
 
 ```ts
 import { usePreferredReducedTransparency } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const isReduced = usePreferredReducedTransparency(); // 'no-preference' | 'reduce'
 ```
 
 ## 来源

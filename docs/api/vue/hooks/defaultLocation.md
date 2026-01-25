@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+默认的 location 对象（如果存在）。
 
 ## 示例
 
 ```ts
 import { defaultLocation } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+if (defaultLocation) {
+  console.log(defaultLocation.href);
+}
+``` 示例代码
 ```
 
 ## 来源

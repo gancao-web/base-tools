@@ -2,16 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+获取 SSR 处理器。
 
 ## 示例
 
 ```ts
 import { getSSRHandler } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+const handler = getSSRHandler('key', () => 'default');
+```来源
 
 [VueUse](https://vueuse.org/functions/getSSRHandler/)

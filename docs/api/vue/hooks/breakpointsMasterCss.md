@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+Master CSS 断点配置。
 
 ## 示例
 
 ```ts
-import { breakpointsMasterCss } from '@base-web-kits/base-tools-vue';
+import { breakpointsMasterCss, useBreakpoints } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const breakpoints = useBreakpoints(breakpointsMasterCss);
+``` 示例代码
 ```
 
 ## 来源

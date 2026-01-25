@@ -2,16 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+格式化日期。
 
 ## 示例
 
 ```ts
 import { formatDate } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+const str = formatDate(new Date(), 'YYYY-MM-DD');
+```来源
 
 [VueUse](https://vueuse.org/functions/formatDate/)

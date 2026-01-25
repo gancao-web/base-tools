@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+简化 Input 或类似组件的状态管理。
 
 ## 示例
 
 ```ts
 import { useEventTarget } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const [value, { onChange, reset }] = useEventTarget({ initialValue: 'this is initial value' });
 ```
 
 ## 来源

@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+生成随机数。
 
 ## 示例
 
 ```ts
 import { rand } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const num = rand(0, 100);
 ```
 
 ## 来源

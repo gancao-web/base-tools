@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+创建自动解包的函数。
 
 ## 示例
 
 ```ts
 import { createUnrefFn } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const add = createUnrefFn((a: number, b: number) => a + b);
 ```
 
 ## 来源

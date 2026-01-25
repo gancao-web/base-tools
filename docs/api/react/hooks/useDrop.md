@@ -2,14 +2,18 @@
 
 ## 描述
 
-请参考官方文档。
+处理元素放置的 Hook。
 
 ## 示例
 
 ```ts
 import { useDrop } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+useDrop(ref, {
+  onDom: (content: string, e) => {},
+  onDragEnter: () => {},
+  onDragLeave: () => {},
+});
 ```
 
 ## 来源

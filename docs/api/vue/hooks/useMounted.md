@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+检查组件是否已挂载。
 
 ## 示例
 
 ```ts
 import { useMounted } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const isMounted = useMounted();
 ```
 
 ## 来源

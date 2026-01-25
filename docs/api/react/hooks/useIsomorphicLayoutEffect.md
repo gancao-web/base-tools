@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+在 SSR 环境下使用 useEffect，在 CSR 环境下使用 useLayoutEffect。
 
 ## 示例
 
 ```ts
 import { useIsomorphicLayoutEffect } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+useIsomorphicLayoutEffect(() => {
+  console.log('layout effect');
+}, []);
 ```
 
 ## 来源

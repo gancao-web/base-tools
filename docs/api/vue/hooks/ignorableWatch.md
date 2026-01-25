@@ -2,14 +2,22 @@
 
 ## 描述
 
-请参考官方文档。
+可忽略的 watch。
 
 ## 示例
 
 ```ts
 import { ignorableWatch } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const count = ref(0);
+const { ignoreUpdates } = ignorableWatch(count, () => {
+  console.log('changed');
+});
+
+ignoreUpdates(() => {
+  count.value++; // 不触发 watch
+});
 ```
 
 ## 来源

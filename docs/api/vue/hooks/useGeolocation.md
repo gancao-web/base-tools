@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Geolocation API。
 
 ## 示例
 
 ```ts
 import { useGeolocation } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { coords, locatedAt, error } = useGeolocation();
 ```
 
 ## 来源

@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的克隆 ref。
 
 ## 示例
 
 ```ts
 import { useCloned } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const source = ref({ foo: 'bar' });
+const { cloned, sync } = useCloned(source);
 ```
 
 ## 来源

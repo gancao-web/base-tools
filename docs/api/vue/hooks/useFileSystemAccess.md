@@ -2,14 +2,18 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 File System Access API。
 
 ## 示例
 
 ```ts
 import { useFileSystemAccess } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const content = ref('');
+const { open, save, saveAs, updateData } = useFileSystemAccess({
+  dataType: 'Text',
+});
 ```
 
 ## 来源

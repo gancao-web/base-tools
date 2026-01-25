@@ -2,14 +2,21 @@
 
 ## 描述
 
-请参考官方文档。
+创建拖放区域。
 
 ## 示例
 
 ```ts
 import { useDropZone } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const dropZoneRef = ref<HTMLElement>();
+
+const { isOver } = useDropZone(dropZoneRef, {
+  onDrop: (files) => {
+    // do something with files
+  },
+});
 ```
 
 ## 来源

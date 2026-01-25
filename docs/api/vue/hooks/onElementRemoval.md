@@ -2,14 +2,19 @@
 
 ## 描述
 
-请参考官方文档。
+元素被移除事件钩子。
 
 ## 示例
 
 ```ts
 import { onElementRemoval } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const el = ref(null);
+onElementRemoval(el, () => {
+  console.log('element removed');
+});
+``` 示例代码
 ```
 
 ## 来源

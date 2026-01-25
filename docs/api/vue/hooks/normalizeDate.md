@@ -2,16 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+标准化日期。
 
 ## 示例
 
 ```ts
 import { normalizeDate } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+const date = normalizeDate('2023-01-01');
+```来源
 
 [VueUse](https://vueuse.org/functions/normalizeDate/)

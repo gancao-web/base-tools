@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+简单的 Web Worker 包装器。
 
 ## 示例
 
 ```ts
 import { useWebWorker } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { data, post, terminate, worker } = useWebWorker('./worker.js');
 ```
 
 ## 来源

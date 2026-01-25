@@ -1,17 +1,14 @@
 # noop
 
 ## 描述
-
-请参考官方文档。
+空函数。
 
 ## 示例
 
 ```ts
 import { noop } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+noop();
+```来源
 
 [VueUse](https://vueuse.org/functions/noop/)

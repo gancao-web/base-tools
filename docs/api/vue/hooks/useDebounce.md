@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+防抖值。
 
 ## 示例
 
 ```ts
 import { useDebounce } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const input = ref('foo');
+const debounced = useDebounce(input, 1000);
 ```
 
 ## 来源

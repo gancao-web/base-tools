@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 navigator.languages。
 
 ## 示例
 
 ```ts
 import { usePreferredLanguages } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const languages = usePreferredLanguages(); // ['en-US', 'en', 'zh-CN', 'zh']
 ```
 
 ## 来源

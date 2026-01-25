@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的数组去重。
 
 ## 示例
 
 ```ts
 import { useArrayUnique } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const list = ref([1, 2, 2, 3]);
+const unique = useArrayUnique(list);
 ```
 
 ## 来源

@@ -2,14 +2,19 @@
 
 ## 描述
 
-请参考官方文档。
+保存 ref 的上一个值。
 
 ## 示例
 
 ```ts
 import { usePrevious } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const count = ref(0);
+const previous = usePrevious(count); // undefined
+
+count.value = 1;
+// previous.value === 0
 ```
 
 ## 来源

@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的滚动位置。
 
 ## 示例
 
 ```ts
 import { useScroll } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const el = ref<HTMLElement | null>(null);
+const { x, y } = useScroll(el);
 ```
 
 ## 来源

@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+管理分页逻辑的 Hook。
 
 ## 示例
 
 ```ts
 import { usePagination } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const { data, loading, pagination } = usePagination(service);
 ```
 
 ## 来源

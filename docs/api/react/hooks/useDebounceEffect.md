@@ -2,14 +2,20 @@
 
 ## 描述
 
-请参考官方文档。
+为 useEffect 增加防抖的能力。
 
 ## 示例
 
 ```ts
 import { useDebounceEffect } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+useDebounceEffect(
+  () => {
+    setRecords(val);
+  },
+  [val],
+  { wait: 1000 },
+);
 ```
 
 ## 来源

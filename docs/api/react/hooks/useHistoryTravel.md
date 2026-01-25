@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+管理状态历史记录，支持撤销和重做。
 
 ## 示例
 
 ```ts
 import { useHistoryTravel } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const { value, setValue, back, forward, go } = useHistoryTravel();
 ```
 
 ## 来源

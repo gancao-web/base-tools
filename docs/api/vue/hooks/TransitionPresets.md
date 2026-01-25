@@ -2,14 +2,19 @@
 
 ## 描述
 
-请参考官方文档。
+CSS 过渡预设。
 
 ## 示例
 
 ```ts
-import { TransitionPresets } from '@base-web-kits/base-tools-vue';
+import { TransitionPresets, useTransition } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const source = ref(0);
+const output = useTransition(source, {
+  transition: TransitionPresets.easeInOutCubic,
+});
+``` 示例代码
 ```
 
 ## 来源

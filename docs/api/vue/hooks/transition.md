@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+Transition 辅助函数。
 
 ## 示例
 
 ```ts
 import { transition } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const show = ref(true);
 ```
 
 ## 来源

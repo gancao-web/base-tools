@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Gamepad API。
 
 ## 示例
 
 ```ts
 import { useGamepad } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { isSupported, gamepads } = useGamepad();
 ```
 
 ## 来源

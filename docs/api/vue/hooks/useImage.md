@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的图片加载。
 
 ## 示例
 
 ```ts
 import { useImage } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { isLoading, error } = useImage({ src: 'https://placekitten.com/200/300' });
 ```
 
 ## 来源

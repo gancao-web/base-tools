@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+获取当前时间戳。
 
 ## 示例
 
 ```ts
 import { now } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const timestamp = now();
 ```
 
 ## 来源

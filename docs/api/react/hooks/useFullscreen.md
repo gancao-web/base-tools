@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+管理全屏的 Hook。
 
 ## 示例
 
 ```ts
 import { useFullscreen } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const [isFullscreen, { enterFullscreen, exitFullscreen, toggleFullscreen }] = useFullscreen(ref);
 ```
 
 ## 来源

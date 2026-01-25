@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+提供重置状态功能的 Hook。
 
 ## 示例
 
 ```ts
 import { useResetState } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const [state, setState, resetState] = useResetState({
+  hello: '',
+  count: 0,
+});
 ```
 
 ## 来源

@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+常见 Checkbox 列表选中状态管理。
 
 ## 示例
 
 ```ts
 import { useSelections } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const { selected, isSelected, toggle, selectAll, unSelectAll, noneSelected, allSelected, partiallySelected, setSelected } = useSelections(
+  ['a', 'b', 'c'],
+  ['a'],
+);
 ```
 
 ## 来源

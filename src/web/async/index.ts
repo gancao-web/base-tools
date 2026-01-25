@@ -23,7 +23,7 @@ export type WebApiConfig<Res = any, Err = any> = {
   /** 是否显示日志, 默认 true */
   showLog?: boolean;
 
-  /** 成功响应数据的处理, 如解密操作 (返回值在成功日志中输出'resMap'字段) */
+  /** 响应数据的转换, 如解密操作 (返回值在成功日志中输出'resMap'字段) */
   resMap?: (res: any) => Res;
 
   /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */

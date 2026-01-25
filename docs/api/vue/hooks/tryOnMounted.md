@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+安全的 onMounted。
 
 ## 示例
 
 ```ts
 import { tryOnMounted } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+tryOnMounted(() => {
+  console.log('mounted');
+});
 ```
 
 ## 来源

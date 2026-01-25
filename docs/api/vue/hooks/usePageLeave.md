@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+检测鼠标是否离开页面。
 
 ## 示例
 
 ```ts
 import { usePageLeave } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const isLeft = usePageLeave();
 ```
 
 ## 来源

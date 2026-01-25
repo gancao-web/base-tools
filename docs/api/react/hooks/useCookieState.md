@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+将状态存储在 Cookie 中。
 
 ## 示例
 
 ```ts
 import { useCookieState } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const [message, setMessage] = useCookieState('useCookieStateString');
 ```
 
 ## 来源

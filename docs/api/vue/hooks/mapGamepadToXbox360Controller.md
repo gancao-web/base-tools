@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+将 Gamepad 映射到 Xbox 360 控制器。
 
 ## 示例
 
 ```ts
-import { mapGamepadToXbox360Controller } from '@base-web-kits/base-tools-vue';
+import { mapGamepadToXbox360Controller, useGamepad } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { gamepads } = useGamepad();
+const xboxController = mapGamepadToXbox360Controller(gamepads.value[0]);
+``` 示例代码
 ```
 
 ## 来源

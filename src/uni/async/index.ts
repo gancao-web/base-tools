@@ -31,7 +31,7 @@ export type UniApiConfig<Res = any, Err = any, Task = any> = {
   /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
   logExtra?: Record<string, unknown>;
 
-  /** 处理成功res, 如解密操作 (返回值在成功日志中输出'resMap'字段) */
+  /** 响应数据的转换, 如解密操作 (返回值在成功日志中输出'resMap'字段) */
   resMap?: (res: any) => Res;
 
   /** 获取task对象 (如uni.downloadFile、uni.uploadFile返回的task对象) */

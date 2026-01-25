@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+异步任务队列。
 
 ## 示例
 
 ```ts
 import { useAsyncQueue } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { activeIndex, result } = useAsyncQueue([
+  () => Promise.resolve(1),
+  () => Promise.resolve(2),
+]);
 ```
 
 ## 来源

@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+监听键盘按键，支持组合键。
 
 ## 示例
 
 ```ts
 import { useKeyPress } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+useKeyPress('leftarrow', () => {
+  setCounter((s) => s - 1);
+});
 ```
 
 ## 来源

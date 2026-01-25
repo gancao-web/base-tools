@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+Quasar 断点配置。
 
 ## 示例
 
 ```ts
-import { breakpointsQuasar } from '@base-web-kits/base-tools-vue';
+import { breakpointsQuasar, useBreakpoints } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const breakpoints = useBreakpoints(breakpointsQuasar);
+``` 示例代码
 ```
 
 ## 来源

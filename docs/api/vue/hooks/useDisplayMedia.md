@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Display Media API。
 
 ## 示例
 
 ```ts
 import { useDisplayMedia } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { stream, start, stop } = useDisplayMedia();
 ```
 
 ## 来源
