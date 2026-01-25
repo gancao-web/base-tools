@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+使用 Intl.RelativeTimeFormat 格式化时间。
 
 ## 示例
 
 ```ts
 import { formatTimeAgoIntl } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const str = formatTimeAgoIntl(new Date(Date.now() - 1000));
+``` 示例代码
 ```
 
 ## 来源

@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+管理 Map 状态的 Hook。
 
 ## 示例
 
 ```ts
 import { useMap } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const [map, { set, setAll, remove, reset, get }] = useMap([
+  ['hello', 'world'],
+  ['foo', 'bar'],
+]);
 ```
 
 ## 来源

@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+管理倒计时的 Hook。
 
 ## 示例
 
 ```ts
 import { useCountDown } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const [countdown, formattedRes] = useCountDown({
+  targetDate: '2022-12-31 24:00:00',
+});
 ```
 
 ## 来源

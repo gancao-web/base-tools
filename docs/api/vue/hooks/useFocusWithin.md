@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+检测焦点是否在元素内。
 
 ## 示例
 
 ```ts
 import { useFocusWithin } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const target = ref<HTMLFormElement>();
+const { focused } = useFocusWithin(target);
 ```
 
 ## 来源

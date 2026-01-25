@@ -2,14 +2,32 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的偏移分页。
 
 ## 示例
 
 ```ts
 import { useOffsetPagination } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const {
+  currentPage,
+  currentPageSize,
+  pageCount,
+  isFirstPage,
+  isLastPage,
+  prev,
+  next,
+} = useOffsetPagination({
+  total: 100,
+  page: 1,
+  pageSize: 10,
+  onPageChange: (page) => {
+    console.log(page);
+  },
+  onPageSizeChange: (pageSize) => {
+    console.log(pageSize);
+  },
+});
 ```
 
 ## 来源

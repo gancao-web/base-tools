@@ -2,14 +2,20 @@
 
 ## 描述
 
-请参考官方文档。
+监听长按事件。
 
 ## 示例
 
 ```ts
 import { useLongPress } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+useLongPress(
+  () => {
+    alert('Long press');
+  },
+  ref,
+  { delay: 300 },
+);
 ```
 
 ## 来源

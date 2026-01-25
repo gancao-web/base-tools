@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+可手动重置的 ref。
 
 ## 示例
 
 ```ts
 import { refManualReset } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const count = refManualReset(0, 1000);
 ```
 
 ## 来源

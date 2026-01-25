@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+管理 Set 状态的 Hook。
 
 ## 示例
 
 ```ts
 import { useSet } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const [set, { add, remove, reset }] = useSet(['hello']);
 ```
 
 ## 来源

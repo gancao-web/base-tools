@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 CSS 变量。
 
 ## 示例
 
 ```ts
 import { useCssVar } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const el = ref(null);
+const color = useCssVar('--color', el);
 ```
 
 ## 来源

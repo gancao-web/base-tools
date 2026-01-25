@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+监听元素悬停状态。
 
 ## 示例
 
 ```ts
 import { useHover } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const isHovering = useHover(ref);
 ```
 
 ## 来源

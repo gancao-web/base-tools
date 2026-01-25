@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 DeviceOrientation API。
 
 ## 示例
 
 ```ts
 import { useDeviceOrientation } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { alpha, beta, gamma } = useDeviceOrientation();
 ```
 
 ## 来源

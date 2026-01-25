@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+封装了常见的无限滚动逻辑。
 
 ## 示例
 
 ```ts
 import { useInfiniteScroll } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const { data, loading, loadMore, loadingMore } = useInfiniteScroll(service);
 ```
 
 ## 来源

@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+Bootstrap V5 断点配置。
 
 ## 示例
 
 ```ts
-import { breakpointsBootstrapV5 } from '@base-web-kits/base-tools-vue';
+import { breakpointsBootstrapV5, useBreakpoints } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const breakpoints = useBreakpoints(breakpointsBootstrapV5);
+``` 示例代码
 ```
 
 ## 来源

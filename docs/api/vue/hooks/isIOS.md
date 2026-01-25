@@ -2,16 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+检查是否在 iOS 设备上运行。
 
 ## 示例
 
-```ts
+````ts
 import { isIOS } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+if (isIOS) {
+  console.log('Running on iOS');
+}
+```来源
 
 [VueUse](https://vueuse.org/functions/isIOS/)
+````

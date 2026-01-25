@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+处理元素拖拽的 Hook。
 
 ## 示例
 
 ```ts
 import { useDrag } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+useDrag(data, ref, {
+  onDragStart: () => {},
+  onDragEnd: () => {},
+});
 ```
 
 ## 来源

@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的元素边界信息。
 
 ## 示例
 
 ```ts
 import { useElementBounding } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const el = ref(null);
+const { x, y, top, right, bottom, left, width, height } = useElementBounding(el);
 ```
 
 ## 来源

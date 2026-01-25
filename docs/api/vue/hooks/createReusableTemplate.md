@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+创建可重用的模板。
 
 ## 示例
 
 ```ts
 import { createReusableTemplate } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const [DefineTemplate, ReuseTemplate] = createReusableTemplate();
+``` 示例代码
 ```
 
 ## 来源

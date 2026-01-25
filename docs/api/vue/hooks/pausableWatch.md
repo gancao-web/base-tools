@@ -2,14 +2,18 @@
 
 ## 描述
 
-请参考官方文档。
+可暂停的 watch。
 
 ## 示例
 
 ```ts
 import { pausableWatch } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const count = ref(0);
+const { stop, pause, resume } = pausableWatch(count, () => {
+  console.log('changed');
+});
 ```
 
 ## 来源

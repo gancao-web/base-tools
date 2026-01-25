@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+安全的 onBeforeMount。
 
 ## 示例
 
 ```ts
 import { tryOnBeforeMount } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+tryOnBeforeMount(() => {
+  console.log('before mount');
+});
 ```
 
 ## 来源

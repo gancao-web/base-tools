@@ -2,14 +2,22 @@
 
 ## 描述
 
-请参考官方文档。
+一个可以处理 setTimeout 计时器函数的 Hook。
 
 ## 示例
 
 ```ts
 import { useTimeout } from '@base-web-kits/base-tools-react';
+import React, { useState } from 'react';
 
-// 示例代码
+export default () => {
+  const [state, setState] = useState(1);
+  useTimeout(() => {
+    setState(state + 1);
+  }, 3000);
+
+  return <div>{state}</div>;
+};
 ```
 
 ## 来源

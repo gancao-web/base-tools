@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+在指定时间后更新值。
 
 ## 示例
 
 ```ts
 import { useTimeout } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const ready = useTimeout(1000); // 1000ms 后变为 true
 ```
 
 ## 来源

@@ -104,7 +104,7 @@ export type RequestConfigBase<D extends RequestData = RequestData> = {
   /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
   logExtra?: Record<string, unknown>;
 
-  /** 响应拦截 */
+  /** 响应数据的转换 */
   resMap?: (data: ResponseData) => ResponseData;
 
   /** 获取task对象, 用于取消请求或监听流式数据 */

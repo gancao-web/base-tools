@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+存储序列化器。
 
 ## 示例
 
 ```ts
-import { StorageSerializers } from '@base-web-kits/base-tools-vue';
+import { StorageSerializers, useStorage } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const state = useStorage('key', { hello: 'hi' }, localStorage, {
+  serializer: StorageSerializers.object,
+});
+``` 示例代码
 ```
 
 ## 来源

@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+处理定时器的 Hook。
 
 ## 示例
 
 ```ts
 import { useInterval } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+useInterval(() => {
+  setCount(count + 1);
+}, 1000);
 ```
 
 ## 来源

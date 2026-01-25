@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+封装了 Ant Design Table 的逻辑，支持分页、排序、筛选等。
 
 ## 示例
 
 ```ts
 import { useAntdTable } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const { tableProps, search, params } = useAntdTable(getTableData, {
+  defaultPageSize: 5,
+  form,
+});
 ```
 
 ## 来源

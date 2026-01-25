@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+创建过滤器包装器。
 
 ## 示例
 
 ```ts
-import { createFilterWrapper } from '@base-web-kits/base-tools-vue';
+import { createFilterWrapper, debounceFilter } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const debouncedFn = createFilterWrapper(debounceFilter(1000), (val) => console.log(val));
+``` 示例代码
 ```
 
 ## 来源

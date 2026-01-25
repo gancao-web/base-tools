@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+将普通函数转换为响应式函数。
 
 ## 示例
 
 ```ts
 import { reactify } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const add = (a: number, b: number) => a + b;
+const reactiveAdd = reactify(add);
 ```
 
 ## 来源

@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+将响应式对象转换为 refs。
 
 ## 示例
 
 ```ts
 import { toRefs } from '@base-web-kits/base-tools-vue';
+import { reactive } from 'vue';
 
-// 示例代码
+const state = reactive({ count: 0 });
+const { count } = toRefs(state);
 ```
 
 ## 来源

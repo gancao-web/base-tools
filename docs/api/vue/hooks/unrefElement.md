@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+解包元素或组件。
 
 ## 示例
 
 ```ts
 import { unrefElement } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const el = ref(null);
+const dom = unrefElement(el);
 ```
 
 ## 来源

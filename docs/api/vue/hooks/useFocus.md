@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的聚焦状态。
 
 ## 示例
 
 ```ts
 import { useFocus } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const target = ref<HTMLButtonElement>();
+const { focused } = useFocus(target);
 ```
 
 ## 来源

@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+Element UI / Plus 断点配置。
 
 ## 示例
 
 ```ts
-import { breakpointsElement } from '@base-web-kits/base-tools-vue';
+import { breakpointsElement, useBreakpoints } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const breakpoints = useBreakpoints(breakpointsElement);
+``` 示例代码
 ```
 
 ## 来源

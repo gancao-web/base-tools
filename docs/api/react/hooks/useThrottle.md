@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+用来处理节流值的 Hook。
 
 ## 示例
 
 ```ts
 import { useThrottle } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const throttledValue = useThrottle(value, { wait: 500 });
 ```
 
 ## 来源

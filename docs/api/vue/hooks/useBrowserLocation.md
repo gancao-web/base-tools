@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的浏览器 Location。
 
 ## 示例
 
 ```ts
 import { useBrowserLocation } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const location = useBrowserLocation();
 ```
 
 ## 来源

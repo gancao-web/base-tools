@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 BroadcastChannel API。
 
 ## 示例
 
 ```ts
 import { useBroadcastChannel } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { isSupported, channel, post, data, close, error } = useBroadcastChannel({ name: 'my-channel' });
 ```
 
 ## 来源

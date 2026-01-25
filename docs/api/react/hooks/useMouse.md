@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+监听鼠标位置。
 
 ## 示例
 
 ```ts
 import { useMouse } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const mouse = useMouse(ref);
 ```
 
 ## 来源

@@ -1,17 +1,16 @@
 # invoke
 
 ## 描述
-
-请参考官方文档。
+立即执行一个函数。
 
 ## 示例
 
 ```ts
 import { invoke } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+const result = invoke(() => {
+  return 1 + 1;
+});
+```来源
 
 [VueUse](https://vueuse.org/functions/invoke/)

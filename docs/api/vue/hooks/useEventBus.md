@@ -2,14 +2,21 @@
 
 ## 描述
 
-请参考官方文档。
+一个简单的事件总线。
 
 ## 示例
 
 ```ts
 import { useEventBus } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const bus = useEventBus<string>('news');
+
+const listener = (event: string) => {
+  console.log(`Received: ${event}`);
+};
+
+bus.on(listener);
+bus.emit('The Tokyo Olympics has begun');
 ```
 
 ## 来源

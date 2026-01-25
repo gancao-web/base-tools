@@ -2,14 +2,18 @@
 
 ## 描述
 
-请参考官方文档。
+锁定 body 滚动。
 
 ## 示例
 
 ```ts
 import { useScrollLock } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const el = ref<HTMLElement | null>(document.body);
+const isLocked = useScrollLock(el);
+
+isLocked.value = true; // body scroll is locked
 ```
 
 ## 来源

@@ -2,14 +2,20 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的按键状态。
 
 ## 示例
 
 ```ts
 import { useMagicKeys } from '@base-web-kits/base-tools-vue';
+import { watch } from 'vue';
 
-// 示例代码
+const { shift, v } = useMagicKeys();
+
+watch(v, (v) => {
+  if (v && shift.value)
+    console.log('Shift + V have been pressed');
+});
 ```
 
 ## 来源

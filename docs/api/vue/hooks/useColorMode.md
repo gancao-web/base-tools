@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的颜色模式（暗黑/明亮）。
 
 ## 示例
 
 ```ts
 import { useColorMode } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const mode = useColorMode(); // 'light' | 'dark' | 'auto'
 ```
 
 ## 来源

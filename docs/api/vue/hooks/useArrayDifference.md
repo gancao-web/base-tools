@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的数组差集。
 
 ## 示例
 
 ```ts
 import { useArrayDifference } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const list1 = ref([1, 2, 3]);
+const list2 = ref([2, 3, 4]);
+const diff = useArrayDifference(list1, list2); // [1]
 ```
 
 ## 来源

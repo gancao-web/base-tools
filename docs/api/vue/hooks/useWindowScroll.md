@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的窗口滚动位置。
 
 ## 示例
 
 ```ts
 import { useWindowScroll } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { x, y } = useWindowScroll();
+``` 示例代码
 ```
 
 ## 来源

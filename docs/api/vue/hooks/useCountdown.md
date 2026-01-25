@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+倒计时。
 
 ## 示例
 
 ```ts
 import { useCountdown } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { remaining, reset, stop, start } = useCountdown(60);
 ```
 
 ## 来源

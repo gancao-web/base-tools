@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的指针状态。
 
 ## 示例
 
 ```ts
 import { usePointer } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { x, y, pressure, pointerType } = usePointer();
 ```
 
 ## 来源

@@ -2,14 +2,19 @@
 
 ## 描述
 
-请参考官方文档。
+步进器助手。
 
 ## 示例
 
 ```ts
 import { useStepper } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { count, inc, dec } = useStepper({
+  initial: 0,
+  min: 0,
+  max: 10,
+  step: 1,
+});
 ```
 
 ## 来源

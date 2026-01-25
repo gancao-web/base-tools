@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的窗口焦点状态。
 
 ## 示例
 
 ```ts
 import { useWindowFocus } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const focused = useWindowFocus();
+``` 示例代码
 ```
 
 ## 来源

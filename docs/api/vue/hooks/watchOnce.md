@@ -2,14 +2,22 @@
 
 ## 描述
 
-请参考官方文档。
+只触发一次的 watch。
 
 ## 示例
 
 ```ts
 import { watchOnce } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const count = ref(0);
+
+watchOnce(count, (val) => {
+  console.log('Only triggered once:', val);
+});
+
+count.value = 1; // Triggered
+count.value = 2; // Ignored
 ```
 
 ## 来源

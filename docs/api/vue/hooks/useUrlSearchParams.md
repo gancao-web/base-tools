@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 URLSearchParams。
 
 ## 示例
 
 ```ts
 import { useUrlSearchParams } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const params = useUrlSearchParams('history');
+
+console.log(params.foo); // url?foo=bar -> bar
+params.foo = 'baz'; // url?foo=baz
 ```
 
 ## 来源

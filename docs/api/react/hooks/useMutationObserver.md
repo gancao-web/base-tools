@@ -2,14 +2,20 @@
 
 ## 描述
 
-请参考官方文档。
+监听 DOM 变化。
 
 ## 示例
 
 ```ts
 import { useMutationObserver } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+useMutationObserver(
+  (mutationsList) => {
+    setCount((c) => c + 1);
+  },
+  ref,
+  { attributes: true },
+);
 ```
 
 ## 来源

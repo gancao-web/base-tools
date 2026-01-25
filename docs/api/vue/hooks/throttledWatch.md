@@ -2,14 +2,18 @@
 
 ## 描述
 
-请参考官方文档。
+节流的 watch。
 
 ## 示例
 
 ```ts
 import { throttledWatch } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const count = ref(0);
+throttledWatch(count, () => {
+  console.log('changed');
+}, { throttle: 1000 });
 ```
 
 ## 来源

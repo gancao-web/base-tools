@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+创建一个只在依赖更新时执行的 useEffect Hook。
 
 ## 示例
 
 ```ts
 import { createUpdateEffect } from '@base-web-kits/base-tools-react';
+import { useEffect } from 'react';
 
-// 示例代码
+// 使用
+const useUpdateEffect = createUpdateEffect(useEffect);
 ```
 
 ## 来源

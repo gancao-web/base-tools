@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+按键事件钩子。
 
 ## 示例
 
 ```ts
 import { onKeyStroke } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+onKeyStroke('Enter', (e) => {
+  e.preventDefault();
+});
 ```
 
 ## 来源

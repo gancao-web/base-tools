@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+用来处理防抖值的 Hook。
 
 ## 示例
 
 ```ts
 import { useDebounce } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const debouncedValue = useDebounce(value, { wait: 500 });
 ```
 
 ## 来源

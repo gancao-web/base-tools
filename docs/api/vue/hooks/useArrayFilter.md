@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Array.filter。
 
 ## 示例
 
 ```ts
 import { useArrayFilter } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const list = ref([1, 2, 3]);
+const greaterThanOne = useArrayFilter(list, i => i > 1);
 ```
 
 ## 来源

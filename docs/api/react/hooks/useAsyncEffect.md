@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+支持异步函数的 useEffect。
 
 ## 示例
 
 ```ts
 import { useAsyncEffect } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+useAsyncEffect(async () => {
+  await mockCheck();
+}, []);
 ```
 
 ## 来源

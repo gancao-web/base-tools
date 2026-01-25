@@ -2,14 +2,18 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的计算属性对象。
 
 ## 示例
 
 ```ts
 import { reactiveComputed } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const count = ref(0);
+const state = reactiveComputed(() => ({
+  double: count.value * 2,
+}));
 ```
 
 ## 来源

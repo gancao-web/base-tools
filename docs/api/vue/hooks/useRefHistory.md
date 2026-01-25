@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+跟踪 ref 的历史记录。
 
 ## 示例
 
 ```ts
 import { useRefHistory } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const count = ref(0);
+const { history, undo, redo } = useRefHistory(count);
 ```
 
 ## 来源

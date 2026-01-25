@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的元素尺寸。
 
 ## 示例
 
 ```ts
 import { useElementSize } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const el = ref(null);
+const { width, height } = useElementSize(el);
 ```
 
 ## 来源

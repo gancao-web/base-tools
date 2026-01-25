@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+基于 Promise 的监听。
 
 ## 示例
 
 ```ts
-import { until } from '@base-web-kits/base-tools-vue';
+import { until, useCounter } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { count, inc } = useCounter();
+
+await until(count).toBe(5);
 ```
 
 ## 来源

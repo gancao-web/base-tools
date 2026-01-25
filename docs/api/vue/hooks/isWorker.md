@@ -2,16 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+检查是否在 Worker 环境中运行。
 
 ## 示例
 
 ```ts
 import { isWorker } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+if (isWorker) {
+  console.log('running in worker');
+}
+```来源
 
 [VueUse](https://vueuse.org/functions/isWorker/)

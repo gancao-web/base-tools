@@ -1,17 +1,14 @@
 # clamp
 
 ## 描述
-
-请参考官方文档。
+将数值限制在指定范围内。
 
 ## 示例
 
 ```ts
 import { clamp } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+const val = clamp(10, 0, 5); // 5
+```来源
 
 [VueUse](https://vueuse.org/functions/clamp/)

@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Storage API (异步)。
 
 ## 示例
 
 ```ts
 import { useStorageAsync } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const state = useStorageAsync('vue-use-storage-async', {
+  name: 'Banana',
+  color: 'Yellow',
+});
 ```
 
 ## 来源

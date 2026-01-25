@@ -2,14 +2,17 @@
 
 ## 描述
 
-请参考官方文档。
+循环列表。
 
 ## 示例
 
 ```ts
 import { useCycleList } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { state, next, prev } = useCycleList(['Dog', 'Cat', 'Lizard', 'Shark']);
+console.log(state.value); // 'Dog'
+next();
+console.log(state.value); // 'Cat'
 ```
 
 ## 来源

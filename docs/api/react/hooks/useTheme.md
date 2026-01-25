@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+管理主题的 Hook。
 
 ## 示例
 
 ```ts
 import { useTheme } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+const theme = useTheme();
 ```
 
 ## 来源

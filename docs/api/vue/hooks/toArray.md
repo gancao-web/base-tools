@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+将值转换为数组。
 
 ## 示例
 
 ```ts
 import { toArray } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const list = toArray(ref(1)); // [1]
 ```
 
 ## 来源

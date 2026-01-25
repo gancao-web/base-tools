@@ -2,16 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+创建一个 ref。
 
 ## 示例
 
 ```ts
 import { createRef } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
-```
-
-## 来源
+const myRef = createRef(1);
+```来源
 
 [VueUse](https://vueuse.org/functions/createRef/)

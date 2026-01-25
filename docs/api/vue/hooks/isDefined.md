@@ -2,14 +2,18 @@
 
 ## 描述
 
-请参考官方文档。
+检查值是否已定义。
 
 ## 示例
 
 ```ts
 import { isDefined } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const count = ref(0);
+if (isDefined(count)) {
+  console.log(count.value);
+}
 ```
 
 ## 来源

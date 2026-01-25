@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+设置页面的 favicon。
 
 ## 示例
 
 ```ts
 import { useFavicon } from '@base-web-kits/base-tools-react';
 
-// 示例代码
+useFavicon(url);
 ```
 
 ## 来源

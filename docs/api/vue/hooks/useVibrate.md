@@ -2,14 +2,20 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 Vibration API。
 
 ## 示例
 
 ```ts
 import { useVibrate } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const { vibrate, stop, isSupported } = useVibrate({ pattern: [300, 100, 300] });
+
+// 开始震动
+vibrate();
+
+// 停止震动
+stop();
 ```
 
 ## 来源

@@ -2,14 +2,18 @@
 
 ## 描述
 
-请参考官方文档。
+使元素可拖拽。
 
 ## 示例
 
 ```ts
 import { useDraggable } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const el = ref<HTMLElement | null>(null);
+const { x, y, style } = useDraggable(el, {
+  initialValue: { x: 40, y: 40 },
+});
 ```
 
 ## 来源

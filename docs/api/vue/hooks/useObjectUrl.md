@@ -2,14 +2,16 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的 URL.createObjectURL。
 
 ## 示例
 
 ```ts
 import { useObjectUrl } from '@base-web-kits/base-tools-vue';
+import { ref } from 'vue';
 
-// 示例代码
+const file = ref<File | null>(null);
+const url = useObjectUrl(file);
 ```
 
 ## 来源

@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+创建响应式函数。
 
 ## 示例
 
 ```ts
 import { createReactiveFn } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const fn = createReactiveFn((val: number) => val * 2);
+``` 示例代码
 ```
 
 ## 来源

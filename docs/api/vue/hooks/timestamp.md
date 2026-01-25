@@ -2,14 +2,14 @@
 
 ## 描述
 
-请参考官方文档。
+响应式的时间戳。
 
 ## 示例
 
 ```ts
 import { timestamp } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+const now = timestamp();
 ```
 
 ## 来源

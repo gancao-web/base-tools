@@ -2,14 +2,15 @@
 
 ## 描述
 
-请参考官方文档。
+提供 SSR 宽度。
 
 ## 示例
 
 ```ts
 import { provideSSRWidth } from '@base-web-kits/base-tools-vue';
 
-// 示例代码
+provideSSRWidth(768);
+``` 示例代码
 ```
 
 ## 来源
