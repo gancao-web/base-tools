@@ -60,7 +60,7 @@ export type RequestConfigBase<D extends RequestData = RequestData> = Omit<
   /** 额外输出的日志数据 */
   logExtra?: Record<string, unknown>;
 
-  /** 响应拦截 */
+  /** 响应数据的转换 */
   resMap?: (
     data: UniApp.RequestSuccessCallbackResult['data'],
   ) => UniApp.RequestSuccessCallbackResult['data'];
