@@ -125,7 +125,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * }
  *
  * // 流式发起
- * const data: ChatData = { content: '你好', conversationId: 123 };
+ * const data = { content: '你好', chatId: 123 };
  * await apiChatStream({ data, onTaskReady });
  *
  * // 流式取消 (在组件销毁或页面关闭时调用)

@@ -77,7 +77,7 @@ await enhanceUniApi(uni.downloadFile, 'downloadFile')(
     - `toastSuccess` - 操作成功的toast提示，默认 `false`（支持函数返回自定义文本）
     - `toastError` - 是否显示操作失败的详细错误信息，默认 `true`（支持函数判断是否显示）
     - `showLog` - 是否显示日志，默认 `true`
-    - `resMap` - 处理成功res, 如解密操作 (返回值在成功日志中输出'resMap'字段)
+    - `resMap` - 响应数据的转换, 如解密操作 (返回值在成功日志中输出'resMap'字段)
     - `logExtra` - 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name')
     - `onTaskReady` - 初始化task对象时的回调函数，默认 `undefined`（支持自定义task事件监听）
 

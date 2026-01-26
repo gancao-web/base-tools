@@ -159,7 +159,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * export function requestApi<T>(config: RequestConfig) {
  *    return request<T>({
  *      header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
- *      // resMap: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
+ *      // resMap: (res) => res, // 响应数据的转换, 如解密操作 (可选)
  *      resKey: 'data',
  *      msgKey: 'message',
  *      codeKey: 'status',
@@ -203,7 +203,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * }
  *
  * // 流式发起
- * const data: ChatData = { content: '你好', conversationId: 123 };
+ * const data = { content: '你好', chatId: 123 };
  * await apiChatStream({ data, onTaskReady });
  *
  * // 流式取消 (在组件销毁或页面关闭时调用)

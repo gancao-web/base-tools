@@ -14,7 +14,7 @@ import type { RequestData, RequestConfig } from '@base-web-kits/base-tools-uni';
 export function requestApi<T>(config: RequestConfig) {
   return request<T>({
     header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
-    // resMap: (res) => res, // 响应拦截，可预处理响应数据，如解密 (可选)
+    // resMap: (res) => res, // 响应数据的转换, 如解密操作 (可选)
     resKey: 'data',
     msgKey: 'message',
     codeKey: 'status',
@@ -58,7 +58,7 @@ const onTaskReady = (task: RequestTask) => {
 }
  *
 // 流式发起
-const data: ChatData = { content: '你好', conversationId: 123 };
+const data = { content: '你好', chatId: 123 };
 await apiChatStream({ data, onTaskReady });
  *
 // 流式取消 (在组件销毁或页面关闭时调用)
@@ -76,7 +76,7 @@ task?.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请�
 - `successKey?: string` - 接口返回成功状态码的字段, 支持"a[0].b.c"的格式 (默认取 codeKey)
 - `successCode: (number | string)[]` - 成功状态码列表
 - `reloginCode: (number | string)[]` - 登录过期状态码列表
-- `resMap?: (data: any) => any` - 响应数据的转换 (如解密)
+- `resMap?: (data: any) => any` - 响应数据的转换, 如解密操作
 - `showLoading?: boolean` - 是否显示进度条，默认 `true`
 - `toastError?: boolean` - 是否提示接口异常，默认 `true`
 - `showLog?: boolean` - 是否输出日志，默认 `true`
