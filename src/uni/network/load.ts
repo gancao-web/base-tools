@@ -17,11 +17,7 @@ const cache = {
  */
 export async function downloadFile(
   option: UniApp.DownloadFileOption & { cacheFile?: boolean },
-  config?: UniApiConfig<
-    UniApp.DownloadSuccessData,
-    UniApp.GeneralCallbackResult,
-    UniApp.DownloadTask
-  >,
+  config?: UniApiConfig,
 ) {
   const { cacheFile = true, url } = option;
   const fillUrl = getFileUrl(url);
@@ -34,12 +30,10 @@ export async function downloadFile(
     return res;
   }
 
-  const { tempFilePath } = await enhanceUniApi<
-    UniApp.DownloadFileOption,
-    UniApp.DownloadSuccessData,
-    UniApp.GeneralCallbackResult,
-    UniApp.DownloadTask
-  >(uni.downloadFile, 'downloadFile')(fillOption, config);
+  const { tempFilePath } = await enhanceUniApi(uni.downloadFile, 'downloadFile')(
+    fillOption,
+    config,
+  );
 
   if (cacheFile) cache.downloadFiles[url] = tempFilePath;
 
@@ -78,18 +72,8 @@ export function loadFontFace(
  *     }),
  * });
  */
-export function uploadFile(
-  option: UniApp.UploadFileOption,
-  config?: UniApiConfig<
-    UniApp.UploadFileSuccessCallbackResult,
-    UniApp.GeneralCallbackResult,
-    UniApp.UploadTask
-  >,
-) {
-  return enhanceUniApi<
-    UniApp.UploadFileOption,
-    UniApp.UploadFileSuccessCallbackResult,
-    UniApp.GeneralCallbackResult,
-    UniApp.UploadTask
-  >(uni.uploadFile, 'uploadFile')(option, config);
+export async function uploadFile(option: UniApp.UploadFileOption, config?: UniApiConfig) {
+  const { data } = await enhanceUniApi(uni.uploadFile, 'uploadFile')(option, config);
+
+  return data;
 }

@@ -52,19 +52,15 @@ export type UploadFail = {
   status: number;
 };
 
-function upload<T>(option: UploadFileOption, config?: UploadConfig) {
-  return new Promise<T>((resolve, reject) => {
+function upload(option: UploadFileOption, config?: UploadConfig) {
+  return new Promise<string>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const { url, file, name = 'file', header, formData, timeout = 0 } = option;
 
     const fail = (error: UploadFail) => reject(error);
 
     const success = (responseText: string) => {
-      try {
-        resolve(JSON.parse(responseText) as T);
-      } catch (e) {
-        resolve(responseText as T);
-      }
+      resolve(responseText);
     };
 
     // 构造任务对象
