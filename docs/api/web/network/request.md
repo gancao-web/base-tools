@@ -28,7 +28,7 @@ setBaseToolsConfig({
 export function requestApi<T>(config: RequestConfig) {
   return request<T>({
     header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
-    // resMap: (res) => res, // 响应拦截 (可选)
+    // resMap: (res) => res, // 响应数据的转换, 如解密操作 (可选)
     resKey: 'data',
     msgKey: 'message',
     codeKey: 'status',
@@ -54,29 +54,31 @@ export function apiGoodList(config: RequestConfig<{ page: number; size: number }
 const goodList = await apiGoodList({ data: { page: 1, size: 10 } });
 
 // 4. 基于上面 requestApi 流式请求 (SSE)
-export function apiChatStream(data: { question: string }) {
-  return requestApi<void>({
+export function apiChatStream(config: RequestConfig) {
+  return requestApi({
+    ...config,
     url: '/sse/chatStream',
-    data,
     resKey: false,
     showLoading: false,
-    responseType: 'arraybuffer',
-    enableChunked: true,
+    responseType: 'arraybuffer', // 流式响应类型
+    enableChunked: true, // 开启分块传输
   });
 }
 
-const { task } = apiChatStream({ question: '你好' }); // 发起流式请求
-
-// 监听数据接收
-task.onChunkReceived((res) => {
-  console.log('ArrayBuffer', res.data); // 接收流式数据
-});
-
-// 取消监听 (流式结束、组件销毁或页面关闭时调用)
-task.offChunkReceived();
-
-// 取消请求 (中断流并抛出异常)
-task.abort();
+// 流式监听
+const onTaskReady = (task: RequestTask) => {
+   task.onChunkReceived((res) => {
+     console.log('ArrayBuffer', res.data);
+   });
+}
+ *
+// 流式发起
+const data = { content: '你好', chatId: 123 };
+await apiChatStream({ data, onTaskReady });
+ *
+// 流式取消 (在组件销毁或页面关闭时调用)
+task?.offChunkReceived(); // 取消监听,中断流式接收
+task?.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已成功)
 ```
 
 ### RequestConfigBase
@@ -103,7 +105,7 @@ task.abort();
 | cacheTime | `number` | 否 | `0` | 响应数据的缓存时间 (毫秒)，仅成功时缓存，内存缓存 |
 | enableChunked | `boolean` | 否 | `false` | 是否开启流式传输 (如 SSE) |
 | responseType | `'text' \| 'arraybuffer' \| 'json'` | 否 | `'json'` | 响应类型 |
-| resMap | `(data: unknown) => unknown` | 否 | - | 响应拦截函数 |
+| resMap | `(data: unknown) => unknown` | 否 | - | 响应数据的转换, 如解密操作 |
 
 **返回值**
 
