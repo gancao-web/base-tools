@@ -8,10 +8,10 @@
 import { uploadFile } from '@base-web-kits/base-tools-web';
 
 // 简单上传
-await uploadFile({ url: 'https://xx', file: file });
+const res = await uploadFile({ url: 'https://xx', file: file });
 
 // 带额外参数和Header
-await uploadFile({
+const res = await uploadFile({
   url: 'https://xx',
   file: file,
   name: 'avatar', // 服务端接收的字段名
@@ -20,7 +20,7 @@ await uploadFile({
 });
 
 // 监听上传进度
-await uploadFile(
+const res = await uploadFile(
   { url: 'https://xx', file: file },
   {
     onTaskReady: (task) => {
@@ -37,6 +37,9 @@ await uploadFile(
     toastSuccess: '上传成功', // 成功提示
   },
 );
+
+// 解析上传结果
+console.log('uploadFile ok', JSON.parse(res));
 ```
 
 ## 参数说明

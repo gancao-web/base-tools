@@ -129,13 +129,16 @@ function upload(option: UploadFileOption, config?: UploadConfig) {
  * @param config 配置项
  * @example
  * // 上传
- * await uploadFile({ url: 'https://xx', file: file});
+ * const res = await uploadFile({ url: 'https://xx', file: file});
  *
  * // 监听上传进度
- * await uploadFile({ url: 'https://xx', file: file}, {
+ * const res = await uploadFile({ url: 'https://xx', file: file}, {
  *   onTaskReady: (task) =>
  *     task.onProgressUpdate((res) => console.log('上传进度:', res.progress)),
  * });
+ *
+ * // 解析上传结果
+ * console.log('uploadFile ok', JSON.parse(res));
  */
 export function uploadFile(option: UploadFileOption, config?: UploadConfig & WebApiConfig) {
   return enhanceWebApi(upload, 'uploadFile')(option, config);

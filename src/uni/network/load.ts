@@ -62,18 +62,25 @@ export function loadFontFace(
  * @param option 选项文档: https://uniapp.dcloud.net.cn/api/request/network-file.html
  * @example
  * // 上传
- * await uploadFile({ url: 'https://xx', filePath: 'xx'});
+ * const res = await uploadFile({ url: 'https://xx', filePath: 'xx'});
  *
  * // 监听上传进度
- * await uploadFile({ url: 'https://xx', filePath: 'xx'}, {
+ * const res = await uploadFile({ url: 'https://xx', filePath: 'xx'}, {
  *   onTaskReady: (task) =>
  *     task.onProgressUpdate((res) => {
  *       console.log('progress', res);
  *     }),
  * });
+ *
+ * // 解析上传结果
+ * console.log('uploadFile ok', JSON.parse(res));
  */
-export async function uploadFile(option: UniApp.UploadFileOption, config?: UniApiConfig) {
-  const { data } = await enhanceUniApi(uni.uploadFile, 'uploadFile')(option, config);
-
-  return data;
+export function uploadFile(option: UniApp.UploadFileOption, config?: UniApiConfig) {
+  return enhanceUniApi(uni.uploadFile, 'uploadFile')(option, {
+    ...config,
+    resMap(res) {
+      const data = res.data;
+      return config?.resMap ? config.resMap(data) : data;
+    },
+  });
 }
