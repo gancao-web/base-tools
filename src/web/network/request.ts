@@ -437,30 +437,6 @@ export function filterRequestHeader(header: RequestConfigBase['header']) {
 }
 
 /**
- * 参数过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 、 0 这些有效值)
- */
-export function filterRequestData(data: Record<string, any>) {
-  const res: Record<string, any> = {};
-  Object.entries(data).forEach(([k, v]) => {
-    if (v !== undefined) res[k] = v;
-  });
-  return res;
-}
-
-/**
- * 请求头过滤空值 (undefined, null, ""), 不过滤0和false
- */
-export function filterRequestHeader(header: RequestConfigBase['header']) {
-  const newHeader: Record<string, string> = {};
-  if (header) {
-    Object.entries(header).forEach(([k, v]) => {
-      if (v !== undefined && v !== null && v !== '') newHeader[k] = String(v);
-    });
-  }
-  return newHeader;
-}
-
-/**
  * 日志输出
  */
 function logRequestInfo(options: {
