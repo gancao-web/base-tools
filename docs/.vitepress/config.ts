@@ -34,8 +34,8 @@ function getModuleSidebar(module: string) {
         // 如果有文件，添加到侧边栏
         if (groupItems.length > 0) {
           groupItems.sort((a, b) => a.text.localeCompare(b.text));
-          // react 和 vue 目录较少，默认展开
-          const isCollapsed = !['react', 'vue'].includes(module);
+          // 目录较少的模块，默认展开
+          const isCollapsed = !['react', 'vue', 'web'].includes(module);
           sidebar.push({ text: it.name, items: groupItems, collapsed: isCollapsed });
         }
       } else if (it.isFile() && it.name.endsWith('.md') && it.name.toLowerCase() !== 'index.md') {
