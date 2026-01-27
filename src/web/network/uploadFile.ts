@@ -111,12 +111,14 @@ function upload(option: UploadFileOption, config?: UploadConfig) {
 
     // 组装 FormData
     const data = new FormData();
-    data.append(name, file);
     if (formData) {
       Object.entries(formData).forEach(([k, v]) => {
         if (v !== undefined && v !== null) data.append(k, String(v));
       });
     }
+
+    // OSS直传的file字段必须写在最后
+    data.append(name, file);
 
     // 发送请求
     xhr.send(data);

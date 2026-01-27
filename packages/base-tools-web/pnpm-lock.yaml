@@ -9,16 +9,16 @@ importers:
   .:
     dependencies:
       '@base-web-kits/base-tools-ts':
-        specifier: ^1.1.11
-        version: 1.1.11(dayjs@1.11.19)
+        specifier: ^1.2.0
+        version: 1.2.0(dayjs@1.11.19)
       axios:
         specifier: '>=0.18.0'
         version: 1.13.2
 
 packages:
 
-  '@base-web-kits/base-tools-ts@1.1.11':
-    resolution: {integrity: sha512-6aEMR4SBkRB6Qn09mai2vSBcbrbhpNYQX1Rr4jhxHXb4Y1JA7cBkKUzFxnUS56sHCBtx3ZzfGbS84bJK2khXMQ==}
+  '@base-web-kits/base-tools-ts@1.2.0':
+    resolution: {integrity: sha512-mNU8y3+FRx6+p9evYKHkDSBcIVNxvU2geeLY0F3FuBFf/kEdjkACBU2+OktVuzd6vCDjSuXppSvG1S4MeBlPrA==}
     peerDependencies:
       dayjs: ^1.0.0
 
@@ -129,7 +129,7 @@ packages:
 
 snapshots:
 
-  '@base-web-kits/base-tools-ts@1.1.11(dayjs@1.11.19)':
+  '@base-web-kits/base-tools-ts@1.2.0(dayjs@1.11.19)':
     dependencies:
       bignumber.js: 9.3.1
       dayjs: 1.11.19
