@@ -3,12 +3,12 @@ import process from 'node:process';
 
 const commands = [
   'npm run test',
-  'tsup --config config/tsup.ts.ts',
-  'tsup --config config/tsup.web.ts',
-  'tsup --config config/tsup.uni.ts',
-  'tsup --config config/tsup.react.ts',
-  'tsup --config config/tsup.vue.ts',
-  'tsup --config config/tsup.umd.ts',
+  'tsup --config scripts/build/tsup.ts.ts',
+  'tsup --config scripts/build/tsup.web.ts',
+  'tsup --config scripts/build/tsup.uni.ts',
+  'tsup --config scripts/build/tsup.react.ts',
+  'tsup --config scripts/build/tsup.vue.ts',
+  'tsup --config scripts/build/tsup.umd.ts',
   'npx tsc --project tsconfig.build.json --emitDeclarationOnly',
   'node scripts/copy-dists.mjs',
 ];
