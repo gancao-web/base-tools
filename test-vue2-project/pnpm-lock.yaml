@@ -54,8 +54,8 @@ packages:
     resolution: {integrity: sha512-0ZrskXVEHSWIqZM/sQZ4EV3jZJXRkio/WCxaqKZP1g//CEWEPSfeZFcms4XeKBCHU0ZKnIkdJeU/kF+eRp5lBg==}
     engines: {node: '>=6.9.0'}
 
-  '@base-web-kits/base-tools-ts@1.1.11':
-    resolution: {integrity: sha512-6aEMR4SBkRB6Qn09mai2vSBcbrbhpNYQX1Rr4jhxHXb4Y1JA7cBkKUzFxnUS56sHCBtx3ZzfGbS84bJK2khXMQ==}
+  '@base-web-kits/base-tools-ts@1.2.5':
+    resolution: {integrity: sha512-lzVeUvYyIRMrIEoKGWUV43rTgWjDV2DoY6GaEmXnXFjbQ5wEaVtkzkFwzrvtGd9uekzxKl0E/apsfqc0oU2AuQ==}
     peerDependencies:
       dayjs: ^1.0.0
 
@@ -396,7 +396,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@base-web-kits/base-tools-ts@1.1.11(dayjs@1.11.19)':
+  '@base-web-kits/base-tools-ts@1.2.5(dayjs@1.11.19)':
     dependencies:
       bignumber.js: 9.3.1
       dayjs: 1.11.19
@@ -412,7 +412,7 @@ snapshots:
 
   '@base-web-kits/base-tools-web@file:../packages/base-tools-web(dayjs@1.11.19)':
     dependencies:
-      '@base-web-kits/base-tools-ts': 1.1.11(dayjs@1.11.19)
+      '@base-web-kits/base-tools-ts': 1.2.5(dayjs@1.11.19)
     transitivePeerDependencies:
       - dayjs
 

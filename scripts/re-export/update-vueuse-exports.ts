@@ -27,17 +27,18 @@ try {
 }
 const version = pkg.version;
 
-const targetFile = path.resolve(__dirname, '../src/vue/hooks/index.ts');
+// 更新 re-export 文件, 通过git diff 查看差异, 就能知道新增了哪些函数, 从而更新文档
+const targetFile1 = path.resolve(__dirname, './docs/vueuse.ts');
 
 const keys = Object.keys(vueUse).sort();
 
-const content = `/**
+const content1 = `/**
  * re-export 全量 vueuse
  * 版本: ${version}
  * 文档: https://vueuse.nodejs.cn/
  * 目的: 提供hooks能力,收敛依赖版本
  *
- * 注意: 此文件由 scripts/update-vueuse-exports.ts 生成, 请勿手动修改.
+ * 注意: 此文件由 scripts/re-export/update-vueuse-exports.ts 生成, 请勿手动修改.
  * 如需更新, 请先升级@vueuse/core, 然后运行: npm run update:vueuse
  */
 export {
@@ -48,7 +49,25 @@ ${keys.map((key) => `  ${key},`).join('\n')}
 export type * from '@vueuse/core';
 `;
 
-fs.writeFileSync(targetFile, content, 'utf-8');
-console.log(`Successfully updated ${targetFile}`);
-console.log(`Current @vueuse/core version: ${version}`);
+fs.writeFileSync(targetFile1, content1, 'utf-8');
+console.log(`Successfully updated ${targetFile1}`);
 console.log(`Total exported values: ${keys.length}`);
+
+// 更新 re-export 文件, 通过git diff 查看差异, 就能知道新增了哪些函数, 从而更新文档
+const targetFile2 = path.resolve(__dirname, '../../src/vue/hooks/index.ts');
+
+const content2 = `/**
+ * re-export 全量 vueuse
+ * 版本: ${version}
+ * 文档: https://vueuse.nodejs.cn/
+ * 目的: 提供hooks能力,收敛依赖版本
+ *
+ * 注意: 此文件由 scripts/re-export/update-vueuse-exports.ts 生成, 请勿手动修改.
+ * 如需更新, 请先升级@vueuse/core, 然后运行: npm run update:vueuse
+ */
+export * from '@vueuse/core';
+`;
+
+fs.writeFileSync(targetFile2, content2, 'utf-8');
+console.log(`Successfully updated ${targetFile2}`);
+console.log(`Current @vueuse/core version: ${version}`);

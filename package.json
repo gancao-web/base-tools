@@ -1,18 +1,18 @@
 {
   "name": "@base-web-kits/base-tools",
-  "version": "1.2.0",
+  "version": "1.2.6",
   "type": "module",
   "sideEffects": false,
   "scripts": {
     "lint": "tsc --noEmit && eslint ./src --ext .ts,.js --fix && prettier --write .",
     "lint:lint-staged": "tsc --noEmit && lint-staged",
     "test": "vitest run",
-    "build": "node scripts/build.mjs",
-    "test:projects": "node scripts/test-projects.mjs",
+    "build": "node scripts/build/index.mjs",
     "version:major": "node scripts/version-bump.mjs major",
     "version:minor": "node scripts/version-bump.mjs minor",
     "version:patch": "node scripts/version-bump.mjs patch",
     "version:alpha": "node scripts/version-bump.mjs alpha",
+    "test:projects": "node scripts/test-projects.mjs",
     "publish:ts": "cd packages/base-tools-ts && npm publish --access public --registry https://registry.npmjs.org",
     "publish:ts:alpha": "cd packages/base-tools-ts && npm publish --access public --tag alpha --registry https://registry.npmjs.org",
     "publish:web": "cd packages/base-tools-web && npm publish --access public --registry https://registry.npmjs.org",
@@ -29,9 +29,9 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "tag": "node scripts/tag-release.mjs",
-    "update:es-toolkit": "npx tsx scripts/update-es-toolkit-exports.ts",
-    "update:ahooks": "npx tsx scripts/update-ahooks-exports.ts",
-    "update:vueuse": "npx tsx scripts/update-vueuse-exports.ts"
+    "update:es-toolkit": "npx tsx scripts/re-export/update-es-toolkit-exports.ts",
+    "update:ahooks": "npx tsx scripts/re-export/update-ahooks-exports.ts",
+    "update:vueuse": "npx tsx scripts/re-export/update-vueuse-exports.ts"
   },
   "exports": {
     "./ts": {

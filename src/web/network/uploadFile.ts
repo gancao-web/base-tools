@@ -52,19 +52,15 @@ export type UploadFail = {
   status: number;
 };
 
-function upload<T>(option: UploadFileOption, config?: UploadConfig) {
-  return new Promise<T>((resolve, reject) => {
+function upload(option: UploadFileOption, config?: UploadConfig) {
+  return new Promise<string>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const { url, file, name = 'file', header, formData, timeout = 0 } = option;
 
     const fail = (error: UploadFail) => reject(error);
 
     const success = (responseText: string) => {
-      try {
-        resolve(JSON.parse(responseText) as T);
-      } catch (e) {
-        resolve(responseText as T);
-      }
+      resolve(responseText);
     };
 
     // 构造任务对象
@@ -115,12 +111,14 @@ function upload<T>(option: UploadFileOption, config?: UploadConfig) {
 
     // 组装 FormData
     const data = new FormData();
-    data.append(name, file);
     if (formData) {
       Object.entries(formData).forEach(([k, v]) => {
         if (v !== undefined && v !== null) data.append(k, String(v));
       });
     }
+
+    // OSS直传的file字段必须写在最后
+    data.append(name, file);
 
     // 发送请求
     xhr.send(data);
@@ -133,13 +131,16 @@ function upload<T>(option: UploadFileOption, config?: UploadConfig) {
  * @param config 配置项
  * @example
  * // 上传
- * await uploadFile({ url: 'https://xx', file: file});
+ * const res = await uploadFile({ url: 'https://xx', file: file});
  *
  * // 监听上传进度
- * await uploadFile({ url: 'https://xx', file: file}, {
+ * const res = await uploadFile({ url: 'https://xx', file: file}, {
  *   onTaskReady: (task) =>
  *     task.onProgressUpdate((res) => console.log('上传进度:', res.progress)),
  * });
+ *
+ * // 解析上传结果
+ * console.log('uploadFile ok', JSON.parse(res));
  */
 export function uploadFile(option: UploadFileOption, config?: UploadConfig & WebApiConfig) {
   return enhanceWebApi(upload, 'uploadFile')(option, config);

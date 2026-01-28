@@ -17,11 +17,7 @@ const cache = {
  */
 export async function downloadFile(
   option: UniApp.DownloadFileOption & { cacheFile?: boolean },
-  config?: UniApiConfig<
-    UniApp.DownloadSuccessData,
-    UniApp.GeneralCallbackResult,
-    UniApp.DownloadTask
-  >,
+  config?: UniApiConfig,
 ) {
   const { cacheFile = true, url } = option;
   const fillUrl = getFileUrl(url);
@@ -34,12 +30,10 @@ export async function downloadFile(
     return res;
   }
 
-  const { tempFilePath } = await enhanceUniApi<
-    UniApp.DownloadFileOption,
-    UniApp.DownloadSuccessData,
-    UniApp.GeneralCallbackResult,
-    UniApp.DownloadTask
-  >(uni.downloadFile, 'downloadFile')(fillOption, config);
+  const { tempFilePath } = await enhanceUniApi(uni.downloadFile, 'downloadFile')(
+    fillOption,
+    config,
+  );
 
   if (cacheFile) cache.downloadFiles[url] = tempFilePath;
 
@@ -68,28 +62,25 @@ export function loadFontFace(
  * @param option 选项文档: https://uniapp.dcloud.net.cn/api/request/network-file.html
  * @example
  * // 上传
- * await uploadFile({ url: 'https://xx', filePath: 'xx'});
+ * const res = await uploadFile({ url: 'https://xx', filePath: 'xx'});
  *
  * // 监听上传进度
- * await uploadFile({ url: 'https://xx', filePath: 'xx'}, {
+ * const res = await uploadFile({ url: 'https://xx', filePath: 'xx'}, {
  *   onTaskReady: (task) =>
  *     task.onProgressUpdate((res) => {
  *       console.log('progress', res);
  *     }),
  * });
+ *
+ * // 解析上传结果
+ * console.log('uploadFile ok', JSON.parse(res));
  */
-export function uploadFile(
-  option: UniApp.UploadFileOption,
-  config?: UniApiConfig<
-    UniApp.UploadFileSuccessCallbackResult,
-    UniApp.GeneralCallbackResult,
-    UniApp.UploadTask
-  >,
-) {
-  return enhanceUniApi<
-    UniApp.UploadFileOption,
-    UniApp.UploadFileSuccessCallbackResult,
-    UniApp.GeneralCallbackResult,
-    UniApp.UploadTask
-  >(uni.uploadFile, 'uploadFile')(option, config);
+export function uploadFile(option: UniApp.UploadFileOption, config?: UniApiConfig) {
+  return enhanceUniApi(uni.uploadFile, 'uploadFile')(option, {
+    ...config,
+    resMap(res) {
+      const data = res.data;
+      return config?.resMap ? config.resMap(data) : data;
+    },
+  });
 }
