@@ -16,7 +16,7 @@ importers:
         version: file:../packages/base-tools-ts(dayjs@1.11.19)
       '@base-web-kits/base-tools-web':
         specifier: file:../packages/base-tools-web
-        version: file:../packages/base-tools-web(axios@1.13.2)(dayjs@1.11.19)
+        version: file:../packages/base-tools-web
       antd:
         specifier: ^4.24.1
         version: 4.24.16(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -161,11 +161,6 @@ packages:
     peerDependencies:
       react: '>=18'
 
-  '@base-web-kits/base-tools-ts@1.2.5':
-    resolution: {integrity: sha512-lzVeUvYyIRMrIEoKGWUV43rTgWjDV2DoY6GaEmXnXFjbQ5wEaVtkzkFwzrvtGd9uekzxKl0E/apsfqc0oU2AuQ==}
-    peerDependencies:
-      dayjs: ^1.0.0
-
   '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts':
     resolution: {directory: ../packages/base-tools-ts, type: directory}
     peerDependencies:
@@ -173,11 +168,6 @@ packages:
 
   '@base-web-kits/base-tools-web@file:../packages/base-tools-web':
     resolution: {directory: ../packages/base-tools-web, type: directory}
-    peerDependencies:
-      axios: '>=0.18.0'
-    peerDependenciesMeta:
-      axios:
-        optional: true
 
   '@ctrl/tinycolor@3.6.1':
     resolution: {integrity: sha512-SITSV6aIXsuVNV3f3O0f2n/cgyEDWoSqtZMYiAmcsYHydcKrOz3gUxB/iXd/Qf08+IZX4KpgNbvUdMBmWz+kcA==}
@@ -1097,13 +1087,6 @@ snapshots:
     transitivePeerDependencies:
       - react-dom
 
-  '@base-web-kits/base-tools-ts@1.2.5(dayjs@1.11.19)':
-    dependencies:
-      bignumber.js: 9.3.1
-      dayjs: 1.11.19
-      es-toolkit: 1.44.0
-      mitt: 3.0.1
-
   '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts(dayjs@1.11.19)':
     dependencies:
       bignumber.js: 9.3.1
@@ -1111,13 +1094,7 @@ snapshots:
       es-toolkit: 1.44.0
       mitt: 3.0.1
 
-  '@base-web-kits/base-tools-web@file:../packages/base-tools-web(axios@1.13.2)(dayjs@1.11.19)':
-    dependencies:
-      '@base-web-kits/base-tools-ts': 1.2.5(dayjs@1.11.19)
-    optionalDependencies:
-      axios: 1.13.2
-    transitivePeerDependencies:
-      - dayjs
+  '@base-web-kits/base-tools-web@file:../packages/base-tools-web': {}
 
   '@ctrl/tinycolor@3.6.1': {}
 
