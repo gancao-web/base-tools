@@ -8,11 +8,11 @@
 import { uploadFile } from '@base-web-kits/base-tools-uni';
 
 // 上传
-const res = await uploadFile({ url: 'https://xx', file: file });
+const res = await uploadFile({ url: 'https://xx', file, data: {} });
 
 // 监听上传进度
 const res = await uploadFile(
-  { url: 'https://xx', file: file },
+  { url: 'https://xx', file, data: {} },
   {
     onTaskReady: (task) => task.onProgressUpdate((res) => console.log('上传进度:', res.progress)),
   },
