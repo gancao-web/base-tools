@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-uni",
-  "version": "1.2.6",
+  "version": "1.2.10",
   "sideEffects": false,
   "description": "Independent Uni-app utilities package built from src/uni.",
   "keywords": [
@@ -24,9 +24,6 @@
     "README.md",
     "src"
   ],
-  "dependencies": {
-    "@base-web-kits/base-tools-ts": "^1.2.0"
-  },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   }

@@ -13,7 +13,7 @@ importers:
         version: file:../packages/base-tools-ts(dayjs@1.11.19)
       '@base-web-kits/base-tools-web':
         specifier: file:../packages/base-tools-web
-        version: file:../packages/base-tools-web(dayjs@1.11.19)
+        version: file:../packages/base-tools-web
     devDependencies:
       '@types/node':
         specifier: ^20.0.0
@@ -27,11 +27,6 @@ importers:
 
 packages:
 
-  '@base-web-kits/base-tools-ts@1.2.5':
-    resolution: {integrity: sha512-lzVeUvYyIRMrIEoKGWUV43rTgWjDV2DoY6GaEmXnXFjbQ5wEaVtkzkFwzrvtGd9uekzxKl0E/apsfqc0oU2AuQ==}
-    peerDependencies:
-      dayjs: ^1.0.0
-
   '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts':
     resolution: {directory: ../packages/base-tools-ts, type: directory}
     peerDependencies:
@@ -39,11 +34,6 @@ packages:
 
   '@base-web-kits/base-tools-web@file:../packages/base-tools-web':
     resolution: {directory: ../packages/base-tools-web, type: directory}
-    peerDependencies:
-      axios: '>=0.18.0'
-    peerDependenciesMeta:
-      axios:
-        optional: true
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -394,13 +384,6 @@ packages:
 
 snapshots:
 
-  '@base-web-kits/base-tools-ts@1.2.5(dayjs@1.11.19)':
-    dependencies:
-      bignumber.js: 9.3.1
-      dayjs: 1.11.19
-      es-toolkit: 1.44.0
-      mitt: 3.0.1
-
   '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts(dayjs@1.11.19)':
     dependencies:
       bignumber.js: 9.3.1
@@ -408,11 +391,7 @@ snapshots:
       es-toolkit: 1.44.0
       mitt: 3.0.1
 
-  '@base-web-kits/base-tools-web@file:../packages/base-tools-web(dayjs@1.11.19)':
-    dependencies:
-      '@base-web-kits/base-tools-ts': 1.2.5(dayjs@1.11.19)
-    transitivePeerDependencies:
-      - dayjs
+  '@base-web-kits/base-tools-web@file:../packages/base-tools-web': {}
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true

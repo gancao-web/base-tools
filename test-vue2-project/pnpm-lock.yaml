@@ -13,7 +13,7 @@ importers:
         version: file:../packages/base-tools-ts(dayjs@1.11.19)
       '@base-web-kits/base-tools-web':
         specifier: file:../packages/base-tools-web
-        version: file:../packages/base-tools-web(dayjs@1.11.19)
+        version: file:../packages/base-tools-web
       vue:
         specifier: ^2.7.7
         version: 2.7.16
@@ -54,11 +54,6 @@ packages:
     resolution: {integrity: sha512-0ZrskXVEHSWIqZM/sQZ4EV3jZJXRkio/WCxaqKZP1g//CEWEPSfeZFcms4XeKBCHU0ZKnIkdJeU/kF+eRp5lBg==}
     engines: {node: '>=6.9.0'}
 
-  '@base-web-kits/base-tools-ts@1.2.5':
-    resolution: {integrity: sha512-lzVeUvYyIRMrIEoKGWUV43rTgWjDV2DoY6GaEmXnXFjbQ5wEaVtkzkFwzrvtGd9uekzxKl0E/apsfqc0oU2AuQ==}
-    peerDependencies:
-      dayjs: ^1.0.0
-
   '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts':
     resolution: {directory: ../packages/base-tools-ts, type: directory}
     peerDependencies:
@@ -66,11 +61,6 @@ packages:
 
   '@base-web-kits/base-tools-web@file:../packages/base-tools-web':
     resolution: {directory: ../packages/base-tools-web, type: directory}
-    peerDependencies:
-      axios: '>=0.18.0'
-    peerDependenciesMeta:
-      axios:
-        optional: true
 
   '@esbuild/android-arm@0.15.18':
     resolution: {integrity: sha512-5GT+kcs2WVGjVs7+boataCkO5Fg0y4kCjzkB5bAip7H4jfnOS3dA6KPiww9W1OEKTKeAcUVhdZGvgI65OXmUnw==}
@@ -396,13 +386,6 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@base-web-kits/base-tools-ts@1.2.5(dayjs@1.11.19)':
-    dependencies:
-      bignumber.js: 9.3.1
-      dayjs: 1.11.19
-      es-toolkit: 1.44.0
-      mitt: 3.0.1
-
   '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts(dayjs@1.11.19)':
     dependencies:
       bignumber.js: 9.3.1
@@ -410,11 +393,7 @@ snapshots:
       es-toolkit: 1.44.0
       mitt: 3.0.1
 
-  '@base-web-kits/base-tools-web@file:../packages/base-tools-web(dayjs@1.11.19)':
-    dependencies:
-      '@base-web-kits/base-tools-ts': 1.2.5(dayjs@1.11.19)
-    transitivePeerDependencies:
-      - dayjs
+  '@base-web-kits/base-tools-web@file:../packages/base-tools-web': {}
 
   '@esbuild/android-arm@0.15.18':
     optional: true
