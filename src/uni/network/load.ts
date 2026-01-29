@@ -60,6 +60,7 @@ export function loadFontFace(
 /**
  * 上传文件
  * @param option 选项文档: https://uniapp.dcloud.net.cn/api/request/network-file.html
+ * @param option.data 与FormData相同, 目的是兼容data的写法, 保持和web端一致
  * @example
  * // 上传
  * const res = await uploadFile({ url: 'https://xx', filePath: 'xx'});
@@ -75,12 +76,27 @@ export function loadFontFace(
  * // 解析上传结果
  * console.log('uploadFile ok', JSON.parse(res));
  */
-export function uploadFile(option: UniApp.UploadFileOption, config?: UniApiConfig) {
-  return enhanceUniApi(uni.uploadFile, 'uploadFile')(option, {
-    ...config,
-    resMap(res) {
-      const data = res.data;
-      return config?.resMap ? config.resMap(data) : data;
+export function uploadFile(
+  option: UniApp.UploadFileOption & {
+    /** 与FormData相同, 目的是兼容data的写法, 保持和web端一致 */
+    data?: Record<string, string | number>;
+  },
+  config?: UniApiConfig,
+) {
+  return enhanceUniApi(uni.uploadFile, 'uploadFile')(
+    {
+      ...option,
+      formData: {
+        ...option.data,
+        ...option.formData,
+      },
     },
-  });
+    {
+      ...config,
+      resMap(res) {
+        const data = res.data;
+        return config?.resMap ? config.resMap(data) : data;
+      },
+    },
+  );
 }
