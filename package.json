@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools",
-  "version": "1.2.6",
+  "version": "1.2.10",
   "type": "module",
   "sideEffects": false,
   "scripts": {
@@ -116,7 +116,6 @@
   "dependencies": {
     "@vueuse/core": "14.1.0",
     "ahooks": "3.9.6",
-    "axios": "^1.13.1",
     "bignumber.js": "^9.1.2",
     "dayjs": "^1.11.19",
     "es-toolkit": "1.44.0",

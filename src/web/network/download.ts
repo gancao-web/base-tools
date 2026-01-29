@@ -1,5 +1,3 @@
-import type { AxiosResponse } from 'axios';
-
 /**
  * 下载文件
  * @param url 完整的下载地址 | base64字符串 | Blob对象
@@ -50,31 +48,6 @@ export async function download(url: string | Blob, fileName = '') {
       setTimeout(() => URL.revokeObjectURL(blobUrl), 100); // Safari 需要延迟 revoke
     }
   }
-}
-
-/**
- * 解析Axios返回的Blob数据
- * @param res Axios响应对象 (responseType='blob')
- * @returns 包含blob数据和文件名的对象 { blob, fileName }
- * @example
- * const res = await axios.get(url, { responseType: 'blob' });
- * const { blob, fileName } = await parseAxiosBlob(res);
- * download(blob, fileName);
- */
-export async function parseAxiosBlob(res: AxiosResponse<Blob>) {
-  const { data, headers, status, statusText, config } = res;
-
-  if (status < 200 || status >= 300) throw new Error(`${status}，${statusText}：${config.url}`);
-
-  // 抛出json错误
-  if (data.type.includes('application/json')) {
-    const txt = await data.text();
-    throw JSON.parse(txt);
-  }
-
-  // 解析文件名
-  const fileName = getDispositionFileName(headers['content-disposition']);
-  return { blob: data, fileName };
 }
 
 /**

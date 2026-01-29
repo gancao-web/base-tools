@@ -1,4 +1,4 @@
-import { cloneDeep } from '@base-web-kits/base-tools-ts';
+import { cloneDeep } from 'es-toolkit';
 import { getBaseToolsConfig } from '../index';
 import type { AppLogInfo } from '../index';
 

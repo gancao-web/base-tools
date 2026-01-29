@@ -41,9 +41,7 @@
     ],
     // 配置路径别名，方便在项目中导入模块, 仅本地开发时使用
     "baseUrl": ".",
-    "paths": {
-      "@base-web-kits/base-tools-ts": ["src/ts/index.ts"]
-    }
+    "paths": {}
   },
 
   // 编译/类型检查包含的源码目录
