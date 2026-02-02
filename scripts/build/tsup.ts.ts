@@ -12,5 +12,10 @@ export default defineConfig({
   // 在npm的dependencies也需声明依赖,仅提供ts类型资源
   noExternal: ['es-toolkit'],
   target: 'es2015',
+  outExtension({ format }) {
+    return {
+      js: format === 'cjs' ? '.cjs' : '.mjs',
+    };
+  },
   tsconfig: 'tsconfig.build.json',
 });
