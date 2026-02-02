@@ -52,7 +52,7 @@ console.log('uploadFile ok', JSON.parse(res));
 | file | `File` | 是 | - | 要上传的文件对象 |
 | name | `string` | 否 | `'file'` | 文件对应的 key (服务端通过这个 key 获取文件的二进制内容) |
 | header | `Record<string, string \| number>` | 否 | - | 请求头 |
-| formData | `Record<string, string \| number>` | 否 | - | 额外的 formData 参数 |
+| data | `Record<string, string \| number>` | 否 | - | 请求参数 |
 | timeout | `number` | 否 | `0` | 超时时间，单位 ms，默认 0（不超时） |
 
 ### config (UploadConfig & WebApiConfig)

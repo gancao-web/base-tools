@@ -17,8 +17,8 @@ export type UploadFileOption = {
   /** 请求头 */
   header?: Record<string, string | number>;
 
-  /** 额外的formData参数 */
-  formData?: Record<string, string | number>;
+  /** 请求参数 */
+  data?: Record<string, string | number>;
 
   /** 超时时间，单位 ms，默认 0（不超时） */
   timeout?: number;
@@ -55,7 +55,7 @@ export type UploadFail = {
 function upload(option: UploadFileOption, config?: UploadConfig) {
   return new Promise<string>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    const { url, file, name = 'file', header, formData, timeout = 0 } = option;
+    const { url, file, name = 'file', header, data, timeout = 0 } = option;
 
     const fail = (error: UploadFail) => reject(error);
 
@@ -110,18 +110,18 @@ function upload(option: UploadFileOption, config?: UploadConfig) {
     xhr.timeout = timeout;
 
     // 组装 FormData
-    const data = new FormData();
-    if (formData) {
-      Object.entries(formData).forEach(([k, v]) => {
-        if (v !== undefined && v !== null) data.append(k, String(v));
+    const formData = new FormData();
+    if (data) {
+      Object.entries(data).forEach(([k, v]) => {
+        if (v !== undefined && v !== null) formData.append(k, String(v));
       });
     }
 
     // OSS直传的file字段必须写在最后
-    data.append(name, file);
+    formData.append(name, file);
 
     // 发送请求
-    xhr.send(data);
+    xhr.send(formData);
   });
 }
 
