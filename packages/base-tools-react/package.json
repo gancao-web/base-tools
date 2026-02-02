@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-react",
-  "version": "1.3.0",
+  "version": "1.3.3",
   "sideEffects": false,
   "description": "Independent React utilities package built from src/react.",
   "keywords": [
@@ -10,12 +10,12 @@
   ],
   "license": "MIT",
   "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
+      "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     }
   },
