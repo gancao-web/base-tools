@@ -1,10 +1,10 @@
 import dayjs from 'dayjs';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import advancedFormat from 'dayjs/plugin/advancedFormat';
-import 'dayjs/locale/zh-cn';
+import customParseFormat from 'dayjs/plugin/customParseFormat.js';
+import utc from 'dayjs/plugin/utc.js';
+import timezone from 'dayjs/plugin/timezone.js';
+import relativeTime from 'dayjs/plugin/relativeTime.js';
+import advancedFormat from 'dayjs/plugin/advancedFormat.js';
+import 'dayjs/locale/zh-cn.js';
 import { zeroPad } from '../number';
 
 dayjs.extend(customParseFormat);
