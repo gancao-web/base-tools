@@ -7,7 +7,10 @@
 ```ts
 import { unzipWith } from '@base-web-kits/base-tools-ts';
 
-const zipped = [[1, 10, 100], [2, 20, 200]];
+const zipped = [
+  [1, 10, 100],
+  [2, 20, 200],
+];
 unzipWith(zipped, (a, b) => a + b);
 // 结果: [3, 30, 300]
 ```

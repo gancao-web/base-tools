@@ -6,10 +6,11 @@
 
 ## 示例
 
-```ts
+````ts
 import { cloneFnJSON } from '@base-web-kits/base-tools-vue';
 
 const cloned = cloneFnJSON(() => ({ a: 1 }));
 ```来源
 
 [VueUse](https://vueuse.org/functions/cloneFnJSON/)
+````

@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { useWebWorkerFn } from '@base-web-kits/base-tools-vue';
 
 const { workerFn, workerStatus, workerTerminate } = useWebWorkerFn(
@@ -17,7 +17,7 @@ const { workerFn, workerStatus, workerTerminate } = useWebWorkerFn(
 
 // const result = await workerFn([1, 2, 3]); // 6
 ``` 示例代码
-```
+````
 
 ## 来源
 

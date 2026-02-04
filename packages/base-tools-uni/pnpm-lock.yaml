@@ -5,7 +5,6 @@ settings:
   excludeLinksFromLockfile: false
 
 importers:
-
   .:
     dependencies:
       '@base-web-kits/base-tools-ts':
@@ -13,26 +12,39 @@ importers:
         version: 1.2.0(dayjs@1.11.19)
 
 packages:
-
   '@base-web-kits/base-tools-ts@1.2.0':
-    resolution: {integrity: sha512-mNU8y3+FRx6+p9evYKHkDSBcIVNxvU2geeLY0F3FuBFf/kEdjkACBU2+OktVuzd6vCDjSuXppSvG1S4MeBlPrA==}
+    resolution:
+      {
+        integrity: sha512-mNU8y3+FRx6+p9evYKHkDSBcIVNxvU2geeLY0F3FuBFf/kEdjkACBU2+OktVuzd6vCDjSuXppSvG1S4MeBlPrA==,
+      }
     peerDependencies:
       dayjs: ^1.0.0
 
   bignumber.js@9.3.1:
-    resolution: {integrity: sha512-Ko0uX15oIUS7wJ3Rb30Fs6SkVbLmPBAKdlm7q9+ak9bbIeFf0MwuBsQV6z7+X768/cHsfg+WlysDWJcmthjsjQ==}
+    resolution:
+      {
+        integrity: sha512-Ko0uX15oIUS7wJ3Rb30Fs6SkVbLmPBAKdlm7q9+ak9bbIeFf0MwuBsQV6z7+X768/cHsfg+WlysDWJcmthjsjQ==,
+      }
 
   dayjs@1.11.19:
-    resolution: {integrity: sha512-t5EcLVS6QPBNqM2z8fakk/NKel+Xzshgt8FFKAn+qwlD1pzZWxh0nVCrvFK7ZDb6XucZeF9z8C7CBWTRIVApAw==}
+    resolution:
+      {
+        integrity: sha512-t5EcLVS6QPBNqM2z8fakk/NKel+Xzshgt8FFKAn+qwlD1pzZWxh0nVCrvFK7ZDb6XucZeF9z8C7CBWTRIVApAw==,
+      }
 
   es-toolkit@1.44.0:
-    resolution: {integrity: sha512-6penXeZalaV88MM3cGkFZZfOoLGWshWWfdy0tWw/RlVVyhvMaWSBTOvXNeiW3e5FwdS5ePW0LGEu17zT139ktg==}
+    resolution:
+      {
+        integrity: sha512-6penXeZalaV88MM3cGkFZZfOoLGWshWWfdy0tWw/RlVVyhvMaWSBTOvXNeiW3e5FwdS5ePW0LGEu17zT139ktg==,
+      }
 
   mitt@3.0.1:
-    resolution: {integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==}
+    resolution:
+      {
+        integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==,
+      }
 
 snapshots:
-
   '@base-web-kits/base-tools-ts@1.2.0(dayjs@1.11.19)':
     dependencies:
       bignumber.js: 9.3.1

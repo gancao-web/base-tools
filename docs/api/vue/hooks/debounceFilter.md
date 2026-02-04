@@ -6,12 +6,12 @@
 
 ## 示例
 
-```ts
+````ts
 import { debounceFilter, watchWithFilter } from '@base-web-kits/base-tools-vue';
 
 watchWithFilter(source, cb, { eventFilter: debounceFilter(1000) });
 ``` 示例代码
-```
+````
 
 ## 来源
 

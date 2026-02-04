@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { notNullish } from '@base-web-kits/base-tools-vue';
 
 if (notNullish(value)) {
@@ -15,3 +15,4 @@ if (notNullish(value)) {
 ```来源
 
 [VueUse](https://vueuse.org/functions/notNullish/)
+````

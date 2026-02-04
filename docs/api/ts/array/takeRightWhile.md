@@ -8,12 +8,12 @@
 import { takeRightWhile } from '@base-web-kits/base-tools-ts';
 
 const users = [
-  { 'user': 'barney',  'active': true },
-  { 'user': 'fred',    'active': false },
-  { 'user': 'pebbles', 'active': false }
+  { user: 'barney', active: true },
+  { user: 'fred', active: false },
+  { user: 'pebbles', active: false },
 ];
 
-takeRightWhile(users, o => !o.active);
+takeRightWhile(users, (o) => !o.active);
 // 结果: objects for ['fred', 'pebbles']
 ```
 

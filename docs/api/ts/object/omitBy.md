@@ -7,7 +7,7 @@
 ```ts
 import { omitBy } from '@base-web-kits/base-tools-ts';
 
-const object = { 'a': 1, 'b': '2', 'c': 3 };
+const object = { a: 1, b: '2', c: 3 };
 
 omitBy(object, isNumber);
 // 结果: { 'b': '2' }

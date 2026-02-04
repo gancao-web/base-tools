@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { watchDebounced } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
@@ -22,7 +22,7 @@ watchDebounced(
 
 count.value++; // Debounced
 ``` 示例代码
-```
+````
 
 ## 来源
 

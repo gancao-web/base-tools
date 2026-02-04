@@ -7,8 +7,8 @@
 ```ts
 import { meanBy } from '@base-web-kits/base-tools-ts';
 
-const objects = [{ 'n': 4 }, { 'n': 2 }, { 'n': 8 }, { 'n': 6 }];
-meanBy(objects, o => o.n);
+const objects = [{ n: 4 }, { n: 2 }, { n: 8 }, { n: 6 }];
+meanBy(objects, (o) => o.n);
 // 结果: 5
 ```
 

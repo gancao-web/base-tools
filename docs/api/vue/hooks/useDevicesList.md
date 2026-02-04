@@ -9,11 +9,7 @@
 ```ts
 import { useDevicesList } from '@base-web-kits/base-tools-vue';
 
-const {
-  videoInputs: cameras,
-  audioInputs: microphones,
-  audioOutputs: speakers,
-} = useDevicesList();
+const { videoInputs: cameras, audioInputs: microphones, audioOutputs: speakers } = useDevicesList();
 ```
 
 ## 来源

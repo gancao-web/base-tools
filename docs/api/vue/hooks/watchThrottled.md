@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { watchThrottled } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
@@ -23,7 +23,7 @@ watchThrottled(
 count.value++; // Triggered
 count.value++; // Throttled
 ``` 示例代码
-```
+````
 
 ## 来源
 

@@ -8,10 +8,10 @@
 import { orderBy } from '@base-web-kits/base-tools-ts';
 
 const users = [
-  { 'user': 'fred',   'age': 48 },
-  { 'user': 'barney', 'age': 34 },
-  { 'user': 'fred',   'age': 40 },
-  { 'user': 'barney', 'age': 36 }
+  { user: 'fred', age: 48 },
+  { user: 'barney', age: 34 },
+  { user: 'fred', age: 40 },
+  { user: 'barney', age: 36 },
 ];
 
 // 以 `user` 升序，`age` 降序排序。

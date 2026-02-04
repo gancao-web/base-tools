@@ -12,10 +12,7 @@ import { ref } from 'vue';
 
 const source = ref(0);
 
-const { trigger, ignoreUpdates } = watchTriggerable(
-  source,
-  (v) => console.log(`Changed to ${v}`),
-);
+const { trigger, ignoreUpdates } = watchTriggerable(source, (v) => console.log(`Changed to ${v}`));
 
 source.value = 1; // Log: Changed to 1
 

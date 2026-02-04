@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { watchAtMost } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
@@ -27,3 +27,4 @@ count.value++; // Ignored
 ```来源
 
 [VueUse](https://vueuse.org/functions/watchAtMost/)
+````

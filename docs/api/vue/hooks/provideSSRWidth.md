@@ -6,12 +6,12 @@
 
 ## 示例
 
-```ts
+````ts
 import { provideSSRWidth } from '@base-web-kits/base-tools-vue';
 
 provideSSRWidth(768);
 ``` 示例代码
-```
+````
 
 ## 来源
 

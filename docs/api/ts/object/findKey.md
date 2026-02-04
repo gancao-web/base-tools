@@ -8,12 +8,12 @@
 import { findKey } from '@base-web-kits/base-tools-ts';
 
 const users = {
-  'barney':  { 'age': 36, 'active': true },
-  'fred':    { 'age': 40, 'active': false },
-  'pebbles': { 'age': 1,  'active': true }
+  barney: { age: 36, active: true },
+  fred: { age: 40, active: false },
+  pebbles: { age: 1, active: true },
 };
 
-findKey(users, o => o.age < 40);
+findKey(users, (o) => o.age < 40);
 // 结果: 'barney' (或者 'pebbles'，取决于遍历顺序)
 ```
 

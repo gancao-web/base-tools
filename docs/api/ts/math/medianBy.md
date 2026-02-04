@@ -7,8 +7,8 @@
 ```ts
 import { medianBy } from '@base-web-kits/base-tools-ts';
 
-const objects = [{ 'n': 1 }, { 'n': 2 }, { 'n': 3 }];
-medianBy(objects, o => o.n);
+const objects = [{ n: 1 }, { n: 2 }, { n: 3 }];
+medianBy(objects, (o) => o.n);
 // 结果: 2
 ```
 

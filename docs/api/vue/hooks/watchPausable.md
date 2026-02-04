@@ -12,9 +12,8 @@ import { ref } from 'vue';
 
 const source = ref('foo');
 
-const { stop, pause, resume, isActive } = watchPausable(
-  source,
-  (v) => console.log(`Changed to ${v}`),
+const { stop, pause, resume, isActive } = watchPausable(source, (v) =>
+  console.log(`Changed to ${v}`),
 );
 
 source.value = 'bar'; // Log: Changed to bar

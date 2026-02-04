@@ -7,8 +7,8 @@
 ```ts
 import { memoize } from '@base-web-kits/base-tools-ts';
 
-const object = { 'a': 1, 'b': 2 };
-const other = { 'c': 3, 'd': 4 };
+const object = { a: 1, b: 2 };
+const other = { c: 3, d: 4 };
 
 const values = memoize(Object.values);
 values(object);

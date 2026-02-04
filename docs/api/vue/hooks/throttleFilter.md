@@ -11,9 +11,13 @@ import { throttleFilter, watchWithFilter } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
 const count = ref(0);
-watchWithFilter(count, () => {
-  console.log('changed');
-}, { eventFilter: throttleFilter(1000) });
+watchWithFilter(
+  count,
+  () => {
+    console.log('changed');
+  },
+  { eventFilter: throttleFilter(1000) },
+);
 ```
 
 ## 来源

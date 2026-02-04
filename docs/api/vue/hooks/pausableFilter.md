@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { pausableFilter } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
@@ -15,7 +15,7 @@ const filter = pausableFilter((fn) => {
   if (isActive.value) fn();
 }, isActive);
 ``` 示例代码
-```
+````
 
 ## 来源
 

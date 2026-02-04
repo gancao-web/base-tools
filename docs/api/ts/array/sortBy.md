@@ -8,13 +8,13 @@
 import { sortBy } from '@base-web-kits/base-tools-ts';
 
 const users = [
-  { 'user': 'fred',   'age': 48 },
-  { 'user': 'barney', 'age': 36 },
-  { 'user': 'fred',   'age': 40 },
-  { 'user': 'barney', 'age': 34 }
+  { user: 'fred', age: 48 },
+  { user: 'barney', age: 36 },
+  { user: 'fred', age: 40 },
+  { user: 'barney', age: 34 },
 ];
 
-sortBy(users, [o => o.user]);
+sortBy(users, [(o) => o.user]);
 // 结果: [['barney', 36], ['barney', 34], ['fred', 48], ['fred', 40]]
 ```
 

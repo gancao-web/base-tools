@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { onKeyDown } from '@base-web-kits/base-tools-vue';
 
 onKeyDown('Enter', () => {
@@ -15,3 +15,4 @@ onKeyDown('Enter', () => {
 ```来源
 
 [VueUse](https://vueuse.org/functions/onKeyDown/)
+````

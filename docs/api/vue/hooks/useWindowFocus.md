@@ -6,12 +6,12 @@
 
 ## 示例
 
-```ts
+````ts
 import { useWindowFocus } from '@base-web-kits/base-tools-vue';
 
 const focused = useWindowFocus();
 ``` 示例代码
-```
+````
 
 ## 来源
 

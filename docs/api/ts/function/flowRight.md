@@ -7,8 +7,12 @@
 ```ts
 import { flowRight } from '@base-web-kits/base-tools-ts';
 
-function add(x) { return x + 1; }
-function square(x) { return x * x; }
+function add(x) {
+  return x + 1;
+}
+function square(x) {
+  return x * x;
+}
 
 const addSquare = flowRight([square, add]);
 addSquare(2);

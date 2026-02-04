@@ -7,7 +7,7 @@
 ```ts
 import { invert } from '@base-web-kits/base-tools-ts';
 
-const object = { 'a': 1, 'b': 2, 'c': 1 };
+const object = { a: 1, b: 2, c: 1 };
 invert(object);
 // 结果: { '1': 'c', '2': 'b' }
 ```

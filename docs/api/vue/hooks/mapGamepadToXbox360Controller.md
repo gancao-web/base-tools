@@ -6,13 +6,13 @@
 
 ## 示例
 
-```ts
+````ts
 import { mapGamepadToXbox360Controller, useGamepad } from '@base-web-kits/base-tools-vue';
 
 const { gamepads } = useGamepad();
 const xboxController = mapGamepadToXbox360Controller(gamepads.value[0]);
 ``` 示例代码
-```
+````
 
 ## 来源
 

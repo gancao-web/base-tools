@@ -7,7 +7,7 @@
 ```ts
 import { pickBy } from '@base-web-kits/base-tools-ts';
 
-const object = { 'a': 1, 'b': '2', 'c': 3 };
+const object = { a: 1, b: '2', c: 3 };
 
 pickBy(object, isNumber);
 // 结果: { 'a': 1, 'c': 3 }

@@ -7,7 +7,7 @@
 ```ts
 import { identity } from '@base-web-kits/base-tools-ts';
 
-const object = { 'a': 1 };
+const object = { a: 1 };
 console.log(identity(object) === object);
 // 结果: true
 ```

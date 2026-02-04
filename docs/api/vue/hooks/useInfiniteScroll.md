@@ -19,7 +19,7 @@ useInfiniteScroll(
     // load more
     data.value.push(data.value.length + 1);
   },
-  { distance: 10 }
+  { distance: 10 },
 );
 ```
 

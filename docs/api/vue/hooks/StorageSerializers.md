@@ -6,14 +6,14 @@
 
 ## 示例
 
-```ts
+````ts
 import { StorageSerializers, useStorage } from '@base-web-kits/base-tools-vue';
 
 const state = useStorage('key', { hello: 'hi' }, localStorage, {
   serializer: StorageSerializers.object,
 });
 ``` 示例代码
-```
+````
 
 ## 来源
 

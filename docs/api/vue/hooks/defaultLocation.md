@@ -6,14 +6,14 @@
 
 ## 示例
 
-```ts
+````ts
 import { defaultLocation } from '@base-web-kits/base-tools-vue';
 
 if (defaultLocation) {
   console.log(defaultLocation.href);
 }
 ``` 示例代码
-```
+````
 
 ## 来源
 

@@ -6,10 +6,11 @@
 
 ## 示例
 
-```ts
+````ts
 import { formatDate } from '@base-web-kits/base-tools-vue';
 
 const str = formatDate(new Date(), 'YYYY-MM-DD');
 ```来源
 
 [VueUse](https://vueuse.org/functions/formatDate/)
+````

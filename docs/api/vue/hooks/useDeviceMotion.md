@@ -9,12 +9,7 @@
 ```ts
 import { useDeviceMotion } from '@base-web-kits/base-tools-vue';
 
-const {
-  acceleration,
-  accelerationIncludingGravity,
-  rotationRate,
-  interval,
-} = useDeviceMotion();
+const { acceleration, accelerationIncludingGravity, rotationRate, interval } = useDeviceMotion();
 ```
 
 ## 来源

@@ -6,12 +6,12 @@
 
 ## 示例
 
-```ts
+````ts
 import { formatTimeAgoIntlParts } from '@base-web-kits/base-tools-vue';
 
 const parts = formatTimeAgoIntlParts(new Date(Date.now() - 1000));
 ``` 示例代码
-```
+````
 
 ## 来源
 

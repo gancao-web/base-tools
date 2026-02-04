@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { createFetch } from '@base-web-kits/base-tools-vue';
 
 const useMyFetch = createFetch({
@@ -15,3 +15,4 @@ const useMyFetch = createFetch({
 ```来源
 
 [VueUse](https://vueuse.org/functions/createFetch/)
+````
