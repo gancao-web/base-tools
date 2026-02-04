@@ -6,12 +6,12 @@
 
 ## 示例
 
-```ts
+````ts
 import { useWindowScroll } from '@base-web-kits/base-tools-vue';
 
 const { x, y } = useWindowScroll();
 ``` 示例代码
-```
+````
 
 ## 来源
 

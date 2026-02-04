@@ -6,10 +6,11 @@
 
 ## 示例
 
-```ts
+````ts
 import { hyphenate } from '@base-web-kits/base-tools-vue';
 
 const str = hyphenate('fooBar'); // 'foo-bar'
 ```来源
 
 [VueUse](https://vueuse.org/functions/hyphenate/)
+````

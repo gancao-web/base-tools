@@ -6,12 +6,12 @@ Vuetify V2 断点配置。
 
 ## 示例
 
-```ts
+````ts
 import { breakpointsVuetifyV2, useBreakpoints } from '@base-web-kits/base-tools-vue';
 
 const breakpoints = useBreakpoints(breakpointsVuetifyV2);
 ``` 示例代码
-```
+````
 
 ## 来源
 

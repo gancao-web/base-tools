@@ -9,12 +9,9 @@
 ```ts
 import { useDeepCompareEffect } from '@base-web-kits/base-tools-react';
 
-useDeepCompareEffect(
-  () => {
-    // ...
-  },
-  [deepObject],
-);
+useDeepCompareEffect(() => {
+  // ...
+}, [deepObject]);
 ```
 
 ## 来源

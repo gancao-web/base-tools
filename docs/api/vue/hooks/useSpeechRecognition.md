@@ -9,12 +9,7 @@
 ```ts
 import { useSpeechRecognition } from '@base-web-kits/base-tools-vue';
 
-const {
-  isListening,
-  result,
-  start,
-  stop,
-} = useSpeechRecognition();
+const { isListening, result, start, stop } = useSpeechRecognition();
 ```
 
 ## 来源

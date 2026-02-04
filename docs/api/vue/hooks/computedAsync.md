@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { computedAsync } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
@@ -19,3 +19,4 @@ const downloads = computedAsync(async () => {
 ```来源
 
 [VueUse](https://vueuse.org/functions/computedAsync/)
+````

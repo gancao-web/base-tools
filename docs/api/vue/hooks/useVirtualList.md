@@ -12,12 +12,13 @@ import { ref } from 'vue';
 
 const list = ref(Array.from(Array(1000).keys()));
 
-const { list: virtualList, containerProps, wrapperProps } = useVirtualList(
-  list,
-  {
-    itemHeight: 22,
-  },
-);
+const {
+  list: virtualList,
+  containerProps,
+  wrapperProps,
+} = useVirtualList(list, {
+  itemHeight: 22,
+});
 ```
 
 ## 来源

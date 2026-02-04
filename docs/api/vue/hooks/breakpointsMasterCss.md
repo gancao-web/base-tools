@@ -6,12 +6,12 @@ Master CSS 断点配置。
 
 ## 示例
 
-```ts
+````ts
 import { breakpointsMasterCss, useBreakpoints } from '@base-web-kits/base-tools-vue';
 
 const breakpoints = useBreakpoints(breakpointsMasterCss);
 ``` 示例代码
-```
+````
 
 ## 来源
 

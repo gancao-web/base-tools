@@ -8,11 +8,11 @@
 import { mapValues } from '@base-web-kits/base-tools-ts';
 
 const users = {
-  'fred':    { 'user': 'fred',    'age': 40 },
-  'pebbles': { 'user': 'pebbles', 'age': 1 }
+  fred: { user: 'fred', age: 40 },
+  pebbles: { user: 'pebbles', age: 1 },
 };
 
-mapValues(users, o => o.age);
+mapValues(users, (o) => o.age);
 // 结果: { 'fred': 40, 'pebbles': 1 }
 ```
 

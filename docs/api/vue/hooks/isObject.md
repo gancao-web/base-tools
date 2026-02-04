@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { isObject } from '@base-web-kits/base-tools-vue';
 
 if (isObject({})) {
@@ -15,3 +15,4 @@ if (isObject({})) {
 ```来源
 
 [VueUse](https://vueuse.org/functions/isObject/)
+````

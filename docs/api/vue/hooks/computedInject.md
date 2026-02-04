@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { computedInject } from '@base-web-kits/base-tools-vue';
 import { provide, ref } from 'vue';
 
@@ -16,7 +16,7 @@ provide(key, count);
 
 const injected = computedInject(key, (v) => v ? v.value * 2 : 0);
 ``` 示例代码
-```
+````
 
 ## 来源
 

@@ -7,7 +7,7 @@
 ```ts
 import { clone } from '@base-web-kits/base-tools-ts';
 
-const objects = [{ 'a': 1 }, { 'b': 2 }];
+const objects = [{ a: 1 }, { b: 2 }];
 const shallow = clone(objects);
 console.log(shallow[0] === objects[0]);
 // 结果: true

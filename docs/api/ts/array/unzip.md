@@ -7,7 +7,10 @@
 ```ts
 import { unzip } from '@base-web-kits/base-tools-ts';
 
-const zipped = [['a', 1, true], ['b', 2, false]];
+const zipped = [
+  ['a', 1, true],
+  ['b', 2, false],
+];
 unzip(zipped);
 // 结果: [['a', 'b'], [1, 2], [true, false]]
 ```

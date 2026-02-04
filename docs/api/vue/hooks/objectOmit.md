@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { objectOmit } from '@base-web-kits/base-tools-vue';
 
 const obj = { a: 1, b: 2, c: 3 };
@@ -14,3 +14,4 @@ const omitted = objectOmit(obj, ['a', 'b']); // { c: 3 }
 ```来源
 
 [VueUse](https://vueuse.org/functions/objectOmit/)
+````

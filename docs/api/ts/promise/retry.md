@@ -7,9 +7,12 @@
 ```ts
 import { retry } from '@base-web-kits/base-tools-ts';
 
-await retry(async () => {
-  // 可能会失败的操作
-}, { retries: 3 });
+await retry(
+  async () => {
+    // 可能会失败的操作
+  },
+  { retries: 3 },
+);
 ```
 
 ## 参数

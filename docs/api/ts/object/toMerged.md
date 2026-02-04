@@ -7,8 +7,8 @@
 ```ts
 import { toMerged } from '@base-web-kits/base-tools-ts';
 
-const object = { 'a': 1 };
-const other = { 'b': 2 };
+const object = { a: 1 };
+const other = { b: 2 };
 
 toMerged(object, other);
 // 结果: { 'a': 1, 'b': 2 }

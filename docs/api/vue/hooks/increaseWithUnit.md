@@ -6,12 +6,12 @@
 
 ## 示例
 
-```ts
+````ts
 import { increaseWithUnit } from '@base-web-kits/base-tools-vue';
 
 const width = increaseWithUnit('10px', 10); // '20px'
 ``` 示例代码
-```
+````
 
 ## 来源
 

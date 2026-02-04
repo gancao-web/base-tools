@@ -7,8 +7,14 @@
 ```ts
 import { unionWith } from '@base-web-kits/base-tools-ts';
 
-const objects = [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 }];
-const others = [{ 'x': 1, 'y': 1 }, { 'x': 1, 'y': 2 }];
+const objects = [
+  { x: 1, y: 2 },
+  { x: 2, y: 1 },
+];
+const others = [
+  { x: 1, y: 1 },
+  { x: 1, y: 2 },
+];
 
 unionWith(objects, others, isEqual);
 // 结果: [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 }, { 'x': 1, 'y': 1 }]

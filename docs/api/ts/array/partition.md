@@ -8,12 +8,12 @@
 import { partition } from '@base-web-kits/base-tools-ts';
 
 const users = [
-  { 'user': 'barney',  'age': 36, 'active': false },
-  { 'user': 'fred',    'age': 40, 'active': true },
-  { 'user': 'pebbles', 'age': 1,  'active': false }
+  { user: 'barney', age: 36, active: false },
+  { user: 'fred', age: 40, active: true },
+  { user: 'pebbles', age: 1, active: false },
 ];
 
-partition(users, o => o.active);
+partition(users, (o) => o.active);
 // 结果: [[{ 'user': 'fred',    'age': 40, 'active': true }], [{ 'user': 'barney',  'age': 36, 'active': false }, { 'user': 'pebbles', 'age': 1,  'active': false }]]
 ```
 

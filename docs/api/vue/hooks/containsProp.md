@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { containsProp } from '@base-web-kits/base-tools-vue';
 
 const obj = { a: 1 };
@@ -16,3 +16,4 @@ if (containsProp(obj, 'a')) {
 ```来源
 
 [VueUse](https://vueuse.org/functions/containsProp/)
+````

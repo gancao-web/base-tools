@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { controlledRef } from '@base-web-kits/base-tools-vue';
 
 const count = controlledRef(0);
@@ -14,3 +14,4 @@ count.set(1, false); // 不触发更新
 ```来源
 
 [VueUse](https://vueuse.org/functions/controlledRef/)
+````

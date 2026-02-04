@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { watchIgnorable } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
@@ -25,7 +25,7 @@ ignoreUpdates(() => {
 
 source.value = 'qux'; // Log: Changed to qux
 ``` 示例代码
-```
+````
 
 ## 来源
 

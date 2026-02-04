@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { bypassFilter } from '@base-web-kits/base-tools-vue';
 
 bypassFilter(() => {
@@ -15,3 +15,4 @@ bypassFilter(() => {
 ```来源
 
 [VueUse](https://vueuse.org/functions/bypassFilter/)
+````

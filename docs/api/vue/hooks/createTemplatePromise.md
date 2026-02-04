@@ -6,13 +6,13 @@
 
 ## 示例
 
-```ts
+````ts
 import { createTemplatePromise } from '@base-web-kits/base-tools-vue';
 
 const TemplatePromise = createTemplatePromise();
 const result = await TemplatePromise.start();
 ``` 示例代码
-```
+````
 
 ## 来源
 

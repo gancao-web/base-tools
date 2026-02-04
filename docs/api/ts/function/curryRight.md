@@ -7,7 +7,7 @@
 ```ts
 import { curryRight } from '@base-web-kits/base-tools-ts';
 
-const abc = function(a, b, c) {
+const abc = function (a, b, c) {
   return [a, b, c];
 };
 

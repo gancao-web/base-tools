@@ -9,11 +9,14 @@
 ```ts
 import { usePerformanceObserver } from '@base-web-kits/base-tools-vue';
 
-usePerformanceObserver({
-  entryTypes: ['paint'],
-}, (list) => {
-  // do something
-});
+usePerformanceObserver(
+  {
+    entryTypes: ['paint'],
+  },
+  (list) => {
+    // do something
+  },
+);
 ```
 
 ## 来源

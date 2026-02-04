@@ -7,7 +7,7 @@
 ```ts
 import { toCamelCaseKeys } from '@base-web-kits/base-tools-ts';
 
-const object = { 'foo_bar': 1, 'baz-qux': 2 };
+const object = { foo_bar: 1, 'baz-qux': 2 };
 toCamelCaseKeys(object);
 // 结果: { 'fooBar': 1, 'bazQux': 2 }
 ```

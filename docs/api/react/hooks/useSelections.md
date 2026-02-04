@@ -9,10 +9,17 @@
 ```ts
 import { useSelections } from '@base-web-kits/base-tools-react';
 
-const { selected, isSelected, toggle, selectAll, unSelectAll, noneSelected, allSelected, partiallySelected, setSelected } = useSelections(
-  ['a', 'b', 'c'],
-  ['a'],
-);
+const {
+  selected,
+  isSelected,
+  toggle,
+  selectAll,
+  unSelectAll,
+  noneSelected,
+  allSelected,
+  partiallySelected,
+  setSelected,
+} = useSelections(['a', 'b', 'c'], ['a']);
 ```
 
 ## 来源

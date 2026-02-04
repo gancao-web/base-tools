@@ -6,12 +6,12 @@
 
 ## 示例
 
-```ts
+````ts
 import { customStorageEventName } from '@base-web-kits/base-tools-vue';
 
 console.log(customStorageEventName);
 ``` 示例代码
-```
+````
 
 ## 来源
 

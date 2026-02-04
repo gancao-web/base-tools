@@ -7,7 +7,11 @@
 ```ts
 import { uniqWith } from '@base-web-kits/base-tools-ts';
 
-const objects = [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 }, { 'x': 1, 'y': 2 }];
+const objects = [
+  { x: 1, y: 2 },
+  { x: 2, y: 1 },
+  { x: 1, y: 2 },
+];
 uniqWith(objects, isEqual);
 // 结果: [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 }]
 ```

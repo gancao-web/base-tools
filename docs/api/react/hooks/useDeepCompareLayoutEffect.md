@@ -9,12 +9,9 @@
 ```ts
 import { useDeepCompareLayoutEffect } from '@base-web-kits/base-tools-react';
 
-useDeepCompareLayoutEffect(
-  () => {
-    // ...
-  },
-  [deepObject],
-);
+useDeepCompareLayoutEffect(() => {
+  // ...
+}, [deepObject]);
 ```
 
 ## 来源

@@ -6,12 +6,12 @@
 
 ## 示例
 
-```ts
+````ts
 import { createFilterWrapper, debounceFilter } from '@base-web-kits/base-tools-vue';
 
 const debouncedFn = createFilterWrapper(debounceFilter(1000), (val) => console.log(val));
 ``` 示例代码
-```
+````
 
 ## 来源
 

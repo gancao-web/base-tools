@@ -9,7 +9,9 @@
 ```ts
 import { useBroadcastChannel } from '@base-web-kits/base-tools-vue';
 
-const { isSupported, channel, post, data, close, error } = useBroadcastChannel({ name: 'my-channel' });
+const { isSupported, channel, post, data, close, error } = useBroadcastChannel({
+  name: 'my-channel',
+});
 ```
 
 ## 来源

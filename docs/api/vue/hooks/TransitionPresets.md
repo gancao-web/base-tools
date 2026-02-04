@@ -6,7 +6,7 @@ CSS 过渡预设。
 
 ## 示例
 
-```ts
+````ts
 import { TransitionPresets, useTransition } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
@@ -15,7 +15,7 @@ const output = useTransition(source, {
   transition: TransitionPresets.easeInOutCubic,
 });
 ``` 示例代码
-```
+````
 
 ## 来源
 

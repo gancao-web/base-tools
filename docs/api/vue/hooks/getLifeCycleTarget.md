@@ -6,12 +6,12 @@
 
 ## 示例
 
-```ts
+````ts
 import { getLifeCycleTarget } from '@base-web-kits/base-tools-vue';
 
 const target = getLifeCycleTarget();
 ``` 示例代码
-```
+````
 
 ## 来源
 

@@ -1,11 +1,12 @@
 # invoke
 
 ## 描述
+
 立即执行一个函数。
 
 ## 示例
 
-```ts
+````ts
 import { invoke } from '@base-web-kits/base-tools-vue';
 
 const result = invoke(() => {
@@ -14,3 +15,4 @@ const result = invoke(() => {
 ```来源
 
 [VueUse](https://vueuse.org/functions/invoke/)
+````

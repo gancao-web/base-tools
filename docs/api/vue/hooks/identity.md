@@ -6,10 +6,11 @@
 
 ## 示例
 
-```ts
+````ts
 import { identity } from '@base-web-kits/base-tools-vue';
 
 const val = identity(1); // 1
 ```来源
 
 [VueUse](https://vueuse.org/functions/identity/)
+````

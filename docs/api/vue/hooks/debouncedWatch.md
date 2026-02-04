@@ -11,9 +11,13 @@ import { debouncedWatch } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
 const count = ref(0);
-debouncedWatch(count, () => {
-  console.log('changed');
-}, { debounce: 1000 });
+debouncedWatch(
+  count,
+  () => {
+    console.log('changed');
+  },
+  { debounce: 1000 },
+);
 ```
 
 ## 来源

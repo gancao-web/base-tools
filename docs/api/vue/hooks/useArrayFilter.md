@@ -11,7 +11,7 @@ import { useArrayFilter } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
 const list = ref([1, 2, 3]);
-const greaterThanOne = useArrayFilter(list, i => i > 1);
+const greaterThanOne = useArrayFilter(list, (i) => i > 1);
 ```
 
 ## 来源

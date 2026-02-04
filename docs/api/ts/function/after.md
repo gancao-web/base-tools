@@ -10,7 +10,7 @@ import { after } from '@base-web-kits/base-tools-ts';
 const saves = ['profile', 'settings'];
 const done = after(saves.length, () => console.log('done saving!'));
 
-saves.forEach(type => {
+saves.forEach((type) => {
   // asyncSave({ 'type': type, 'complete': done });
   done();
 });

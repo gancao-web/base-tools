@@ -8,11 +8,11 @@
 import { keyBy } from '@base-web-kits/base-tools-ts';
 
 const array = [
-  { 'dir': 'left', 'code': 97 },
-  { 'dir': 'right', 'code': 100 }
+  { dir: 'left', code: 97 },
+  { dir: 'right', code: 100 },
 ];
 
-keyBy(array, o => String.fromCharCode(o.code));
+keyBy(array, (o) => String.fromCharCode(o.code));
 // 结果: { 'a': { 'dir': 'left', 'code': 97 }, 'd': { 'dir': 'right', 'code': 100 } }
 ```
 

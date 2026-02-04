@@ -7,8 +7,8 @@
 ```ts
 import { isSubset } from '@base-web-kits/base-tools-ts';
 
-const object = { 'a': 1, 'b': 2 };
-const source = { 'a': 1 };
+const object = { a: 1, b: 2 };
+const source = { a: 1 };
 
 isSubset(object, source);
 // 结果: true

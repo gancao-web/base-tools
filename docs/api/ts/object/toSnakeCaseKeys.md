@@ -7,7 +7,7 @@
 ```ts
 import { toSnakeCaseKeys } from '@base-web-kits/base-tools-ts';
 
-const object = { 'fooBar': 1, 'bazQux': 2 };
+const object = { fooBar: 1, bazQux: 2 };
 toSnakeCaseKeys(object);
 // 结果: { 'foo_bar': 1, 'baz_qux': 2 }
 ```

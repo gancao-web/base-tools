@@ -10,7 +10,7 @@
 import { useMemoize } from '@base-web-kits/base-tools-vue';
 
 const getUser = useMemoize(async (userId: number) => {
-  return await fetch(`https://api.github.com/users/${userId}`).then(r => r.json());
+  return await fetch(`https://api.github.com/users/${userId}`).then((r) => r.json());
 });
 
 const user1 = await getUser(1); // request

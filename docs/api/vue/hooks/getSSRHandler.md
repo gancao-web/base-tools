@@ -6,10 +6,11 @@
 
 ## 示例
 
-```ts
+````ts
 import { getSSRHandler } from '@base-web-kits/base-tools-vue';
 
 const handler = getSSRHandler('key', () => 'default');
 ```来源
 
 [VueUse](https://vueuse.org/functions/getSSRHandler/)
+````

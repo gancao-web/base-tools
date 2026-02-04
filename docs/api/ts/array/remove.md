@@ -8,7 +8,7 @@
 import { remove } from '@base-web-kits/base-tools-ts';
 
 const array = [1, 2, 3, 4];
-const evens = remove(array, n => n % 2 == 0);
+const evens = remove(array, (n) => n % 2 == 0);
 
 console.log(array);
 // 结果: [1, 3]
