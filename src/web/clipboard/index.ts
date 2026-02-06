@@ -13,7 +13,6 @@ export async function copyText(text: string): Promise<void> {
     try {
       await navigator.clipboard.writeText(text);
       return;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       // 继续尝试回退方案
     }

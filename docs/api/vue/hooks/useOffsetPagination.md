@@ -9,25 +9,18 @@
 ```ts
 import { useOffsetPagination } from '@base-web-kits/base-tools-vue';
 
-const {
-  currentPage,
-  currentPageSize,
-  pageCount,
-  isFirstPage,
-  isLastPage,
-  prev,
-  next,
-} = useOffsetPagination({
-  total: 100,
-  page: 1,
-  pageSize: 10,
-  onPageChange: (page) => {
-    console.log(page);
-  },
-  onPageSizeChange: (pageSize) => {
-    console.log(pageSize);
-  },
-});
+const { currentPage, currentPageSize, pageCount, isFirstPage, isLastPage, prev, next } =
+  useOffsetPagination({
+    total: 100,
+    page: 1,
+    pageSize: 10,
+    onPageChange: (page) => {
+      console.log(page);
+    },
+    onPageSizeChange: (pageSize) => {
+      console.log(pageSize);
+    },
+  });
 ```
 
 ## 来源

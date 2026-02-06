@@ -7,8 +7,11 @@
 ```ts
 import { differenceWith } from '@base-web-kits/base-tools-ts';
 
-const objects = [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 }];
-differenceWith(objects, [{ 'x': 1, 'y': 2 }], isEqual);
+const objects = [
+  { x: 1, y: 2 },
+  { x: 2, y: 1 },
+];
+differenceWith(objects, [{ x: 1, y: 2 }], isEqual);
 // 结果: [{ 'x': 2, 'y': 1 }]
 ```
 

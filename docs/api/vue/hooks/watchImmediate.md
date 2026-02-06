@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { watchImmediate } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
@@ -17,7 +17,7 @@ watchImmediate(source, (v) => {
 });
 // Log: Value: 0
 ``` 示例代码
-```
+````
 
 ## 来源
 

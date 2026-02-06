@@ -13,7 +13,7 @@ function customizer(value) {
   }
 }
 
-const objects = [{ 'a': 1 }, { 'b': 2 }];
+const objects = [{ a: 1 }, { b: 2 }];
 const deep = cloneDeepWith(objects, customizer);
 // 结果: [{ 'a': 2 }, { 'b': 4 }]
 ```

@@ -7,7 +7,7 @@
 ```ts
 import { flattenObject } from '@base-web-kits/base-tools-ts';
 
-const object = { 'a': { 'b': 2 } };
+const object = { a: { b: 2 } };
 flattenObject(object);
 // 结果: { 'a.b': 2 }
 ```

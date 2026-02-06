@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { isWorker } from '@base-web-kits/base-tools-vue';
 
 if (isWorker) {
@@ -15,3 +15,4 @@ if (isWorker) {
 ```来源
 
 [VueUse](https://vueuse.org/functions/isWorker/)
+````

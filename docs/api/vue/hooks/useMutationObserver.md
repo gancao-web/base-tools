@@ -12,11 +12,15 @@ import { ref } from 'vue';
 
 const el = ref(null);
 
-useMutationObserver(el, (mutations) => {
-  console.log(mutations);
-}, {
-  attributes: true,
-});
+useMutationObserver(
+  el,
+  (mutations) => {
+    console.log(mutations);
+  },
+  {
+    attributes: true,
+  },
+);
 ```
 
 ## 来源

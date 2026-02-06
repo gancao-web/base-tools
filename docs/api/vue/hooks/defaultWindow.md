@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { defaultWindow } from '@base-web-kits/base-tools-vue';
 
 if (defaultWindow) {
@@ -15,3 +15,4 @@ if (defaultWindow) {
 ```来源
 
 [VueUse](https://vueuse.org/functions/defaultWindow/)
+````

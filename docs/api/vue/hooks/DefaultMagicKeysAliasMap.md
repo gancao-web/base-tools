@@ -6,12 +6,12 @@
 
 ## 示例
 
-```ts
+````ts
 import { DefaultMagicKeysAliasMap } from '@base-web-kits/base-tools-vue';
 
 console.log(DefaultMagicKeysAliasMap);
 ``` 示例代码
-```
+````
 
 ## 来源
 

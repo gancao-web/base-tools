@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { onKeyUp } from '@base-web-kits/base-tools-vue';
 
 onKeyUp('Enter', () => {
@@ -15,3 +15,4 @@ onKeyUp('Enter', () => {
 ```来源
 
 [VueUse](https://vueuse.org/functions/onKeyUp/)
+````

@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { computedEager } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
@@ -15,3 +15,4 @@ const double = computedEager(() => count.value * 2);
 ```来源
 
 [VueUse](https://vueuse.org/functions/computedEager/)
+````

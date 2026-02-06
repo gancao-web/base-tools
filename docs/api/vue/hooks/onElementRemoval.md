@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { onElementRemoval } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
@@ -15,7 +15,7 @@ onElementRemoval(el, () => {
   console.log('element removed');
 });
 ``` 示例代码
-```
+````
 
 ## 来源
 

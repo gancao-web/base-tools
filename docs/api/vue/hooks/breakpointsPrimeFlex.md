@@ -6,12 +6,12 @@ PrimeFlex 断点配置。
 
 ## 示例
 
-```ts
+````ts
 import { breakpointsPrimeFlex, useBreakpoints } from '@base-web-kits/base-tools-vue';
 
 const breakpoints = useBreakpoints(breakpointsPrimeFlex);
 ``` 示例代码
-```
+````
 
 ## 来源
 

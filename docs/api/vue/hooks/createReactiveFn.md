@@ -6,12 +6,12 @@
 
 ## 示例
 
-```ts
+````ts
 import { createReactiveFn } from '@base-web-kits/base-tools-vue';
 
 const fn = createReactiveFn((val: number) => val * 2);
 ``` 示例代码
-```
+````
 
 ## 来源
 

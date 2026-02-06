@@ -6,14 +6,14 @@
 
 ## 示例
 
-```ts
+````ts
 import { defaultNavigator } from '@base-web-kits/base-tools-vue';
 
 if (defaultNavigator) {
   console.log(defaultNavigator.userAgent);
 }
 ``` 示例代码
-```
+````
 
 ## 来源
 

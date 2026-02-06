@@ -6,12 +6,12 @@
 
 ## 示例
 
-```ts
+````ts
 import { createReusableTemplate } from '@base-web-kits/base-tools-vue';
 
 const [DefineTemplate, ReuseTemplate] = createReusableTemplate();
 ``` 示例代码
-```
+````
 
 ## 来源
 

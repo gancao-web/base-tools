@@ -6,10 +6,11 @@
 
 ## 示例
 
-```ts
+````ts
 import { formatTimeAgo } from '@base-web-kits/base-tools-vue';
 
 const str = formatTimeAgo(new Date(Date.now() - 1000));
 ```来源
 
 [VueUse](https://vueuse.org/functions/formatTimeAgo/)
+````

@@ -7,8 +7,8 @@
 ```ts
 import { sumBy } from '@base-web-kits/base-tools-ts';
 
-const objects = [{ 'n': 4 }, { 'n': 2 }, { 'n': 8 }, { 'n': 6 }];
-sumBy(objects, o => o.n);
+const objects = [{ n: 4 }, { n: 2 }, { n: 8 }, { n: 6 }];
+sumBy(objects, (o) => o.n);
 // 结果: 20
 ```
 

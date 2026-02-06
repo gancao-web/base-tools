@@ -11,7 +11,7 @@ import { useArrayEvery } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
 const list = ref([1, 2, 3]);
-const allPositive = useArrayEvery(list, i => i > 0);
+const allPositive = useArrayEvery(list, (i) => i > 0);
 ```
 
 ## 来源

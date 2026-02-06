@@ -6,12 +6,12 @@ Bootstrap V5 断点配置。
 
 ## 示例
 
-```ts
+````ts
 import { breakpointsBootstrapV5, useBreakpoints } from '@base-web-kits/base-tools-vue';
 
 const breakpoints = useBreakpoints(breakpointsBootstrapV5);
 ``` 示例代码
-```
+````
 
 ## 来源
 

@@ -6,10 +6,11 @@
 
 ## 示例
 
-```ts
+````ts
 import { camelize } from '@base-web-kits/base-tools-vue';
 
 const str = camelize('foo-bar'); // 'fooBar'
 ```来源
 
 [VueUse](https://vueuse.org/functions/camelize/)
+````

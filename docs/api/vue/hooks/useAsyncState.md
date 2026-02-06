@@ -11,7 +11,7 @@ import { useAsyncState } from '@base-web-kits/base-tools-vue';
 import axios from 'axios';
 
 const { state, isReady, isLoading } = useAsyncState(
-  axios.get('https://jsonplaceholder.typicode.com/todos/1').then(t => t.data),
+  axios.get('https://jsonplaceholder.typicode.com/todos/1').then((t) => t.data),
   { id: null },
 );
 ```

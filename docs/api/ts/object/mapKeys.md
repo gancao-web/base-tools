@@ -7,7 +7,7 @@
 ```ts
 import { mapKeys } from '@base-web-kits/base-tools-ts';
 
-mapKeys({ 'a': 1, 'b': 2 }, (value, key) => key + value);
+mapKeys({ a: 1, b: 2 }, (value, key) => key + value);
 // 结果: { 'a1': 1, 'b2': 2 }
 ```
 

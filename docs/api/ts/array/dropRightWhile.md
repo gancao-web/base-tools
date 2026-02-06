@@ -8,12 +8,12 @@
 import { dropRightWhile } from '@base-web-kits/base-tools-ts';
 
 const users = [
-  { 'user': 'barney',  'active': true },
-  { 'user': 'fred',    'active': false },
-  { 'user': 'pebbles', 'active': false }
+  { user: 'barney', active: true },
+  { user: 'fred', active: false },
+  { user: 'pebbles', active: false },
 ];
 
-dropRightWhile(users, o => !o.active);
+dropRightWhile(users, (o) => !o.active);
 // 结果: objects for ['barney']
 ```
 

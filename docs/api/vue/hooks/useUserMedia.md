@@ -16,8 +16,7 @@ const { stream, start, stop, enabled } = useUserMedia({
   audio: false,
 });
 
-if (video.value && stream.value)
-  video.value.srcObject = stream.value;
+if (video.value && stream.value) video.value.srcObject = stream.value;
 ```
 
 ## 来源

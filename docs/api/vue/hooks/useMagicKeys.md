@@ -13,8 +13,7 @@ import { watch } from 'vue';
 const { shift, v } = useMagicKeys();
 
 watch(v, (v) => {
-  if (v && shift.value)
-    console.log('Shift + V have been pressed');
+  if (v && shift.value) console.log('Shift + V have been pressed');
 });
 ```
 

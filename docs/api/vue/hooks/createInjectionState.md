@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { createInjectionState } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
@@ -15,7 +15,7 @@ const [useProvideCount, useCount] = createInjectionState(() => {
   return { count };
 });
 ``` 示例代码
-```
+````
 
 ## 来源
 

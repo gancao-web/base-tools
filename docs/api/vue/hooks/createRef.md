@@ -6,10 +6,11 @@
 
 ## 示例
 
-```ts
+````ts
 import { createRef } from '@base-web-kits/base-tools-vue';
 
 const myRef = createRef(1);
 ```来源
 
 [VueUse](https://vueuse.org/functions/createRef/)
+````

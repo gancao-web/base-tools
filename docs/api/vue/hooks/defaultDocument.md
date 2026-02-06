@@ -6,14 +6,14 @@
 
 ## 示例
 
-```ts
+````ts
 import { defaultDocument } from '@base-web-kits/base-tools-vue';
 
 if (defaultDocument) {
   console.log(defaultDocument.title);
 }
 ``` 示例代码
-```
+````
 
 ## 来源
 

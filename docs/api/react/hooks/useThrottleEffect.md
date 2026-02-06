@@ -13,7 +13,7 @@ import React, { useState } from 'react';
 export default () => {
   const [value, setValue] = useState('hello');
   const [records, setRecords] = useState<string[]>([]);
-  
+
   useThrottleEffect(
     () => {
       setRecords((val) => [...val, value]);

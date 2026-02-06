@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { watchArray } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
@@ -21,3 +21,4 @@ list.value.push(4); // Added: [4], Removed: []
 ```来源
 
 [VueUse](https://vueuse.org/functions/watchArray/)
+````

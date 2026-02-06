@@ -8,12 +8,12 @@
 import { takeWhile } from '@base-web-kits/base-tools-ts';
 
 const users = [
-  { 'user': 'barney',  'active': false },
-  { 'user': 'fred',    'active': false },
-  { 'user': 'pebbles', 'active': true }
+  { user: 'barney', active: false },
+  { user: 'fred', active: false },
+  { user: 'pebbles', active: true },
 ];
 
-takeWhile(users, o => !o.active);
+takeWhile(users, (o) => !o.active);
 // 结果: objects for ['barney', 'fred']
 ```
 

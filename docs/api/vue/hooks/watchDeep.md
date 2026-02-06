@@ -6,7 +6,7 @@
 
 ## 示例
 
-```ts
+````ts
 import { watchDeep } from '@base-web-kits/base-tools-vue';
 import { ref } from 'vue';
 
@@ -20,3 +20,4 @@ state.value.count++; // Triggered
 ```来源
 
 [VueUse](https://vueuse.org/functions/watchDeep/)
+````

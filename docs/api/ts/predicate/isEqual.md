@@ -7,8 +7,8 @@
 ```ts
 import { isEqual } from '@base-web-kits/base-tools-ts';
 
-const object = { 'a': 1 };
-const other = { 'a': 1 };
+const object = { a: 1 };
+const other = { a: 1 };
 
 isEqual(object, other);
 // 结果: true
