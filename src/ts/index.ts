@@ -4,6 +4,7 @@
 export * from './array';
 export * from './async';
 export * from './bean';
+export * from './buffer';
 export * from './day';
 export * from './es-toolkit';
 export * from './number';
