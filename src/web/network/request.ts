@@ -108,7 +108,16 @@ export type RequestConfigBase<D extends RequestData = RequestData> = {
   /** 获取请求对象, 用于取消请求 */
   onTaskReady?: (task: RequestTask) => void;
 
-  /** 流式数据接收事件回调 (已完成基础流式解析,返回消息对象) */
+  /**
+   * 流式数据接收事件回调 (已完成基础流式解析,返回消息对象)
+   * @example
+   * function onMessage(msg: SSEMessage) {
+   *   console.log(msg);
+   *   if(msg.type === 'DONE') { } // 流式传输结束
+   *   if(msg.type === 'thinking') { } // 思考中
+   *   if(msg.type === 'xx') { } // 各种消息类型
+   * }
+   */
   onMessage?: MessageCallback;
 };
 
@@ -117,9 +126,6 @@ export type RequestTask = {
   /** 取消请求 */
   abort: () => void;
 };
-
-/** 流式数据块接收事件回调 */
-export type ChunkCallback = (response: { data: ArrayBuffer }) => void;
 
 /**
  * 流式解析对象
@@ -202,13 +208,16 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * // 流式监听
  * const onMessage = (msg: SSEMessage) => {
  *   console.log(msg);
+ *   if(msg.type === 'DONE') { } // 流式传输结束
+ *   if(msg.type === 'thinking') { } // 思考中
+ *   if(msg.type === 'xx') { } // 各种消息类型
  * }
  *
  * // 流式发起
  * const data = { content: '你好', chatId: 123 };
  * apiChatStream({ data, onTaskReady, onMessage });
  *
- * // 流式取消 (在组件销毁或页面关闭时调用, 若流式已生成, 此时abort无效, 因为请求已成功)
+ * // 流式取消 (在组件销毁或页面关闭时调用)
  * chatTask?.abort();
  */
 export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
@@ -508,9 +517,11 @@ function checkCache(cacheKey: string) {
  * 处理流式响应
  */
 async function handleStreamResponse(response: Response, sseTask: SseTask) {
-  if (!response.body) return 'Stream is empty';
+  if (!response.body) throw new Error('Response body is null');
   if (sseTask.parser === undefined) {
-    return 'onMessage is undefined → Stream parser skipped';
+    throw new Error(
+      'Stream parser missing: Please set config.onMessage when enableChunked is true',
+    );
   }
 
   const reader = response.body.getReader();

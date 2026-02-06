@@ -182,6 +182,7 @@ export class SSEParser {
       msg = { raw: data };
     }
 
+    // 补充SSE协议头中的对应值 (若 JSON 中包含 id/event/retry 字段，优先使用 JSON 中的值)
     if (this.eventType && msg.event === undefined) msg.event = this.eventType;
     if (this.eventType && msg.type === undefined) msg.type = this.eventType;
     if (this.eventId && msg.id === undefined) msg.id = this.eventId;

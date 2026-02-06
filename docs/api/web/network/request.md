@@ -54,7 +54,7 @@ export function apiGoodList(config: RequestConfig<{ page: number; size: number }
 const goodList = await apiGoodList({ data: { page: 1, size: 10 } });
 
 // 4. 基于上面 requestApi 流式请求 (SSE)
-export function apiChatStream(config: RequestConfig) {
+export function apiChatStream(config: RequestConfig<ChatData>) {
   return requestApi({
     ...config,
     url: '/sse/chatStream',
@@ -65,6 +65,9 @@ export function apiChatStream(config: RequestConfig) {
   });
 }
 
+// 发送的消息类型
+type ChatData = { content: string; conversationId: number };
+
 // 初始化请求对象
 let chatTask: RequestTask;
 const onTaskReady = (task: RequestTask) => {
@@ -74,13 +77,21 @@ const onTaskReady = (task: RequestTask) => {
 // 流式监听
 const onMessage = (msg: SSEMessage) => {
   console.log(msg);
+  // 流式传输结束
+  // if (msg.type === 'DONE') { }
+
+  // 思考中
+  // if (msg.type === 'thinking') { }
+
+  // 各种消息类型
+  // if (msg.type === 'xx') {  }
 };
 
 // 流式发起
-const data = { content: '你好', chatId: 123 };
+const data = { content: '你好', conversationId: 123 };
 apiChatStream({ data, onTaskReady, onMessage });
 
-// 流式取消 (在组件销毁或页面关闭时调用, 若流式已生成, 此时abort无效, 因为请求已成功)
+// 流式取消 (在组件销毁或页面关闭时调用)
 chatTask?.abort();
 ```
 

@@ -5,7 +5,7 @@ import { getBaseToolsConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformOs } from '../system';
 import { toast } from '../ui';
-import { SSEParser, type SSEMessage } from '../../ts/buffer/SSEParser';
+import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
 import type { AppLogInfo } from '../config';
 
 /** 请求参数 */
@@ -65,8 +65,17 @@ export type RequestConfigBase<D extends RequestData = RequestData> = Omit<
   /** 获取请求对象, 用于取消请求 */
   onTaskReady?: (task: UniApp.RequestTask) => void;
 
-  /** 流式响应监听 */
-  onMessage?: (msg: SSEMessage) => void;
+  /**
+   * 流式数据接收事件回调 (已完成基础流式解析,返回消息对象)
+   * @example
+   * function onMessage(msg: SSEMessage) {
+   *   console.log(msg);
+   *   if(msg.type === 'DONE') { } // 流式传输结束
+   *   if(msg.type === 'thinking') { } // 思考中
+   *   if(msg.type === 'xx') { } // 各种消息类型
+   * }
+   */
+  onMessage?: MessageCallback;
 };
 
 /** 请求缓存 */
@@ -126,13 +135,16 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * // 流式监听
  * const onMessage = (msg: SSEMessage) => {
  *   console.log(msg);
+ *   if(msg.type === 'DONE') { } // 流式传输结束
+ *   if(msg.type === 'thinking') { } // 思考中
+ *   if(msg.type === 'xx') { } // 各种消息类型
  * }
  *
  * // 流式发起
  * const data = { content: '你好', chatId: 123 };
  * apiChatStream({ data, onTaskReady, onMessage });
  *
- * // 流式取消 (在组件销毁或页面关闭时调用, 若流式已生成, 此时abort无效, 因为请求已成功)
+ * // 流式取消 (在组件销毁或页面关闭时调用)
  * chatTask?.abort();
  */
 export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
@@ -252,13 +264,13 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       });
 
       // 覆盖abort方法, 取消流式接收
-      const oldAbort = task.abort;
+      const oldAbort = task.abort.bind(task);
 
       task.abort = () => {
         sseTask.parser = null; // 清空解析对象
         // @ts-ignore
         task.offChunkReceived(); // 小程序必须取消监听,才能中断流式接收 (而h5直接abort即可)
-        oldAbort(); // 取消请求
+        oldAbort(); // 取消请求 (小程序流式请求响应后,就无法中断,只能offChunkReceived)
       };
     }
 
