@@ -65,20 +65,23 @@ export function apiChatStream(config: RequestConfig) {
   });
 }
 
-// 流式监听
+// 初始化请求对象
+let chatTask: RequestTask;
 const onTaskReady = (task: RequestTask) => {
-   task.onChunkReceived((res) => {
-     console.log('ArrayBuffer', res.data);
-   });
-}
- *
+  chatTask = task;
+};
+
+// 流式监听
+const onMessage = (msg: SSEMessage) => {
+  console.log(msg);
+};
+
 // 流式发起
 const data = { content: '你好', chatId: 123 };
-await apiChatStream({ data, onTaskReady });
- *
-// 流式取消 (在组件销毁或页面关闭时调用)
-task?.offChunkReceived(); // 取消监听,中断流式接收
-task?.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已成功)
+apiChatStream({ data, onTaskReady, onMessage });
+
+// 流式取消 (在组件销毁或页面关闭时调用, 若流式已生成, 此时abort无效, 因为请求已成功)
+chatTask?.abort();
 ```
 
 ### RequestConfigBase

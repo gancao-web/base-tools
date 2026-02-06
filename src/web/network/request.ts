@@ -3,6 +3,7 @@ import { toDayjs } from '../../ts/day';
 import { getObjectValue } from '../../ts/object';
 import { appendUrlParam } from '../../ts/url';
 import { getBaseToolsConfig } from '../config';
+import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
 import type { AppLogInfo } from '../config';
 
 /** 请求方法类型 */
@@ -104,28 +105,28 @@ export type RequestConfigBase<D extends RequestData = RequestData> = {
   /** 响应数据的转换 */
   resMap?: (data: ResponseData) => ResponseData;
 
-  /** 获取task对象, 用于取消请求或监听流式数据 */
+  /** 获取请求对象, 用于取消请求 */
   onTaskReady?: (task: RequestTask) => void;
+
+  /** 流式数据接收事件回调 (已完成基础流式解析,返回消息对象) */
+  onMessage?: MessageCallback;
 };
 
-/**
- * 请求任务对象 (用于取消请求或监听流式数据)
- */
-export interface RequestTask {
+/** 请求任务对象 (用于取消请求) */
+export type RequestTask = {
   /** 取消请求 */
   abort: () => void;
+};
 
-  /** 监听流式数据块接收事件 */
-  onChunkReceived: (callback: ChunkCallback) => void;
-
-  /** 取消监听流式数据块接收事件 */
-  offChunkReceived: () => void;
-}
+/** 流式数据块接收事件回调 */
+export type ChunkCallback = (response: { data: ArrayBuffer }) => void;
 
 /**
- * 流式数据块接收事件回调
+ * 流式解析对象
+ * - undefined: 未初始化
+ * - null: 已取消
  */
-export type ChunkCallback = (response: { data: ArrayBuffer }) => void;
+type SseTask = { parser: SSEParser | undefined | null };
 
 /** 请求缓存 */
 const requestCache = new Map<string, { res: unknown; expire: number }>();
@@ -192,20 +193,23 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  *   });
  * }
  *
- * // 流式监听
+ * // 初始化请求对象
+ * let chatTask: RequestTask;
  * const onTaskReady = (task: RequestTask) => {
- *    task.onChunkReceived((res) => {
- *      console.log('ArrayBuffer', res.data);
- *    });
+ *    chatTask = task;
+ * }
+ *
+ * // 流式监听
+ * const onMessage = (msg: SSEMessage) => {
+ *   console.log(msg);
  * }
  *
  * // 流式发起
  * const data = { content: '你好', chatId: 123 };
- * await apiChatStream({ data, onTaskReady });
+ * apiChatStream({ data, onTaskReady, onMessage });
  *
- * // 流式取消 (在组件销毁或页面关闭时调用)
- * task?.offChunkReceived(); // 取消监听,中断流式接收
- * task?.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已成功)
+ * // 流式取消 (在组件销毁或页面关闭时调用, 若流式已生成, 此时abort无效, 因为请求已成功)
+ * chatTask?.abort();
  */
 export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
   const {
@@ -227,23 +231,25 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     responseType = 'json',
     timeout = 60000,
     onTaskReady,
+    onMessage,
   } = config;
 
   // 1. 初始化控制对象
   const controller = new AbortController();
   const signal = controller.signal;
-  let chunkCallback: ChunkCallback | null = null;
+
+  // 流式解析对象
+  const sseTask: SseTask = { parser: onMessage ? new SSEParser(onMessage) : undefined };
 
   // 构造 Task 对象
   const task: RequestTask = {
-    abort: () => controller.abort(),
-    onChunkReceived: (cb) => {
-      chunkCallback = cb;
-    },
-    offChunkReceived: () => {
-      chunkCallback = null;
+    abort: () => {
+      sseTask.parser = null;
+      controller.abort();
     },
   };
+
+  // Task 准备就绪的回调
   onTaskReady?.(task);
 
   // 2. 创建 Promise
@@ -345,7 +351,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         if (enableChunked) {
           if (showLoading) appConfig.hideLoading?.();
 
-          const res = await handleStreamResponse(response, chunkCallback);
+          const res = await handleStreamResponse(response, sseTask);
 
           logRequestInfo({ status: 'success', config: logConfig, startTime, res });
 
@@ -501,18 +507,26 @@ function checkCache(cacheKey: string) {
 /**
  * 处理流式响应
  */
-async function handleStreamResponse(response: Response, chunkCallback: ChunkCallback | null) {
-  if (!response.body) throw new Error('Response body is null');
+async function handleStreamResponse(response: Response, sseTask: SseTask) {
+  if (!response.body) return 'Stream is empty';
+  if (sseTask.parser === undefined) {
+    return 'onMessage is undefined → Stream parser skipped';
+  }
 
   const reader = response.body.getReader();
-
   while (true) {
     const { done, value } = await reader.read();
-    if (done) break;
-    if (chunkCallback && value) {
-      chunkCallback({ data: value.buffer });
+
+    if (sseTask.parser === null) {
+      await reader.cancel();
+      throw new DOMException('BodyStreamBuffer was aborted', 'AbortError');
     }
+
+    if (done) break;
+    if (sseTask.parser && value) sseTask.parser.receive(value.buffer);
   }
+
+  if (sseTask.parser) sseTask.parser.flush();
 
   return 'Stream Finished';
 }

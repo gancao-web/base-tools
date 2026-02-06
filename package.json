@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools",
-  "version": "1.3.3",
+  "version": "1.3.5",
   "type": "module",
   "sideEffects": false,
   "scripts": {
@@ -82,7 +82,7 @@
   "devDependencies": {
     "@commitlint/cli": "^17.6.1",
     "@commitlint/config-conventional": "^17.6.1",
-    "@dcloudio/types": "^3.4.28",
+    "@dcloudio/types": "^3.4.29",
     "@types/node": "^24.10.0",
     "@types/react": "^18.3.3",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
@@ -92,7 +92,7 @@
     "eslint-plugin-import": "^2.32.0",
     "husky": "^8.0.0",
     "lint-staged": "^16.2.6",
-    "miniprogram-api-typings": "^4.1.0",
+    "miniprogram-api-typings": "^5.0.0",
     "prettier": "^3.6.2",
     "react": "^18.3.1",
     "tsup": "^8.5.1",

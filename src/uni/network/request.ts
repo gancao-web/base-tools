@@ -5,6 +5,7 @@ import { getBaseToolsConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformOs } from '../system';
 import { toast } from '../ui';
+import { SSEParser, type SSEMessage } from '../../ts/buffer/SSEParser';
 import type { AppLogInfo } from '../config';
 
 /** 请求参数 */
@@ -61,8 +62,11 @@ export type RequestConfigBase<D extends RequestData = RequestData> = Omit<
     data: UniApp.RequestSuccessCallbackResult['data'],
   ) => UniApp.RequestSuccessCallbackResult['data'];
 
-  /** 获取task对象, 用于取消请求和监听流式响应 */
+  /** 获取请求对象, 用于取消请求 */
   onTaskReady?: (task: UniApp.RequestTask) => void;
+
+  /** 流式响应监听 */
+  onMessage?: (msg: SSEMessage) => void;
 };
 
 /** 请求缓存 */
@@ -113,20 +117,23 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  *   });
  * }
  *
- * // 流式监听
+ * // 初始化请求对象
+ * let chatTask: RequestTask;
  * const onTaskReady = (task: RequestTask) => {
- *    task.onChunkReceived((res) => {
- *      console.log('ArrayBuffer', res.data);
- *    });
+ *    chatTask = task;
+ * }
+ *
+ * // 流式监听
+ * const onMessage = (msg: SSEMessage) => {
+ *   console.log(msg);
  * }
  *
  * // 流式发起
  * const data = { content: '你好', chatId: 123 };
- * await apiChatStream({ data, onTaskReady });
+ * apiChatStream({ data, onTaskReady, onMessage });
  *
- * // 流式取消 (在组件销毁或页面关闭时调用)
- * task?.offChunkReceived(); // 取消监听,中断流式接收
- * task?.abort(); // 取消请求 (若流式已生成,此时abort无效,因为请求已成功)
+ * // 流式取消 (在组件销毁或页面关闭时调用, 若流式已生成, 此时abort无效, 因为请求已成功)
+ * chatTask?.abort();
  */
 export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
   return new Promise<T>((resolve, reject) => {
@@ -146,6 +153,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       cacheTime,
       resMap,
       onTaskReady,
+      onMessage,
     } = config;
 
     // 参数: 过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 这些有效值)
@@ -232,6 +240,27 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         reject(e);
       },
     });
+
+    if (onMessage) {
+      // 流式解析对象
+      const sseTask: { parser: SSEParser | null } = { parser: new SSEParser(onMessage) };
+
+      // 监听流式响应
+      // @ts-ignore
+      task.onChunkReceived((res: { data: ArrayBuffer }) => {
+        sseTask.parser?.receive(res.data);
+      });
+
+      // 覆盖abort方法, 取消流式接收
+      const oldAbort = task.abort;
+
+      task.abort = () => {
+        sseTask.parser = null; // 清空解析对象
+        // @ts-ignore
+        task.offChunkReceived(); // 小程序必须取消监听,才能中断流式接收 (而h5直接abort即可)
+        oldAbort(); // 取消请求
+      };
+    }
 
     // task对象初始化完毕
     onTaskReady?.(task);
