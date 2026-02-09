@@ -1,6 +1,16 @@
-# Web Skill (@base-web-kits/skill)
+# Web Project Skill (@base-web-kits/skill)
 
-`@base-web-kits` 工具库的Skills和Rules，支持**Trae** 和 **Cursor**。精准推荐 `ts/web/react/vue/uni-app` 中常用工具函数，指导 React/Vue 项目正确使用 Hooks，提升开发效率，避免重复造轮子。
+[Web工具库](https://gancao-web.github.io/base-tools/)的skills和rules，精准推荐 `ts/web/react/vue/uni-app` 中常用工具函数，指导 React/Vue 项目正确使用 hooks，提升开发效率，避免重复造轮子。
+
+## 🚀 支持环境
+
+- **Trae**: 支持，提供项目级和全局技能配置。
+- **Cursor**: 支持，自动生成 `.cursor/rules/base-tools.mdc`。
+- **GitHub Copilot**: 支持，自动生成 `.github/copilot-instructions.md`。
+- **Claude Code**: 支持，自动生成或追加到 `CLAUDE.md`。
+- **Windsurf**: 支持，自动生成 `.windsurfrules`。
+- **Roo Code (Cline)**: 支持，自动生成 `.clinerules`。
+- **Aider**: 支持，自动生成 `CONVENTIONS.md`。
 
 ## 🚀 单独安装
 
@@ -23,15 +33,17 @@ npx @base-web-kits/skill install-skill
 npx @base-web-kits/skill install-skill --scan
 ```
 
-## 🌍 全局安装
+## 🌍 全局安装 (仅 Trae)
 
-一次安装，所有项目通用，可以使用全局模式：
+目前仅 **Trae** 支持全局技能注入，一次安装所有项目通用：
 
 ```bash
 npx @base-web-kits/skill install-skill --global
 ```
 
-这将把 Skill 注入到 Trae 和 Cursor 的全局配置文件中（如 `~/.trae/user_rules.md` 和 `~/.cursorrules`），无需每个项目单独安装。
+这将自动创建 `~/.trae/skills/base-tools/SKILL.md`，**即刻生效**。
+
+> **注意**: Cursor、VS Code (Copilot) 等其他工具尚未支持读取本地全局配置文件，请使用上方的**单独安装**或**批量安装**模式 - 2026-02。
 
 ## ✅ 验证生效
 
@@ -39,7 +51,9 @@ npx @base-web-kits/skill install-skill --global
 
 | 测试场景 | 推荐提问 | 预期 AI 回答 |
 | :-- | :-- | :-- |
-| **JS 基础** | "我需要深拷贝一个对象,请编写或推荐一个函数" | 推荐使用 `base-tools-ts` (es-toolkit) 的 `cloneDeep` |
-| **正则验证** | "我需要校验身份证号,请编写或推荐一个函数" | 推荐使用 `base-tools-ts` 的 `isIdentityCard` |
-| **React** | "我需要监听窗口大小变化,请编写或推荐一个函数" | 推荐使用 `base-tools-react` (ahooks) 的 `useSize` 或 `useResponsive` |
-| **UniApp** | "我需要在小程序打开相册,选择一张照片,请编写或推荐一个函数" | 推荐使用 `base-tools-uni` 的 `chooseMedia` 函数 |
+| **JS工具库** | "我需要深拷贝一个对象,请编写或推荐一个函数,优先考虑已配置的skill" | 推荐使用 `base-tools-ts` 的 `cloneDeep` |
+| **JS正则验证** | "我需要校验邮箱格式,请编写或推荐一个函数,优先考虑已配置的skill" | 推荐使用 `base-tools-ts` 的 `isEmail` |
+| **通用web** | "我需要复制文本到剪贴板,请编写或推荐一个函数,优先考虑已配置的skill" | 推荐使用 `base-tools-web` 的 `copyText` |
+| **React项目** | "我需要监听dom元素的尺寸变化,请编写或推荐一个函数,优先考虑已配置的skill" | 推荐使用 `base-tools-react` 的 `useSize` |
+| **Vue项目** | "我需要监听元素外部点击事件,请编写或推荐一个函数,优先考虑已配置的skill" | 推荐使用 `base-tools-vue` 的 `onClickOutside` |
+| **UniApp项目** | "我需要保存网络图片到系统相册,请编写或推荐一个函数,优先考虑已配置的skill" | 推荐使用 `base-tools-uni` 的 `saveImageToPhotosAlbum` 函数 |

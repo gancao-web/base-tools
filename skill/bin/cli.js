@@ -20,6 +20,37 @@ const TARGETS = [
     file: 'base-tools.mdc',
     source: 'base-tools/SKILL.md',
   },
+  {
+    type: 'GitHub Copilot',
+    dir: '.github',
+    file: 'copilot-instructions.md',
+    source: 'base-tools/SKILL.md',
+  },
+  {
+    type: 'Claude Code',
+    dir: '.',
+    file: 'CLAUDE.md',
+    source: 'base-tools/SKILL.md',
+    append: true,
+  },
+  {
+    type: 'Windsurf',
+    dir: '.',
+    file: '.windsurfrules',
+    source: 'base-tools/SKILL.md',
+  },
+  {
+    type: 'Roo Code',
+    dir: '.',
+    file: '.clinerules',
+    source: 'base-tools/SKILL.md',
+  },
+  {
+    type: 'Aider',
+    dir: '.',
+    file: 'CONVENTIONS.md',
+    source: 'base-tools/SKILL.md',
+  },
 ];
 
 function installToDir(projectRoot) {
@@ -36,8 +67,28 @@ function installToDir(projectRoot) {
         if (!fs.existsSync(targetDirFull)) {
           fs.mkdirSync(targetDirFull, { recursive: true });
         }
+
         const content = fs.readFileSync(sourcePath, 'utf-8');
-        fs.writeFileSync(targetPath, content, 'utf-8');
+        let finalContent = content;
+
+        if (fs.existsSync(targetPath)) {
+          const existingContent = fs.readFileSync(targetPath, 'utf-8');
+          // Avoid duplication
+          if (
+            existingContent.includes("name: 'base-tools'") ||
+            existingContent.includes('# Base Tools Expert')
+          ) {
+            // Already installed
+            return;
+          }
+
+          if (target.append) {
+            const separator = existingContent.trim() ? '\n\n' : '';
+            finalContent = existingContent + separator + content;
+          }
+        }
+
+        fs.writeFileSync(targetPath, finalContent, 'utf-8');
         installedCount++;
       } catch (e) {
         console.error(`❌ [${projectRoot}] Failed for ${target.type}:`, e.message);
@@ -91,17 +142,51 @@ function installGlobal() {
   const GLOBAL_TARGETS = [
     {
       type: 'Trae Global',
-      path: path.join(homeDir, '.trae', 'user_rules.md'),
+      path: path.join(homeDir, '.trae', 'skills', 'base-tools', 'SKILL.md'),
       source: 'base-tools/SKILL.md',
-      append: true,
-    },
-    {
-      type: 'Cursor Global',
-      path: path.join(homeDir, '.cursorrules'),
-      source: 'base-tools/SKILL.md',
-      append: true,
+      append: false,
     },
   ];
+
+  // Attempt to clean up legacy installation in .trae/user_rules.md and .trae/rules.md
+  try {
+    const traeUserRulesPath = path.join(homeDir, '.trae', 'user_rules.md');
+    if (fs.existsSync(traeUserRulesPath)) {
+      let content = fs.readFileSync(traeUserRulesPath, 'utf-8');
+      if (content.includes("name: 'base-tools'") || content.includes('# Base Tools Expert')) {
+        console.log('🧹 Cleaning up legacy installation in .trae/user_rules.md...');
+        // Remove content starting from the skill header
+        const skillMarker = "\n\n---\nname: 'base-tools'";
+        const skillMarker2 = "name: 'base-tools'";
+
+        if (content.includes(skillMarker)) {
+          content = content.split(skillMarker)[0];
+        } else if (content.includes(skillMarker2)) {
+          // Fallback for different line endings or missing newlines
+          const parts = content.split(skillMarker2);
+          if (parts.length > 0) {
+            // Remove the last part which likely contains the skill
+            content = parts[0].replace(/---\s*$/, '').trim();
+          }
+        }
+
+        fs.writeFileSync(traeUserRulesPath, content, 'utf-8');
+        console.log('✅ Cleaned up .trae/user_rules.md');
+      }
+    }
+
+    const traeRulesPath = path.join(homeDir, '.trae', 'rules.md');
+    if (fs.existsSync(traeRulesPath)) {
+      const content = fs.readFileSync(traeRulesPath, 'utf-8');
+      if (content.includes("name: 'base-tools'")) {
+        console.log('🧹 Cleaning up legacy .trae/rules.md...');
+        fs.unlinkSync(traeRulesPath);
+        console.log('✅ Deleted .trae/rules.md');
+      }
+    }
+  } catch (e) {
+    console.warn('⚠️ Failed to clean up legacy files:', e.message);
+  }
 
   let successCount = 0;
 
