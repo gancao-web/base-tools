@@ -2,6 +2,7 @@
 
 视频的选择或拍摄
 
+- 微信小程序推荐使用chooseMedia, 而chooseVideo已标记过时
 - 支持h5 (小程序上传取tempFilePaths, 而H5取tempFiles)
 
 ## 示例
