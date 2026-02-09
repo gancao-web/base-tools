@@ -2,6 +2,9 @@
 
 选择图片和视频，支持拍照和录像
 
+- 微信小程序推荐使用chooseMedia, 而chooseImage或chooseVideo已标记过时
+- 不支持H5 (如需在H5上使用, 请使用chooseImage或chooseVideo)
+
 ## 示例
 
 ```ts

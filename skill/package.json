@@ -1,0 +1,33 @@
+{
+  "name": "@base-web-kits/skill",
+  "version": "1.0.0",
+  "description": "Web工具库的skills和rules。精准推荐ts/web/react/vue/uni-app中常用工具函数和hooks",
+  "main": "index.js",
+  "bin": {
+    "install-skill": "./bin/cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "version:major": "npm version major",
+    "version:minor": "npm version minor",
+    "version:patch": "npm version patch",
+    "version:alpha": "npm version prerelease --preid=alpha",
+    "pub": "npm publish --no-git-checks",
+    "pub:alpha": "npm publish --tag alpha --no-git-checks"
+  },
+  "keywords": [
+    "trae",
+    "cursor",
+    "skills",
+    "ai",
+    "web",
+    "react",
+    "vue",
+    "uni-app",
+    "hooks",
+    "typescript",
+    "utils"
+  ],
+  "author": "wenju",
+  "license": "ISC"
+}

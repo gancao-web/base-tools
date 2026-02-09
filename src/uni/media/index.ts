@@ -7,6 +7,7 @@ const cache = {
 
 /**
  * 图片和视频的选择或拍摄
+ * - 微信小程序推荐使用chooseMedia, 而chooseImage或chooseVideo已标记过时
  * - 不支持H5 (如需在H5上使用, 请使用chooseImage或chooseVideo)
  * @param option 选项文档 https://uniapp.dcloud.net.cn/api/media/video.html#choosemedia
  * @returns 路径数组 (不是File对象)
@@ -36,6 +37,7 @@ export async function chooseMedia(option?: UniApp.ChooseMediaOption) {
 
 /**
  * 图片的选择或拍摄
+ * - 微信小程序推荐使用chooseMedia, 而chooseImage已标记过时
  * - 支持h5 (小程序上传取tempFilePaths, 而H5取tempFiles)
  * @param option 选项文档 https://uniapp.dcloud.net.cn/api/media/image.html
  * @returns 图片路径和File对象数组 {tempFilePaths, tempFiles}
@@ -48,6 +50,7 @@ export function chooseImage(option?: UniApp.ChooseImageOptions, config?: UniApiC
 
 /**
  * 视频的选择或拍摄
+ * - 微信小程序推荐使用chooseMedia, 而chooseVideo已标记过时
  * - 支持h5 (小程序上传取tempFilePaths, 而H5取tempFiles)
  * @param option 选项文档 https://uniapp.dcloud.net.cn/api/media/video.html
  * @returns 视频路径和File对象 {tempFilePath, tempFile}
