@@ -7,6 +7,8 @@ description: 'Expert on internal @base-web-kits/base-tools libraries. Invoke whe
 
 This skill provides knowledge about the `@base-web-kits/base-tools` monorepo packages. Always prioritize using these libraries over writing custom utility functions to avoid "reinventing the wheel".
 
+**IMPORTANT**: If you recommend using any function from these libraries, you MUST check if the corresponding package is installed in the project's `package.json`. If not, you MUST execute the installation command (e.g., `npm i @base-web-kits/base-tools-ts`) or instruct the user to install it.
+
 ## 📦 Packages Overview
 
 ### 1. `@base-web-kits/base-tools-ts` (Universal JS/TS)
@@ -19,17 +21,17 @@ Core utility library, compatible with all environments (Node, Browser, UniApp). 
   - Full export of [es-toolkit](https://es-toolkit.dev/) (modern, high-performance lodash alternative).
   - **Array**: `chunk`, `difference`, `intersection`, `uniq`, `shuffle`, `sample`, `groupBy`.
   - **Function**: `debounce`, `throttle`, `once`, `memoize`.
-  - **Object**: `clone`, `cloneDeep`, `merge`, `pick`, `omit`, `get`, `set`.
-  - **String**: `camelCase`, `kebabCase`, `snakeCase`, `capitalize`.
+  - **Object**: `cloneDeep`, `pick`, `omit`, `get`, `set`.
+  - **String**: `camelCase`, `capitalize`.
   - **Predicate**: `isNil`, `isString`, `isNumber`, `isEmpty`.
 - **Async (`async`)**: `toAsync` (await-to-js style error handling).
 - **Bean (`bean`)**: `EventBus` (simple pub/sub).
 - **Buffer (`buffer`)**: `SSEParser` (Server-Sent Events parser), `PolyfillTextDecoder`.
 - **Validator (`validator`)**:
-  - Identity: `isIdentityCard`, `isPassport`, `isHKMOPermit`, `isTaiwanPermit`, `isOfficerId`, `isSoldierId`.
+  - Identity: `isIdentityCard`, `isPassport`.
   - Contact: `isMobilePhone`, `isLandline`, `isPhone`, `isEmail`.
   - Network: `isURL`, `isIP`, `isPortNumber`.
-  - Other: `isChinese`, `isChineseName`, `isDigits`, `isNumeric`, `isBankCard`, `isLicensePlate`, `isHexColor`.
+  - Other: `isChinese`, `isDigits`, `isNumeric`, `isBankCard`, `isLicensePlate`, `isHexColor`.
 - **Date (`day`)**: `toDayjs` (dayjs wrapper), `getDateRangeBefore`, `getDateRangeAfter`, `getCountdownParts`, `getAgeByBirthdate`.
 - **Number/Math (`number`)**:
   - BigNumber wrappers: `mathPlus`, `mathMinus`, `mathTimes`, `mathDiv`, `mathPow`, `mathRound`, `mathFixed`.
@@ -68,7 +70,7 @@ Utilities for UniApp development. **Install:** `npm i @base-web-kits/base-tools-
 - **UI**: `toast`, `tabScrollToCenter`.
 - **Router**: `href` (powerful router), `toHome`, `toLogin`, `back`, `checkLogin`.
 - **System**: `getWindowInfo`, `getDeviceInfo`, `getAppBaseInfo`, `copyText`.
-- **Media**: `chooseImage`, `chooseVideo`, `chooseMedia` (handles permissions/compression).
+- **Media**: `chooseMedia`.
 - **Pay**: `toPayWx`.
 - **Platform**: `getPlatformOs`, `getPlatformUni`.
 
@@ -103,13 +105,19 @@ Utilities for UniApp development. **Install:** `npm i @base-web-kits/base-tools-
 
    ```typescript
    // Example for TS
-   import { isMobilePhone, toMaskPhone } from '@base-web-kits/base-tools-ts';
+   import { cloneDeep, isEmail } from '@base-web-kits/base-tools-ts';
+
+   // Example for Web
+   import { copyText } from '@base-web-kits/base-tools-web';
 
    // Example for React
-   import { useRequest } from '@base-web-kits/base-tools-react';
+   import { useSize } from '@base-web-kits/base-tools-react';
 
    // Example for Vue
-   import { useLocalStorage } from '@base-web-kits/base-tools-vue';
+   import { onClickOutside } from '@base-web-kits/base-tools-vue';
+
+   // Example for uni-app
+   import { saveImageToPhotosAlbum } from '@base-web-kits/base-tools-uni';
    ```
 
 4. **Documentation**:
