@@ -7,6 +7,8 @@ Description: Cross-platform utility library (TS/Web/React/Vue/Uni)
 
 ### REACT
 
+> Install: `npm i @base-web-kits/base-tools-react`
+
 - [clearCache](/base-tools/api/react/hooks/clearCache)
 - [configResponsive](/base-tools/api/react/hooks/configResponsive)
 - [createUpdateEffect](/base-tools/api/react/hooks/createUpdateEffect)
@@ -103,6 +105,8 @@ Description: Cross-platform utility library (TS/Web/React/Vue/Uni)
 - [withWrapper](/base-tools/api/react/hoc/withWrapper)
 
 ### TS
+
+> Install: `npm i @base-web-kits/base-tools-ts`
 
 - [after](/base-tools/api/ts/function/after)
 - [appendUrlParam](/base-tools/api/ts/url/appendUrlParam)
@@ -377,6 +381,8 @@ Description: Cross-platform utility library (TS/Web/React/Vue/Uni)
 
 ### UNI
 
+> Install: `npm i @base-web-kits/base-tools-uni`
+
 - [authorize](/base-tools/api/uni/other/authorize)
 - [back](/base-tools/api/uni/router/back)
 - [checkLogin](/base-tools/api/uni/router/checkLogin)
@@ -425,6 +431,8 @@ Description: Cross-platform utility library (TS/Web/React/Vue/Uni)
 - [withUnitRpx](/base-tools/api/uni/string/withUnitRpx)
 
 ### VUE
+
+> Install: `npm i @base-web-kits/base-tools-vue`
 
 - [assert](/base-tools/api/vue/hooks/assert)
 - [asyncComputed](/base-tools/api/vue/hooks/asyncComputed)
@@ -729,6 +737,8 @@ Description: Cross-platform utility library (TS/Web/React/Vue/Uni)
 - [whenever](/base-tools/api/vue/hooks/whenever)
 
 ### WEB
+
+> Install: `npm i @base-web-kits/base-tools-web`
 
 - [copyBlob](/base-tools/api/web/clipboard/copyBlob)
 - [copyHtml](/base-tools/api/web/clipboard/copyHtml)

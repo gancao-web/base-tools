@@ -17,33 +17,35 @@
 仅为某一个项目注入 AI 能力 (在项目根目录下运行以下命令即可)：
 
 ```bash
-npx @base-web-kits/skill install-skill
+npx skills add gancao-web/base-tools
+```
+
+或
+
+```bash
+npx @base-web-kits/skill
 ```
 
 运行成功后：
 
-1. 项目中会生成 `.trae/` 和 `.cursor/` 目录。
-2. **请将这些文件提交到 Git**。这样其他团队成员拉取代码后，无需再次安装即可直接获得相同的 AI 能力。
+1. 项目中会生成 skill 描述文件。
+2. 请将这些文件提交到 Git。其他成员拉取代码后，无需安装即可获得相同的 AI 能力。
 
 ## 🛠️ 批量安装
 
 一个目录包含多个项目，可以使用扫描模式批量安装 (在目录根目录下运行以下命令即可)：
 
 ```bash
-npx @base-web-kits/skill install-skill --scan
+npx @base-web-kits/skill --scan
 ```
 
 ## 🌍 全局安装 (仅 Trae)
 
-目前仅 **Trae** 支持全局技能注入，一次安装所有项目通用：
+全局技能注入，一次安装所有项目通用 (在任意目录下运行以下命令即可)：
 
 ```bash
-npx @base-web-kits/skill install-skill --global
+npx @base-web-kits/skill --global
 ```
-
-这将自动创建 `~/.trae/skills/base-tools/SKILL.md`，**即刻生效**。
-
-> **注意**: Cursor、VS Code (Copilot) 等其他工具尚未支持读取本地全局配置文件，请使用上方的**单独安装**或**批量安装**模式 - 2026-02。
 
 ## ✅ 验证生效
 
