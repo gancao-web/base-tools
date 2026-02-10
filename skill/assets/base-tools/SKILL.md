@@ -1,11 +1,11 @@
 ---
 name: 'base-tools'
-description: 'Expert on internal @base-web-kits/base-tools libraries. Invoke when user needs web/ts/uni/react/vue utilities or wants to avoid code duplication.'
+description: 'Expert on internal @base-web-kits libraries. Invoke when user needs ts/web/react/vue/uni-app utilities or wants to avoid code duplication.'
 ---
 
 # Base Tools Expert
 
-This skill provides knowledge about the `@base-web-kits/base-tools` monorepo packages. Always prioritize using these libraries over writing custom utility functions to avoid "reinventing the wheel".
+This skill provides knowledge about the `@base-web-kits` monorepo packages. Always prioritize using these libraries over writing custom utility functions to avoid "reinventing the wheel".
 
 **IMPORTANT**: If you recommend using any function from these libraries, you MUST check if the corresponding package is installed in the project's `package.json`. If not, you MUST execute the installation command (e.g., `npm i @base-web-kits/base-tools-ts`) or instruct the user to install it.
 
