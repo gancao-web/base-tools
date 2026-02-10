@@ -11,7 +11,7 @@ content: |
 
   ### 1. `@base-web-kits/base-tools-ts` (Universal JS/TS)
 
-  Core utility library, compatible with all environments (Node, Browser, UniApp). **Install:** `npm i @base-web-kits/base-tools-ts`
+  Core utility library, compatible with all environments (Node, Browser, uni-app). **Install:** `npm i @base-web-kits/base-tools-ts`
 
   **Key Modules & Functions:**
 
@@ -58,9 +58,9 @@ content: |
   - **Network**: `request` (axios wrapper), `uploadFile`, `downloadFile`, `preloadImage`.
   - **Clipboard**: `copyText`.
 
-  ### 3. `@base-web-kits/base-tools-uni` (UniApp)
+  ### 3. `@base-web-kits/base-tools-uni` (uni-app)
 
-  Utilities for UniApp development. **Install:** `npm i @base-web-kits/base-tools-uni`
+  Utilities for uni-app development. **Install:** `npm i @base-web-kits/base-tools-uni`
 
   **Key Modules & Functions:**
 
