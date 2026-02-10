@@ -1,11 +1,9 @@
 {
   "name": "@base-web-kits/skill",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Web工具库的skills和rules。精准推荐ts/web/react/vue/uni-app中常用工具函数和hooks",
   "main": "index.js",
-  "bin": {
-    "install-skill": "./bin/cli.js"
-  },
+  "bin": "./bin/cli.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "version:major": "npm version major",
