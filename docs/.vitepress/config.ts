@@ -150,7 +150,7 @@ export default defineConfig({
     },
     nav: [
       { text: '指南', link: '/guide' },
-      { text: 'skill', link: 'https://www.npmjs.com/package/@base-web-kits/skill' },
+      { text: 'skill', link: '/skill' },
       { text: 'TS', link: '/api/ts/' },
       { text: 'Web', link: '/api/web/' },
       { text: 'React', link: '/api/react/' },
