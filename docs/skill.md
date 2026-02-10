@@ -2,52 +2,20 @@
 
 [Web工具库](https://gancao-web.github.io/base-tools/)的skills和rules，精准推荐 `ts/web/react/vue/uni-app` 中常用工具函数，指导 React/Vue 项目正确使用 hooks，提升开发效率，避免重复造轮子。
 
-## 🚀 支持环境
+## 🚀 安装
 
-- **Trae**: 支持，提供项目级和全局技能配置。
-- **Cursor**: 支持，自动生成 `.cursor/rules/base-tools.mdc`。
-- **GitHub Copilot**: 支持，自动生成 `.github/copilot-instructions.md`。
-- **Claude Code**: 支持，自动生成或追加到 `CLAUDE.md`。
-- **Windsurf**: 支持，自动生成 `.windsurfrules`。
-- **Roo Code (Cline)**: 支持，自动生成 `.clinerules`。
-- **Aider**: 支持，自动生成 `CONVENTIONS.md`。
-
-## 🚀 单独安装
-
-仅为某一个项目注入 AI 能力 (在项目根目录下运行以下命令即可)：
+在项目根目录下运行以下命令即可：
 
 ```bash
 npx skills add gancao-web/base-tools
 ```
 
-或
-
-```bash
-npx @base-web-kits/skill
-```
-
 运行成功后：
 
-1. 项目中会生成 skill 描述文件。
+1. 项目中会在 `.agents` 目录生成 skill 描述文件。
 2. 请将这些文件提交到 Git。其他成员拉取代码后，无需安装即可获得相同的 AI 能力。
 
-## 🛠️ 批量安装
-
-一个目录包含多个项目，可以使用扫描模式批量安装 (在目录根目录下运行以下命令即可)：
-
-```bash
-npx @base-web-kits/skill --scan
-```
-
-## 🌍 全局安装 (仅 Trae)
-
-全局技能注入，一次安装所有项目通用 (在任意目录下运行以下命令即可)：
-
-```bash
-npx @base-web-kits/skill --global
-```
-
-## ✅ 验证生效
+## ✅ 验证
 
 安装完成后，可以在对话框中输入以下问题进行测试。如果 AI 推荐了 `@base-web-kits` 下的相关包或函数，说明配置已生效。
 
