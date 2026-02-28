@@ -245,7 +245,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         // 隐藏进度条 (不能写在complete回调,否则toast会被hideLoading隐藏)
         if (showLoading) uni.hideLoading();
         // 请求异常
-        if (toastError) toast('请求失败,请检查网络');
+        if (toastError) toast(`请求失败:${e.errMsg || String(e)}`);
         // 上报日志
         logRequestInfo({ status: 'fail', config: logConfig, startTime, e });
         // 失败回调
@@ -329,7 +329,7 @@ function logRequestInfo(options: {
     log('info', info);
   } else {
     // 失败日志
-    info.e = e;
+    info.e = e instanceof Error ? { name: e.name, message: e.message, stack: e.stack } : String(e); // Error需转为普通对象,否则发送网络日志会序列化成空对象
     log('error', info);
   }
 }
