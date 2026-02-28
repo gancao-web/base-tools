@@ -154,17 +154,18 @@ npx skills add gancao-web/base-tools
 
 ### 配置 Polyfill
 
-#### 1. Vite 项目 (推荐)
+需经过两步:
 
-使用 `@vitejs/plugin-legacy` 插件，它会自动根据目标浏览器注入所需的 Polyfill。
+1. 配置打包工具, 将ES6+代码转换为ES5。
+2. 在入口文件顶部引入 `core-js` 进行 Polyfill。
 
-```bash
-npm add -D @vitejs/plugin-legacy
-```
+以 Vite 项目为例:
+
+1. 使用 `@vitejs/plugin-legacy` 插件，将ES6+代码转换为ES5。
 
 ```ts
 // vite.config.ts
-import legacy from '@vitejs/plugin-legacy';
+import legacy from '@vitejs/plugin-legacy'; // 安装命令: npm install -D @vitejs/plugin-legacy
 
 export default {
   plugins: [
@@ -178,41 +179,15 @@ export default {
       // 与Element对齐: https://element-plus.org/zh-CN/guide/installation
       targets: ['Chrome >= 64', 'Edge >= 79', 'Firefox >= 78', 'Safari >= 12', 'not IE 11'],
 
-      // 自动根据目标浏览器注入所需的 Polyfill
-      modernPolyfills: true,
+      renderLegacyChunks: true, // 必须开启, 确保生成 ES5 兼容包
+      modernPolyfills: false, // 关闭按需注入polyfill, 因为legacy无法全量分析项目代码间接依赖了哪些新API, 需在入口文件 main.ts 全量引入 'core-js/stable'
     }),
   ],
 };
 ```
 
-#### 2. Webpack / Vue CLI
-
-请确保安装了 `core-js`，并在入口文件顶部引入。
-
-```bash
-npm add core-js
-```
+2. 入口文件 main.ts 顶部引入 core-js/stable 进行 Polyfill
 
 ```ts
-import 'core-js/stable';
+import 'core-js/stable'; // 安装命令: npm install core-js
 ```
-
-或者在 `babel.config.js` 中配置：
-
-```js
-module.exports = {
-  presets: [
-    [
-      '@babel/preset-env',
-      {
-        useBuiltIns: 'usage',
-        corejs: 3,
-      },
-    ],
-  ],
-};
-```
-
-#### 3. uni-app 项目
-
-uni-app 如果运行在小程序,原生app,微信端h5，则无需额外配置 Polyfill。
