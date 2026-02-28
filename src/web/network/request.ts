@@ -412,7 +412,8 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
           return;
         }
 
-        if (!isAbortError && toastError) appConfig.toast?.({ status, msg: '网络请求失败' });
+        if (!isAbortError && toastError)
+          appConfig.toast?.({ status, msg: `请求失败,${String(e)}` });
         logRequestInfo({ status, config: logConfig, startTime, e });
         reject(e);
       } finally {
@@ -487,7 +488,7 @@ function logRequestInfo(options: {
     info.res = cloneDeep(res); // 深拷贝,避免外部修改对象,造成输出不一致
     log('info', info);
   } else {
-    info.e = e;
+    info.e = e instanceof Error ? { name: e.name, message: e.message, stack: e.stack } : String(e); // Error需转为普通对象,否则发送网络日志会序列化成空对象
     log('error', info);
   }
 }
