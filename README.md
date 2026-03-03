@@ -171,7 +171,7 @@ export default {
       // 与Element对齐: https://element-plus.org/zh-CN/guide/installation
       targets: ['Chrome >= 64', 'Edge >= 79', 'Firefox >= 78', 'Safari >= 12', 'not IE 11'],
 
-      // 按需自动引入polyfill (至少升级到vite3.x, 推荐vite5+)
+      // 按需自动引入polyfill (需使用vite3以上版本,因为vite2.x缺少新的ES特性,如Object.hasOwn)
       modernPolyfills: true,
     }),
   ],
