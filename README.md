@@ -128,40 +128,32 @@ npx skills add gancao-web/base-tools
 
 本工具库和相关依赖可能涉及的新特性及其最低兼容版本：
 
-| 特性                                      | ES 版本 | 最低兼容版本 (Browser/OS)           |
-| :---------------------------------------- | :------ | :---------------------------------- |
-| **Array.prototype.includes**              | ES2016  | Chrome 47+, iOS 9+, Android 6.0+    |
-| **Object.values / entries**               | ES2017  | Chrome 54+, iOS 10.3+, Android 7.0+ |
-| **String.prototype.padStart / padEnd**    | ES2017  | Chrome 57+, iOS 10.3+, Android 8.0+ |
-| **Object.getOwnPropertyDescriptors**      | ES2017  | Chrome 54+, iOS 10.3+, Android 7.0+ |
-| **Promise.prototype.finally**             | ES2018  | Chrome 63+, iOS 11.3+, Android 9.0+ |
-| **Async Iterator (Symbol.asyncIterator)** | ES2018  | Chrome 63+, iOS 12.0+, Android 9.0+ |
-| **Object.fromEntries**                    | ES2019  | Chrome 73+, iOS 12.2+, Android 10+  |
-| **Array.prototype.flat / flatMap**        | ES2019  | Chrome 69+, iOS 12.0+, Android 9.0+ |
-| **String.prototype.trimStart / trimEnd**  | ES2019  | Chrome 66+, iOS 12.0+, Android 9.0+ |
-| **Promise.allSettled**                    | ES2020  | Chrome 76+, iOS 13.0+, Android 10+  |
-| **String.prototype.matchAll**             | ES2020  | Chrome 80+, iOS 13.0+, Android 10+  |
-| **BigInt**                                | ES2020  | Chrome 67+, iOS 14.0+, Android 11+  |
-| **globalThis**                            | ES2020  | Chrome 71+, iOS 12.2+, Android 9.0+ |
-| **String.prototype.replaceAll**           | ES2021  | Chrome 85+, iOS 13.4+, Android 11+  |
-| **Promise.any**                           | ES2021  | Chrome 85+, iOS 14.0+, Android 11+  |
-| **WeakRef / FinalizationRegistry**        | ES2021  | Chrome 84+, iOS 14.5+, Android 11+  |
-| **Array/String.prototype.at**             | ES2022  | Chrome 92+, iOS 15.4+, Android 12+  |
-| **Error.prototype.cause**                 | ES2022  | Chrome 93+, iOS 15.0+, Android 12+  |
-| **Object.hasOwn**                         | ES2022  | Chrome 93+, iOS 15.4+, Android 12+  |
+| 特性                                     | ES 版本 | 最低兼容版本 (Browser/OS)           |
+| :--------------------------------------- | :------ | :---------------------------------- |
+| **Object.values / entries**              | ES2017  | Chrome 54+, iOS 10.3+, Android 7.0+ |
+| **String.prototype.padStart / padEnd**   | ES2017  | Chrome 57+, iOS 10.3+, Android 8.0+ |
+| **Object.getOwnPropertyDescriptors**     | ES2017  | Chrome 54+, iOS 10.3+, Android 7.0+ |
+| **Promise.prototype.finally**            | ES2018  | Chrome 63+, iOS 11.3+, Android 9.0+ |
+| **Symbol.asyncIterator**                 | ES2018  | Chrome 63+, iOS 12.0+, Android 9.0+ |
+| **Object.fromEntries**                   | ES2019  | Chrome 73+, iOS 12.2+, Android 10+  |
+| **Array.prototype.flat / flatMap**       | ES2019  | Chrome 69+, iOS 12.0+, Android 9.0+ |
+| **String.prototype.trimStart / trimEnd** | ES2019  | Chrome 66+, iOS 12.0+, Android 9.0+ |
+| **Promise.allSettled**                   | ES2020  | Chrome 76+, iOS 13.0+, Android 10+  |
+| **String.prototype.matchAll**            | ES2020  | Chrome 80+, iOS 13.0+, Android 10+  |
+| **BigInt**                               | ES2020  | Chrome 67+, iOS 14.0+, Android 11+  |
+| **globalThis**                           | ES2020  | Chrome 71+, iOS 12.2+, Android 9.0+ |
+| **String.prototype.replaceAll**          | ES2021  | Chrome 85+, iOS 13.4+, Android 11+  |
+| **Promise.any**                          | ES2021  | Chrome 85+, iOS 14.0+, Android 11+  |
+| **WeakRef / FinalizationRegistry**       | ES2021  | Chrome 84+, iOS 14.5+, Android 11+  |
+| **Array/String.prototype.at**            | ES2022  | Chrome 92+, iOS 15.4+, Android 12+  |
+| **Error.prototype.cause**                | ES2022  | Chrome 93+, iOS 15.0+, Android 12+  |
+| **Object.hasOwn**                        | ES2022  | Chrome 93+, iOS 15.4+, Android 12+  |
 
 本工具库构建目标为 **ES2015+**。但不内置 Polyfill, 如需支持低版本浏览器, 请务必在项目中配置 Polyfill。
 
 ### 配置 Polyfill
 
-需经过两步:
-
-1. 配置打包工具, 将ES6+代码转换为ES5。
-2. 在入口文件顶部引入 `core-js` 进行 Polyfill。
-
-以 Vite 项目为例:
-
-1. 使用 `@vitejs/plugin-legacy` 插件，将ES6+代码转换为ES5。
+以 Vite 项目为例, 使用 `@vitejs/plugin-legacy` 插件自动按需注入 Polyfill。
 
 ```ts
 // vite.config.ts
@@ -179,15 +171,9 @@ export default {
       // 与Element对齐: https://element-plus.org/zh-CN/guide/installation
       targets: ['Chrome >= 64', 'Edge >= 79', 'Firefox >= 78', 'Safari >= 12', 'not IE 11'],
 
-      renderLegacyChunks: true, // 必须开启, 确保生成 ES5 兼容包
-      modernPolyfills: false, // 关闭按需注入polyfill, 因为legacy无法全量分析项目代码间接依赖了哪些新API, 需在入口文件 main.ts 全量引入 'core-js/stable'
+      // 按需自动引入polyfill (至少升级到vite3.x, 推荐vite5+)
+      modernPolyfills: true,
     }),
   ],
 };
-```
-
-2. 入口文件 main.ts 顶部引入 core-js/stable 进行 Polyfill
-
-```ts
-import 'core-js/stable'; // 安装命令: npm install core-js
 ```
