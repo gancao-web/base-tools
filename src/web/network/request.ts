@@ -344,20 +344,36 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 
       try {
         // 2.7 发起请求
-        const response = await fetch(fillUrl, {
+        let response = await fetch(fillUrl, {
           method,
           headers: fillHeader,
           body: fillBody,
           signal,
         });
 
+        // HTTP异常处理
         if (!response.ok) {
           if (showLoading) appConfig.hideLoading?.();
-          throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+
+          // 尝试解析响应体，让业务状态码逻辑有机会生效 (兼容服务端设置401+JSON体的情况,确保toLogin能正常触发)
+          let errorText: string;
+          try {
+            errorText = await response.text();
+            JSON.parse(errorText);
+          } catch {
+            throw new Error(`HTTP Error ${response.status}`); // 非JSON体,直接抛出HTTP异常: 502, 503, 504等
+          }
+
+          // 用已读取的 text 构造一个新的 Response，让后续 parseResponse 能正常消费 (因为response.text只能读取一次)
+          response = new Response(errorText, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers,
+          });
         }
 
         // 2.8 处理流式响应
-        if (enableChunked) {
+        if (enableChunked && response.ok) {
           if (showLoading) appConfig.hideLoading?.();
 
           const res = await handleStreamResponse(response, sseTask);
@@ -401,6 +417,8 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
           reject(res);
         }
       } catch (e) {
+        if (showLoading) appConfig.hideLoading?.();
+
         const status = 'fail';
         const isAbortError = e instanceof DOMException && e.name === 'AbortError'; // 取消请求不视为错误
 
