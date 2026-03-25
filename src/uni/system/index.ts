@@ -101,3 +101,13 @@ export function copyText(text: string, toastSuccess = '复制成功') {
     { toastSuccess },
   );
 }
+
+/**
+ * 调起客户端扫码界面，扫码成功后返回对应的结果
+ * @example
+ * const res = await scanCode({ scanType: ['barCode', 'qrCode'] });
+ * console.log('扫码结果:', res);
+ */
+export function scanCode(options?: UniApp.ScanCodeOptions) {
+  return enhanceUniApi(uni.scanCode, 'scanCode')(options);
+}
