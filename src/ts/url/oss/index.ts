@@ -47,13 +47,11 @@ export function getOSSImg(src: string, option: OSSImgOption) {
  * @param option 视频处理选项
  * @returns 处理后的URL（格式: `{src}?x-oss-process=video/xx`）
  * @example
- * 视频转码: getOSSVideo('xx.mp4', { convert: { format: 'mp4' } })
- * 转为动图: getOSSVideo('xx.mp4', { animation: { format: 'gif' } })
- * 雪碧图: getOSSVideo('xx.mp4', { sprite: { format: 'png' } })
- * 多帧截取: getOSSVideo('xx.mp4', { snapshots: { count: 3 } })
- * 视频拼接: getOSSVideo('xx.mp4', { concat: { list: 'a.mp4,b.mp4' } })
- * 信息查询: getOSSVideo('xx.mp4', { info: true })
- * 组合操作: getOSSVideo('xx.mp4', { convert: { format: 'mp4' }, snapshots: { count: 3 } })
+ * 单帧截取: getOSSVideo('xx.mp4', { snapshot: { t: 1 } })
+ * 多帧截取: getOSSVideo('xx.mp4', { snapshots: { f: 'jpg' } })
+ * 转为动图: getOSSVideo('xx.mp4', { animation: { f: 'gif' } })
+ * 视频转码: getOSSVideo('xx.mp4', { convert: { f: 'mp4' } })
+ * 信息提取: getOSSVideo('xx.mp4', { info: true })
  */
 export function getOSSVideo(src: string, option: OSSVideoOption) {
   return buildOSSUrl(src, 'video', option);
@@ -66,8 +64,7 @@ export function getOSSVideo(src: string, option: OSSVideoOption) {
  * @param option 音频处理选项
  * @returns 处理后的URL（格式: `{src}?x-oss-process=audio/xx`）
  * @example
- * 音频转码: getOSSAudio('xx.mp3', { 'convert': { format: 'mp3' } })
- * 音频拼接: getOSSAudio('xx.mp3', { 'concat': { list: 'a.mp3,b.mp3' } })
+ * 音频转码: getOSSAudio('xx.mp3', { 'convert': { f: 'mp3' } })
  * 信息查询: getOSSAudio('xx.mp3', { 'info': true })
  */
 export function getOSSAudio(src: string, option: OSSAudioOption) {
@@ -117,11 +114,11 @@ export function buildOSSUrl(src: string, type: string, option: OSSOption) {
 
 /**
  * 构造图片处理参数
- * @param type 图片处理类型,如`resize`, `flip`, `format`, `info`
+ * @param type 图片处理类型,如`resize`, `flip`, `f`, `info`
  * @param option 图片处理选项
  * @returns `object`返回格式为`resize,w_100,h_100`
  * @returns `number`返回格式为`flip,1`
- * @returns `string`返回格式为`format,jpg`
+ * @returns `string`返回格式为`f,jpg`
  * @returns `true`返回格式为`info`, `false`返回空字符串
  */
 function getOSSSegs(type: string, option?: Record<string, unknown> | number | string | boolean) {
