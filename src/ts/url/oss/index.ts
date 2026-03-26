@@ -47,7 +47,7 @@ export function getOSSImg(src: string, option: OSSImgOption) {
  * @param option 视频处理选项
  * @returns 处理后的URL（格式: `{src}?x-oss-process=video/xx`）
  * @example
- * 单帧截取: getOSSVideo('xx.mp4', { snapshot: { t: 1 } })
+ * 单帧截取: getOSSVideo('xx.mp4', { snapshot: { t: 0, f: 'jpg', w: 800 } })
  * 多帧截取: getOSSVideo('xx.mp4', { snapshots: { f: 'jpg' } })
  * 转为动图: getOSSVideo('xx.mp4', { animation: { f: 'gif' } })
  * 视频转码: getOSSVideo('xx.mp4', { convert: { f: 'mp4' } })
