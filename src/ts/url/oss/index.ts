@@ -114,7 +114,7 @@ export function buildOSSUrl(src: string, type: string, option: OSSOption) {
 
 /**
  * 构造图片处理参数
- * @param type 图片处理类型,如`resize`, `flip`, `f`, `info`
+ * @param type 图片处理类型,如`resize`, `flip`, `format`, `info`
  * @param option 图片处理选项
  * @returns `object`返回格式为`resize,w_100,h_100`
  * @returns `number`返回格式为`flip,1`
