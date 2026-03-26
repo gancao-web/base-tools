@@ -51,21 +51,21 @@ export function getWindowHeight() {
  * 状态栏高度
  */
 export function getStatusBarHeight() {
-  return getWindowInfo().statusBarHeight;
+  return getWindowInfo().statusBarHeight || 0;
 }
 
 /**
  * 顶部安全区高度
  */
 export function getSafeAreaTop() {
-  return getWindowInfo().safeAreaInsets?.top;
+  return getWindowInfo().safeAreaInsets?.top || 0;
 }
 
 /**
  * 底部安全区高度
  */
 export function getSafeAreaBottom() {
-  return getWindowInfo().safeAreaInsets?.bottom;
+  return getWindowInfo().safeAreaInsets?.bottom || 0;
 }
 
 /**
