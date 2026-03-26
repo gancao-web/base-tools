@@ -72,6 +72,21 @@ export function toDayjs(t?: BaseTime, fmt?: dayjs.OptionType) {
 }
 
 /**
+ * 格式时间
+ * @param t 时间
+ * @param fmt 日期格式，默认 `YYYY-MM-DD HH:mm:ss`
+ * @returns 格式化后的日期字符串
+ * @example
+ * dateFormat(1765337596913) // "2025-12-10 11:33:16"
+ * dateFormat(1765337596913, 'YYYY-MM-DD HH:mm:ss.SSS') // "2025-12-10 11:33:16.913"
+ * dateFormat('2025-12-10 11:33:16', 'YYYY年MM月DD日') // "2025年12月10日"
+ */
+export function dateFormat(t?: BaseTime, fmt = 'YYYY-MM-DD HH:mm:ss') {
+  if (!t) return '';
+  return toDayjs(t).format(fmt);
+}
+
+/**
  * 获取“前几天”的日期范围
  * @param offset 正整数天数
  * @param fmt 日期格式，默认 `YYYY-MM-DD`
