@@ -17,7 +17,8 @@ export * from './index.d';
  * @returns 处理后的图片URL（格式: `{src}?x-oss-process=image/xx`）
  * @example
  * 缩放: getOSSImg('xx.jpg', { resize: { w: 100, h: 100 } })
- * 水印: getOSSImg('xx.jpg', { watermark: { text: '水印' } });
+ * 文本水印: getOSSImg('xx.jpg', { watermark: { text: '水印' } });
+ * 图片水印: getOSSImg('xx.jpg', { watermark: { image: 'https://xx.png' } });
  * 翻转: getOSSImg('xx.jpg', { flip: 1 });
  * 裁剪: getOSSImg('xx.jpg', { crop: { w: 100, h: 100 } });
  * 质量: getOSSImg('xx.jpg', { quality: { q: 80 } });
