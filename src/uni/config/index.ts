@@ -35,6 +35,11 @@ export type AppConfig = {
   hostIcon: string;
 
   /**
+   * 图标版本, 默认空 (用于刷新CDN缓存, 比如配置'1.0', 那么图标地址后面会统一加上'?v=1.0')
+   */
+  versionIcon?: string;
+
+  /**
    * 是否为tabbar页 (使href方法正确跳转tabbar页面)
    * @example
    * (url) => url.startsWith('/pages/tabbar/')
@@ -92,6 +97,7 @@ const appConfig: AppConfig = {
   pathWebview: '',
   hostFile: '',
   hostIcon: '',
+  versionIcon: '',
   isTabBar: () => false,
   isLogin: () => false,
 };
