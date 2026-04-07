@@ -129,6 +129,7 @@ function getOSSSegs(type: string, option?: Record<string, unknown> | number | st
   if (typeof option === 'number' || typeof option === 'string') return `${type},${option}`;
 
   const segs = Object.entries(option)
+    .filter(([, v]) => v !== null && v !== undefined)
     .map(([k, v]) => `${k}_${v}`)
     .join(',');
 
