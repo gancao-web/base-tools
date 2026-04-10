@@ -109,6 +109,7 @@ setBaseToolsConfig({
 | **Object.fromEntries**                   | ES2019  | Chrome 73+, iOS 12.2+, Android 10+  |
 | **Array.prototype.flat / flatMap**       | ES2019  | Chrome 69+, iOS 12.0+, Android 9.0+ |
 | **String.prototype.trimStart / trimEnd** | ES2019  | Chrome 66+, iOS 12.0+, Android 9.0+ |
+| **`??` / `?.`**                          | ES2020  | Chrome 80+, iOS 13.4+, Android 10+  |
 | **Promise.allSettled**                   | ES2020  | Chrome 76+, iOS 13.0+, Android 10+  |
 | **String.prototype.matchAll**            | ES2020  | Chrome 80+, iOS 13.0+, Android 10+  |
 | **BigInt**                               | ES2020  | Chrome 67+, iOS 14.0+, Android 11+  |
