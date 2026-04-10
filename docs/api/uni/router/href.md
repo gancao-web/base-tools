@@ -18,7 +18,7 @@ const name = encodeURIComponent('中文名称|json数据');
 href(`/pages/user/detail?name=${name}`);
 
 // 需要登录的页面
-href('/pages/user/profile', { checkLogin: true });
+href('/pages/user/profile', { needLogin: true });
 
 // 关闭当前页面跳转（redirectTo）
 href('/pages/home/index', { mode: 'redirectTo' });
@@ -34,7 +34,7 @@ href('/pages/detail/index', { throttle: 2000 }); // 2秒内不允许重复打开
 
 - `url: string` - 页面路径，支持相对路径和绝对路径
 - `config?: object` - 可选配置项：
-  - `checkLogin?: boolean` - 是否校验登录，未登录则自动跳转到登录页
+  - `needLogin?: boolean` - 是否校验登录，未登录则自动跳转到登录页
   - `mode?: 'redirectTo' | 'reLaunch'` - 打开方式，默认为 `navigateTo`
   - `throttle?: number` - 节流时间（毫秒），防止重复点击，默认为 `1000ms`
 

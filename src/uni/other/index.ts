@@ -37,6 +37,15 @@ export function getSetting(options?: UniApp.GetSettingOptions) {
 }
 
 /**
+ * 获取登录凭证
+ * @example
+ * const { code } = await getAuthCode();
+ */
+export function getAuthCode(options?: UniApp.LoginOptions) {
+  return enhanceUniApi(uni.login, 'login')(options);
+}
+
+/**
  * 消息订阅
  * @example
  * await requestSubscribeMessage(['xxxid']);

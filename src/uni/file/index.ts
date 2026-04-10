@@ -20,8 +20,11 @@ export function getFileUrl(src?: string) {
  * @param src 相对图标地址
  */
 export function getIconUrl(icon: string) {
-  const { hostIcon } = getBaseToolsConfig();
-  return hostIcon + icon;
+  if (!icon) return '';
+  if (icon.startsWith('/static/')) return icon; // 本地图标
+
+  const { hostIcon, versionIcon } = getBaseToolsConfig();
+  return `${hostIcon}${icon}${versionIcon ? `?v=${versionIcon}` : ''}`;
 }
 
 /**
@@ -32,8 +35,7 @@ export function getIconUrl(icon: string) {
  * :style="{'background-image': getIconBg('xx')}"
  */
 export function getIconBg(icon: string) {
-  const { hostIcon } = getBaseToolsConfig();
-  return `url(${hostIcon + icon})`;
+  return `url(${getIconUrl(icon)})`;
 }
 
 /**

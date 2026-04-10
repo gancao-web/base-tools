@@ -39,9 +39,6 @@
       // node 相关的 TypeScript 类型(如NodeJS.Timeout,process.env.NODE_ENV)，需要安装 @types/node
       "node"
     ],
-    // 配置路径别名，方便在项目中导入模块, 仅本地开发时使用
-    "baseUrl": ".",
-    "paths": {}
   },
 
   // 编译/类型检查包含的源码目录

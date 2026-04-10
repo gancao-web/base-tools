@@ -8,8 +8,9 @@ export default defineConfig({
   dts: true,
   splitting: false,
   clean: true,
-  // vue2+webpack默认不编译node_modules的es6, 需对'es-toolkit'进行打包转义es5 (无需在npm的dependencies声明依赖,因为不对外暴露es-toolkit的函数)
-  noExternal: ['es-toolkit'],
+  // 为了解决vue2+webpack不支持es6的问题, 需对re-export的第三方库进行打包, 并转为es2015
+  // 为了在 pnpm 严格布局下, dependencies依赖丢失的问题, 需对运行时依赖打包到库里
+  noExternal: ['es-toolkit', 'dayjs'],
   target: 'es2015',
   outExtension({ format }) {
     return {

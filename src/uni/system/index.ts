@@ -51,21 +51,21 @@ export function getWindowHeight() {
  * 状态栏高度
  */
 export function getStatusBarHeight() {
-  return getWindowInfo().statusBarHeight;
+  return getWindowInfo().statusBarHeight || 0;
 }
 
 /**
  * 顶部安全区高度
  */
 export function getSafeAreaTop() {
-  return getWindowInfo().safeAreaInsets?.top;
+  return getWindowInfo().safeAreaInsets?.top || 0;
 }
 
 /**
  * 底部安全区高度
  */
 export function getSafeAreaBottom() {
-  return getWindowInfo().safeAreaInsets?.bottom;
+  return getWindowInfo().safeAreaInsets?.bottom || 0;
 }
 
 /**
@@ -100,4 +100,14 @@ export function copyText(text: string, toastSuccess = '复制成功') {
     { data: text, showToast: false },
     { toastSuccess },
   );
+}
+
+/**
+ * 调起客户端扫码界面，扫码成功后返回对应的结果
+ * @example
+ * const res = await scanCode({ scanType: ['barCode', 'qrCode'] });
+ * console.log('扫码结果:', res);
+ */
+export function scanCode(options?: UniApp.ScanCodeOptions) {
+  return enhanceUniApi(uni.scanCode, 'scanCode')(options);
 }
