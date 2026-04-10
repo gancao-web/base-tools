@@ -9,8 +9,8 @@ export default defineConfig({
   splitting: false,
   clean: true,
   // 为了解决vue2+webpack不支持es6的问题, 需对re-export的第三方库进行打包, 并转为es2015
-  // 在npm的dependencies也需声明依赖,仅提供ts类型资源
-  noExternal: ['es-toolkit'],
+  // 为了在 pnpm 严格布局下, dependencies依赖丢失的问题, 需对运行时依赖打包到库里
+  noExternal: ['es-toolkit', 'bignumber.js', 'dayjs', 'mitt'],
   target: 'es2015',
   outExtension({ format }) {
     return {
