@@ -98,10 +98,18 @@ export function toLogin() {
 /**
  * 返回 (长度不够, 直接跳首页)
  * - 需在入口文件初始化应用配置 setBaseToolsConfig({ pathHome })
- * @param delta 返回页数,默认1
+ * @param delta 返回页数或指定页面, 默认1
+ * @example
+ * <view @click="back()">返回前一页</view>
+ * <view @click="back(2)">返回前2页</view>
+ * <view @click="back('/pages/login')">返回到登录之前的页面</view>
  */
-export function back(delta = 1) {
-  if (getCurrentPages().length > delta) {
+export function back(delta: number | string = 1) {
+  if (typeof delta === 'string') {
+    const routes = getCurrentPages().map((item) => `/${item.route}`);
+    const index = routes.indexOf(delta);
+    uni.navigateBack({ delta: routes.length - index });
+  } else if (getCurrentPages().length > delta) {
     uni.navigateBack({ delta });
   } else {
     toHome();
