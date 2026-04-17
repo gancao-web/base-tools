@@ -21,6 +21,15 @@ export function toast(msg: string, duration = 1000) {
 }
 
 /**
+ * 显示 loading 提示框
+ * @param title 提示的文字，默认：'请稍后...'
+ * @param mask 是否显示透明蒙层，防止触摸穿透，默认：false
+ */
+export function showLoading(title = '请稍后...', mask = false) {
+  uni.showLoading({ title, mask });
+}
+
+/**
  * 模态框
  * @param option 模态框参数
  * @returns Promise<void>
