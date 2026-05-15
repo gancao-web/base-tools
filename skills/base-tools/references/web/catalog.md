@@ -34,7 +34,7 @@
 
 #### request
 - 来源: `src/web/network/request.ts`
-- 导出: `apiChatStream`、`apiGoodList`、`filterRequestData`、`filterRequestHeader`、`request`、`requestApi`、`RequestConfig`、`RequestConfigBase`、`RequestData`、`RequestMethod`、`RequestTask`、`ResponseData`
+- 导出: `filterRequestData`、`filterRequestHeader`、`request`、`RequestConfig`、`RequestConfigBase`、`RequestData`、`RequestMethod`、`RequestTask`、`ResponseData`
 
 #### uploadFile
 - 来源: `src/web/network/uploadFile.ts`

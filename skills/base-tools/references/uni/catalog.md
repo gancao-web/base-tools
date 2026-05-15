@@ -42,7 +42,7 @@
 
 #### request
 - 来源: `src/uni/network/request.ts`
-- 导出: `apiChatStream`、`apiGoodList`、`request`、`requestApi`、`RequestConfig`、`RequestConfigBase`、`RequestData`
+- 导出: `request`、`RequestConfig`、`RequestConfigBase`、`RequestData`
 
 ### other
 - 来源: `src/uni/other/index.ts`
@@ -70,7 +70,7 @@
 
 ### update
 - 来源: `src/uni/update/index.ts`
-- 导出: `appUpdate`、`mpUpdate`
+- 导出: `mpUpdate`
 
 ### url
 - 来源: `src/uni/url/index.ts`
