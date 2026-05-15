@@ -565,6 +565,18 @@ async function handleStreamResponse(response: Response, sseTask: SseTask) {
  * 解析响应数据
  */
 async function parseResponse(response: Response, responseType: string) {
+  if (!response.ok) {
+    // HTTP 非 2xx && responseType是'arraybuffer'或'text' (如服务端设置401+JSON体,确保toLogin能正常触发)
+    const text = await response.text();
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error(`HTTP Error ${response.status}: ${text || response.statusText}`);
+    }
+  }
+
+  // HTTP 为 2xx 的响应数据
   let resData: ResponseData;
   if (responseType === 'arraybuffer') {
     resData = await response.arrayBuffer();

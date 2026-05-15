@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools",
-  "version": "1.3.16",
+  "version": "1.3.18",
   "type": "module",
   "sideEffects": false,
   "scripts": {
@@ -30,6 +30,7 @@
     "docs:build": "npm run docs:llms && vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "tag": "node scripts/tag-release.mjs",
+    "skills:generate": "node scripts/generate-skills.mjs",
     "update:es-toolkit": "npx tsx scripts/re-export/update-es-toolkit-exports.ts",
     "update:ahooks": "npx tsx scripts/re-export/update-ahooks-exports.ts",
     "update:vueuse": "npx tsx scripts/re-export/update-vueuse-exports.ts"
