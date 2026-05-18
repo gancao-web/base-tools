@@ -7,7 +7,7 @@
 在项目根目录下运行以下命令即可：
 
 ```bash
-npx skills add gancao-web/base-tools
+npx skills add gancao-web/base-tools --skill base-tools
 ```
 
 运行成功后：
