@@ -9,3 +9,4 @@ https://www.skills.sh/gancao-web/base-tools/base-tools
 1. 在 `GitHub` 主仓库根目录创建 `skills` 目录
 2. 把 `SKILL.md` 分类存放到 `skills` 目录下
 3. 检查 `SKILL.md` 的 `name` 和 `description`，必须使用单引号包裹
+4. skill的 `README.md` 可省，加上的话会显示在 `www.skills.sh` 中
