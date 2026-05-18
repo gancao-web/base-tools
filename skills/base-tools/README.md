@@ -1,4 +1,4 @@
-# Web Project Skill (@base-web-kits/skill)
+# base-tools
 
 [Web工具库](https://gancao-web.github.io/base-tools/)的skills和rules，精准推荐 `ts/web/react/vue/uni-app` 中常用工具函数，指导 React/Vue 项目正确使用 hooks，提升开发效率，避免重复造轮子。
 
