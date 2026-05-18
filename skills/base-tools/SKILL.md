@@ -1,6 +1,6 @@
 ---
-name: base-tools
-description: `@base-web-kits` 工具库的总入口 skill。用于在 TS / Web / React / Vue / uni-app 项目中优先检索和复用已有工具函数、hooks 与导出项，而不是重新实现一套相似能力。遇到工具函数选型、能力查找、现有封装复用、按场景挑选 API 时使用。
+name: 'base-tools'
+description: '在 TS / Web / React / Vue / uni-app 项目中优先检索和复用已有工具函数、hooks 与导出项，而不是重新实现一套相似能力。遇到工具函数选型、能力查找、现有封装复用、按场景挑选 API 时使用。'
 ---
 
 # Base Tools Router
