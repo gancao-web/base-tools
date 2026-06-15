@@ -1,7 +1,7 @@
 # Base Tools Full Documentation
 
 Project: @base-web-kits/base-tools
-Date: 2026-02-09
+Date: 2026-06-15
 
 
 
@@ -10812,7 +10812,7 @@ await enhanceUniApi(uni.downloadFile, 'downloadFile')(
     - `toastSuccess` - 操作成功的toast提示，默认 `false`（支持函数返回自定义文本）
     - `toastError` - 是否显示操作失败的详细错误信息，默认 `true`（支持函数判断是否显示）
     - `showLog` - 是否显示日志，默认 `true`
-    - `resMap` - 响应数据的转换, 如解密操作 (返回值在成功日志中输出'resMap'字段)
+    - `transformResponse` - 响应数据的转换, 如解密操作 (返回值在成功日志中输出'transformResponse'字段)
     - `logExtra` - 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name')
     - `onTaskReady` - 初始化task对象时的回调函数，默认 `undefined`（支持自定义task事件监听）
 
@@ -11261,7 +11261,8 @@ import type { RequestData, RequestConfig } from '@base-web-kits/base-tools-uni';
 export function requestApi<T>(config: RequestConfig) {
   return request<T>({
     header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
-    // resMap: (res) => res, // 响应数据的转换, 如解密操作 (可选)
+    // transformRequest: ({ header, data }) => ({ header, data }), // 请求前转换, 如加密请求头和请求参数 (可选)
+    // transformResponse: (res) => res, // 响应数据的转换, 如解密操作 (可选)
     resKey: 'data',
     msgKey: 'message',
     codeKey: 'status',
@@ -11337,16 +11338,17 @@ chatTask?.abort();
 - `successKey?: string` - 接口返回成功状态码的字段, 支持"a[0].b.c"的格式 (默认取 codeKey)
 - `successCode: (number | string)[]` - 成功状态码列表
 - `reloginCode: (number | string)[]` - 登录过期状态码列表
-- `resMap?: (data: any) => any` - 响应数据的转换, 如解密操作
-- `showLoading?: boolean` - 是否显示进度条，默认 `true`
+- `transformRequest?: (ctx: { url: string; method?: string; header: Record<string, string | number | boolean>; data?: D }) => Partial<{ url: string; header: Record<string, string | number | boolean>; data?: D }> | Promise<...>` - 请求前的数据转换, 可用于加密 `header`、`data` 或重写 `url`
+- `transformResponse?: (data: any) => any` - 响应数据的转换, 如解密操作
+- `showLoading?: boolean | string` - 是否显示进度条，默认 `true`，支持字符串自定义文案
 - `toastError?: boolean` - 是否提示接口异常，默认 `true`
 - `showLog?: boolean` - 是否输出日志，默认 `true`
 - `cacheTime?: number` - 缓存时间，默认 `0` 不缓存 (单位毫秒)
-- `extraLog?: Record<string, unknown>` - 额外输出的日志数据
+- `logExtra?: Record<string, unknown>` - 额外输出的日志数据
 
 ## 返回值
 
-`Promise<T> & { task?: UniApp.RequestTask }`
+Promise<T>
 
 ## 版本
 
@@ -11423,6 +11425,28 @@ await authorize('scope.writePhotosAlbum', "请开启'添加到相册'的权限",
 ## 版本
 
 - 1.0.0 新增
+
+
+==================================================
+File: uni/other/getAuthCode.md
+==================================================
+
+# getAuthCode
+
+获取登录凭证（uni.login 的 code），用于后续换取用户登录态信息
+
+## 示例
+
+```ts
+import { getAuthCode } from '@base-web-kits/base-tools-uni';
+
+const { code } = await getAuthCode();
+console.log('登录凭证:', code);
+```
+
+## 版本
+
+- 1.3.11 新增
 
 
 ==================================================
@@ -11599,15 +11623,18 @@ File: uni/router/back.md
 
 ## 示例
 
-```ts
+```tsx
 import { back } from '@base-web-kits/base-tools-uni';
 
-back();
+<view @click="back()">返回前一页</view>
+<view @click="back(2)">返回前2页</view>
+<view @click="back('/pages/login')">返回到登录之前的页面</view>
 ```
 
 ## 版本
 
 - 1.0.0 新增
+- 1.3.16 支持string 跳转
 
 
 ==================================================
@@ -11681,7 +11708,7 @@ const name = encodeURIComponent('中文名称|json数据');
 href(`/pages/user/detail?name=${name}`);
 
 // 需要登录的页面
-href('/pages/user/profile', { checkLogin: true });
+href('/pages/user/profile', { needLogin: true });
 
 // 关闭当前页面跳转（redirectTo）
 href('/pages/home/index', { mode: 'redirectTo' });
@@ -11697,7 +11724,7 @@ href('/pages/detail/index', { throttle: 2000 }); // 2秒内不允许重复打开
 
 - `url: string` - 页面路径，支持相对路径和绝对路径
 - `config?: object` - 可选配置项：
-  - `checkLogin?: boolean` - 是否校验登录，未登录则自动跳转到登录页
+  - `needLogin?: boolean` - 是否校验登录，未登录则自动跳转到登录页
   - `mode?: 'redirectTo' | 'reLaunch'` - 打开方式，默认为 `navigateTo`
   - `throttle?: number` - 节流时间（毫秒），防止重复点击，默认为 `1000ms`
 
@@ -11975,6 +12002,69 @@ console.log('windowWidth:', windowWidth);
 ## 版本
 
 - 1.0.0 新增
+
+
+==================================================
+File: uni/system/scanCode.md
+==================================================
+
+# scanCode
+
+调起客户端扫码界面，扫码成功后返回对应的结果
+
+## 示例
+
+```ts
+import { scanCode } from '@base-web-kits/base-tools-uni';
+
+const res = await scanCode({ scanType: ['barCode', 'qrCode'] });
+console.log('扫码结果:', res);
+```
+
+## 参数
+
+- `options` - 扫码配置（可选）
+  - `scanType` - 扫码类型数组，如 `['barCode', 'qrCode']`
+  - `onlyFromCamera` - 是否只允许从相机扫码，不允许从相册选取图片
+
+## 返回值
+
+- `Promise<UniApp.ScanCodeSuccessRes>` - 返回扫码结果对象
+  - `result` - 扫码内容
+  - `scanType` - 扫码类型
+  - `charSet` - 字符集
+  - `path` - 当所扫的码为当前应用的合法二维码时，会返回此字段，内容为二维码携带的 path
+
+## 版本
+
+- 1.3.11 新增
+
+
+==================================================
+File: uni/ui/showLoading.md
+==================================================
+
+# showLoading
+
+显示 loading 提示框
+
+## 示例
+
+```ts
+import { showLoading } from '@base-web-kits/base-tools-uni';
+
+showLoading(); // '请稍后...'
+showLoading('保存中...');
+```
+
+## 参数
+
+- `title: string` - 提示的文字，默认：'请稍后...'
+- `mask: boolean` - 是否显示透明蒙层，防止触摸穿透，默认：false
+
+## 版本
+
+- 1.3.16 新增
 
 
 ==================================================
@@ -20660,7 +20750,7 @@ File: web/network/request.md
 
 # request
 
-基础请求方法，基于 fetch API 封装，支持流式请求、缓存、拦截器、字段属性等功能。
+基础请求方法，基于 fetch API 封装，支持流式请求、缓存、请求前转换、响应数据转换等功能。
 
 ## 示例
 
@@ -20688,7 +20778,8 @@ setBaseToolsConfig({
 export function requestApi<T>(config: RequestConfig) {
   return request<T>({
     header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
-    // resMap: (res) => res, // 响应数据的转换, 如解密操作 (可选)
+    // transformRequest: ({ header, data }) => ({ header, data }), // 请求前转换, 如加密请求头和请求参数 (可选)
+    // transformResponse: (res) => res, // 响应数据的转换, 如解密操作 (可选)
     resKey: 'data',
     msgKey: 'message',
     codeKey: 'status',
@@ -20772,18 +20863,19 @@ chatTask?.abort();
 | successKey | `string` | 否 | - | 接口返回成功状态码的字段 (默认取 codeKey) |
 | successCode | `(number \| string)[]` | 是 | - | 成功状态码列表 |
 | reloginCode | `(number \| string)[]` | 是 | - | 登录过期状态码列表 |
-| showLoading | `boolean` | 否 | `true` | 是否显示进度条 |
+| showLoading | `boolean \| string` | 否 | `true` | 是否显示进度条，支持字符串自定义文案 |
 | toastError | `boolean` | 否 | `true` | 是否提示接口异常 |
 | showLog | `boolean` | 否 | `true` | 是否输出日志 |
-| extraLog | `Record<string, unknown>` | 否 | - | 额外输出的日志数据 |
+| logExtra | `Record<string, unknown>` | 否 | - | 额外输出的日志数据 |
 | cacheTime | `number` | 否 | `0` | 响应数据的缓存时间 (毫秒)，仅成功时缓存，内存缓存 |
 | enableChunked | `boolean` | 否 | `false` | 是否开启流式传输 (如 SSE) |
 | responseType | `'text' \| 'arraybuffer' \| 'json'` | 否 | `'json'` | 响应类型 |
-| resMap | `(data: unknown) => unknown` | 否 | - | 响应数据的转换, 如解密操作 |
+| transformRequest | `(ctx: { url: string; method: RequestMethod; header: Record<string, string>; data?: D }) => Partial<{ url: string; header: Record<string, string>; data?: D }> \| Promise<...>` | 否 | - | 请求前的数据转换, 可用于加密 `header`、`data` 或重写 `url` |
+| transformResponse | `(data: unknown) => unknown` | 否 | - | 响应数据的转换, 如解密操作 |
 
 **返回值**
 
-返回一个 Promise 对象，该 Promise 对象附加了一个类型为`RequestTask`的`task`属性，用于控制请求（如取消请求）。
+Promise<T>
 
 ### RequestTask
 

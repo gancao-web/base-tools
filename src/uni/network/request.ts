@@ -11,6 +11,19 @@ import type { AppLogInfo } from '../config';
 /** 请求参数 */
 export type RequestData = UniApp.RequestOptions['data'];
 
+/** 请求前转换上下文 */
+export type TransformRequestContext<D extends RequestData = RequestData> = {
+  url: string;
+  method?: string;
+  header: Record<string, string | number | boolean>;
+  data?: D;
+};
+
+/** 请求前转换结果 */
+export type TransformRequestResult<D extends RequestData = RequestData> = Partial<
+  Pick<TransformRequestContext<D>, 'url' | 'header' | 'data'>
+>;
+
 /**
  * 发起请求的配置 (对外,参数可选)
  */
@@ -57,8 +70,13 @@ export type RequestConfigBase<D extends RequestData = RequestData> = Omit<
   /** 额外输出的日志数据 */
   logExtra?: Record<string, unknown>;
 
+  /** 请求前的数据转换, 可用于加密 header、data 或重写 url */
+  transformRequest?: (
+    ctx: TransformRequestContext<D>,
+  ) => TransformRequestResult<D> | Promise<TransformRequestResult<D>>;
+
   /** 响应数据的转换 */
-  resMap?: (
+  transformResponse?: (
     data: UniApp.RequestSuccessCallbackResult['data'],
   ) => UniApp.RequestSuccessCallbackResult['data'];
 
@@ -76,6 +94,17 @@ export type RequestConfigBase<D extends RequestData = RequestData> = Omit<
    * }
    */
   onMessage?: MessageCallback;
+};
+
+/** 日志请求 */
+type RequestLogConfig = {
+  url?: string;
+  data?: unknown;
+  header?: unknown;
+  method?: string;
+  logExtra?: Record<string, unknown>;
+  showLog?: boolean;
+  resKey?: RequestConfigBase['resKey'];
 };
 
 /** 请求缓存 */
@@ -163,119 +192,162 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       toastError = true,
       enableChunked,
       cacheTime,
-      resMap,
+      transformRequest,
+      transformResponse,
       onTaskReady,
       onMessage,
     } = config;
 
     // 参数: 过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 这些有效值)
-    const fillData = isPlainObject(data) ? pickBy(data, (val) => val !== undefined) : data;
+    let fillData = isPlainObject(data) ? pickBy(data, (val) => val !== undefined) : data;
 
     // 请求头: 过滤空值 (undefined, null, ""), 不过滤0和false
-    const emptyValue = [undefined, null, ''];
-    const fillHeader = header ? pickBy(header, (val) => !emptyValue.includes(val)) : {};
+    let fillHeader = header
+      ? pickBy(header, (val) => val !== undefined && val !== null && val !== '')
+      : {};
 
-    // 日志输出的config
-    const logConfig = { ...config, data: fillData, header: fillHeader };
+    const execute = async () => {
+      let fillUrl = url;
 
-    // 记录请求开始时间
-    const startTime = Date.now();
+      if (transformRequest) {
+        const transformed =
+          (await transformRequest({
+            url: fillUrl,
+            method: config.method,
+            header: { ...fillHeader },
+            data: fillData as D,
+          })) || {};
 
-    // 缓存处理
-    const isCache = cacheTime && cacheTime > 0;
-    const cacheKey = isCache ? JSON.stringify({ url, data: fillData }) : '';
-    if (isCache) {
-      const cached = requestCache.get(cacheKey);
-      if (cached) {
-        if (cached.expire > startTime) {
-          const { res } = cached;
-          logRequestInfo({ status: 'success', config: logConfig, fromCache: true, startTime, res });
-          resolve(getResult(res, resKey)); // 返回缓存数据
-          return;
+        if (transformed.url !== undefined) fillUrl = transformed.url;
+        if (transformed.header !== undefined) {
+          fillHeader = pickBy(
+            transformed.header,
+            (val) => val !== undefined && val !== null && val !== '',
+          );
         }
-        requestCache.delete(cacheKey); // 删除过期缓存
+        if (transformed.data !== undefined) {
+          const transformedData = transformed.data;
+          fillData = isPlainObject(transformedData)
+            ? pickBy(transformedData, (val) => val !== undefined)
+            : transformedData;
+        }
       }
-    }
 
-    // 显示进度条
-    if (showLoading) uni.showLoading(typeof showLoading === 'string' ? { title: showLoading } : {});
+      // 日志输出的config
+      const logConfig = { ...config, url: fillUrl, data: fillData, header: fillHeader };
 
-    // 发送请求
-    const task = uni.request({
-      ...config,
-      data: fillData,
-      header: fillHeader,
-      success: (xhr) => {
-        // 隐藏进度条 (不能写在complete回调,否则toast会被hideLoading隐藏)
-        if (showLoading) uni.hideLoading();
+      // 记录请求开始时间
+      const startTime = Date.now();
 
-        // 响应拦截
-        const res = resMap ? resMap(xhr.data) : xhr.data;
-
-        // 解析数据 (分块传输会先不断执行task.onChunkReceived回调,流式传输完毕才执行success回调)
-        const code = enableChunked ? '' : getObjectValue(res, codeKey);
-        const scode = enableChunked ? '' : successKey ? getObjectValue(res, successKey) : code;
-        const msg = enableChunked ? '' : getObjectValue(res, msgKey);
-        const isSuccess = enableChunked ? true : successCode.includes(scode);
-        const isRelogin = enableChunked ? false : reloginCode.includes(code);
-
-        // 缓存数据
-        if (isSuccess && isCache) {
-          requestCache.set(cacheKey, { res, expire: Date.now() + cacheTime });
+      // 缓存处理
+      const isCache = cacheTime && cacheTime > 0;
+      const cacheKey = isCache ? JSON.stringify({ url: fillUrl, data: fillData }) : '';
+      if (isCache) {
+        const cached = requestCache.get(cacheKey);
+        if (cached) {
+          if (cached.expire > startTime) {
+            const { res } = cached;
+            logRequestInfo({
+              status: 'success',
+              config: logConfig,
+              fromCache: true,
+              startTime,
+              res,
+            });
+            resolve(getResult(res, resKey)); // 返回缓存数据
+            return;
+          }
+          requestCache.delete(cacheKey); // 删除过期缓存
         }
+      }
 
-        // 日志
-        logRequestInfo({ status: 'success', config: logConfig, startTime, res });
+      // 显示进度条
+      if (showLoading)
+        uni.showLoading(typeof showLoading === 'string' ? { title: showLoading } : {});
 
-        if (isSuccess) {
-          // 业务正常
-          resolve(getResult(res, resKey));
-        } else if (isRelogin) {
-          // 重新登录
-          toLogin();
-          reject(res);
-        } else {
-          // 业务异常
-          if (toastError) toast(msg, 2000);
-          reject(res);
-        }
-      },
+      // 发送请求
+      const task = uni.request({
+        ...config,
+        url: fillUrl,
+        data: fillData,
+        header: fillHeader,
+        success: (xhr) => {
+          // 隐藏进度条 (不能写在complete回调,否则toast会被hideLoading隐藏)
+          if (showLoading) uni.hideLoading();
 
-      fail(e) {
-        // 隐藏进度条 (不能写在complete回调,否则toast会被hideLoading隐藏)
-        if (showLoading) uni.hideLoading();
-        // 请求异常
-        if (toastError) toast(`请求失败:${e.errMsg || JSON.stringify(e)}`);
-        // 上报日志
-        logRequestInfo({ status: 'fail', config: logConfig, startTime, e });
-        // 失败回调
-        reject(e);
-      },
-    });
+          // 响应数据转换
+          const res = transformResponse ? transformResponse(xhr.data) : xhr.data;
 
-    if (onMessage) {
-      // 流式解析对象
-      const sseTask: { parser: SSEParser | null } = { parser: new SSEParser(onMessage) };
+          // 解析数据 (分块传输会先不断执行task.onChunkReceived回调,流式传输完毕才执行success回调)
+          const code = enableChunked ? '' : getObjectValue(res, codeKey);
+          const scode = enableChunked ? '' : successKey ? getObjectValue(res, successKey) : code;
+          const msg = enableChunked ? '' : getObjectValue(res, msgKey);
+          const isSuccess = enableChunked ? true : successCode.includes(scode);
+          const isRelogin = enableChunked ? false : reloginCode.includes(code);
 
-      // 监听流式响应
-      // @ts-ignore
-      task.onChunkReceived((res: { data: ArrayBuffer }) => {
-        sseTask.parser?.receive(res.data);
+          // 缓存数据
+          if (isSuccess && isCache) {
+            requestCache.set(cacheKey, { res, expire: Date.now() + cacheTime });
+          }
+
+          // 日志
+          logRequestInfo({ status: 'success', config: logConfig, startTime, res });
+
+          if (isSuccess) {
+            // 业务正常
+            resolve(getResult(res, resKey));
+          } else if (isRelogin) {
+            // 重新登录
+            toLogin();
+            reject(res);
+          } else {
+            // 业务异常
+            if (toastError) toast(msg, 2000);
+            reject(res);
+          }
+        },
+
+        fail(e) {
+          // 隐藏进度条 (不能写在complete回调,否则toast会被hideLoading隐藏)
+          if (showLoading) uni.hideLoading();
+          // 请求异常
+          if (toastError) toast(`请求失败:${e.errMsg || JSON.stringify(e)}`);
+          // 上报日志
+          logRequestInfo({ status: 'fail', config: logConfig, startTime, e });
+          // 失败回调
+          reject(e);
+        },
       });
 
-      // 覆盖abort方法, 取消流式接收
-      const oldAbort = task.abort.bind(task);
+      if (onMessage) {
+        // 流式解析对象
+        const sseTask: { parser: SSEParser | null } = { parser: new SSEParser(onMessage) };
 
-      task.abort = () => {
-        sseTask.parser = null; // 清空解析对象
+        // 监听流式响应
         // @ts-ignore
-        task.offChunkReceived(); // 小程序必须取消监听,才能中断流式接收 (而h5直接abort即可)
-        oldAbort(); // 取消请求 (小程序流式请求响应后,就无法中断,只能offChunkReceived)
-      };
-    }
+        task.onChunkReceived((res: { data: ArrayBuffer }) => {
+          sseTask.parser?.receive(res.data);
+        });
 
-    // task对象初始化完毕
-    onTaskReady?.(task);
+        // 覆盖abort方法, 取消流式接收
+        const oldAbort = task.abort.bind(task);
+
+        task.abort = () => {
+          sseTask.parser = null; // 清空解析对象
+          // @ts-ignore
+          task.offChunkReceived(); // 小程序必须取消监听,才能中断流式接收 (而h5直接abort即可)
+          oldAbort(); // 取消请求 (小程序流式请求响应后,就无法中断,只能offChunkReceived)
+        };
+      }
+
+      // task对象初始化完毕
+      onTaskReady?.(task);
+    };
+
+    execute().catch((e) => {
+      if (showLoading) uni.hideLoading();
+      reject(e);
+    });
   });
 }
 
@@ -283,7 +355,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
  * 日志输出
  */
 function logRequestInfo(options: {
-  config: RequestConfigBase<RequestData>;
+  config: RequestLogConfig;
   fromCache?: boolean;
   startTime: number;
   status: 'success' | 'fail';

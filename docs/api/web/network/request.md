@@ -1,6 +1,6 @@
 # request
 
-基础请求方法，基于 fetch API 封装，支持流式请求、缓存、拦截器、字段属性等功能。
+基础请求方法，基于 fetch API 封装，支持流式请求、缓存、请求前转换、响应数据转换等功能。
 
 ## 示例
 
@@ -28,7 +28,8 @@ setBaseToolsConfig({
 export function requestApi<T>(config: RequestConfig) {
   return request<T>({
     header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
-    // resMap: (res) => res, // 响应数据的转换, 如解密操作 (可选)
+    // transformRequest: ({ header, data }) => ({ header, data }), // 请求前转换, 如加密请求头和请求参数 (可选)
+    // transformResponse: (res) => res, // 响应数据的转换, 如解密操作 (可选)
     resKey: 'data',
     msgKey: 'message',
     codeKey: 'status',
@@ -112,18 +113,19 @@ chatTask?.abort();
 | successKey | `string` | 否 | - | 接口返回成功状态码的字段 (默认取 codeKey) |
 | successCode | `(number \| string)[]` | 是 | - | 成功状态码列表 |
 | reloginCode | `(number \| string)[]` | 是 | - | 登录过期状态码列表 |
-| showLoading | `boolean` | 否 | `true` | 是否显示进度条 |
+| showLoading | `boolean \| string` | 否 | `true` | 是否显示进度条，支持字符串自定义文案 |
 | toastError | `boolean` | 否 | `true` | 是否提示接口异常 |
 | showLog | `boolean` | 否 | `true` | 是否输出日志 |
-| extraLog | `Record<string, unknown>` | 否 | - | 额外输出的日志数据 |
+| logExtra | `Record<string, unknown>` | 否 | - | 额外输出的日志数据 |
 | cacheTime | `number` | 否 | `0` | 响应数据的缓存时间 (毫秒)，仅成功时缓存，内存缓存 |
 | enableChunked | `boolean` | 否 | `false` | 是否开启流式传输 (如 SSE) |
 | responseType | `'text' \| 'arraybuffer' \| 'json'` | 否 | `'json'` | 响应类型 |
-| resMap | `(data: unknown) => unknown` | 否 | - | 响应数据的转换, 如解密操作 |
+| transformRequest | `(ctx: { url: string; method: RequestMethod; header: Record<string, string>; data?: D }) => Partial<{ url: string; header: Record<string, string>; data?: D }> \| Promise<...>` | 否 | - | 请求前的数据转换, 可用于加密 `header`、`data` 或重写 `url` |
+| transformResponse | `(data: unknown) => unknown` | 否 | - | 响应数据的转换, 如解密操作 |
 
 **返回值**
 
-返回一个 Promise 对象，该 Promise 对象附加了一个类型为`RequestTask`的`task`属性，用于控制请求（如取消请求）。
+Promise<T>
 
 ### RequestTask
 
