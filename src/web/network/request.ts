@@ -39,6 +39,19 @@ export type RequestData =
  */
 export type ResponseData = string | ArrayBuffer | Blob | Record<string, unknown> | unknown[] | null;
 
+/** 请求前转换上下文 */
+export type TransformRequestContext<D extends RequestData = RequestData> = {
+  url: string;
+  method: RequestMethod;
+  header: Record<string, string>;
+  data?: D;
+};
+
+/** 请求前转换结果 */
+export type TransformRequestResult<D extends RequestData = RequestData> = Partial<
+  Pick<TransformRequestContext<D>, 'url' | 'header' | 'data'>
+>;
+
 /**
  * 发起请求的配置 (对外,参数可选)
  */
@@ -102,8 +115,13 @@ export type RequestConfigBase<D extends RequestData = RequestData> = {
   /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
   logExtra?: Record<string, unknown>;
 
+  /** 请求前的数据转换, 可用于加密 header、data 或重写 url */
+  transformRequest?: (
+    ctx: TransformRequestContext<D>,
+  ) => TransformRequestResult<D> | Promise<TransformRequestResult<D>>;
+
   /** 响应数据的转换 */
-  resMap?: (data: ResponseData) => ResponseData;
+  transformResponse?: (data: ResponseData) => ResponseData;
 
   /** 获取请求对象, 用于取消请求 */
   onTaskReady?: (task: RequestTask) => void;
@@ -134,6 +152,17 @@ export type RequestTask = {
  */
 type SseTask = { parser: SSEParser | undefined | null };
 
+/** 日志请求 */
+type RequestLogConfig = {
+  url?: string;
+  data?: unknown;
+  header?: unknown;
+  method?: RequestMethod;
+  logExtra?: Record<string, unknown>;
+  showLog?: boolean;
+  resKey?: RequestConfigBase['resKey'];
+};
+
 /** 请求缓存 */
 const requestCache = new Map<string, { res: unknown; expire: number }>();
 
@@ -163,7 +192,8 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * export function requestApi<T>(config: RequestConfig) {
  *    return request<T>({
  *      header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
- *      // resMap: (res) => res, // 响应数据的转换, 如解密操作 (可选)
+ *      // transformRequest: ({ header, data }) => ({ header, data }), // 请求前转换, 如加密请求头和请求参数 (可选)
+ *      // transformResponse: (res) => res, // 响应数据的转换, 如解密操作 (可选)
  *      resKey: 'data',
  *      msgKey: 'message',
  *      codeKey: 'status',
@@ -236,7 +266,8 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     toastError = true,
     enableChunked = false,
     cacheTime,
-    resMap,
+    transformRequest,
+    transformResponse,
     responseType = 'json',
     timeout = 60000,
     onTaskReady,
@@ -265,29 +296,53 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
   return new Promise<T>((resolve, reject) => {
     const execute = async () => {
       const isGet = method === 'GET';
-      const isObjectData = isPlainObject(data);
-      const isArrayData = !isObjectData && Array.isArray(data);
 
       // 2.1 参数处理
       // 参数过滤 undefined
-      const fillData = isObjectData ? filterRequestData(data) : data;
+      let fillData = isPlainObject(data) ? filterRequestData(data) : data;
 
       // 请求头过滤空值 (undefined, null, "")
-      const fillHeader = filterRequestHeader(header);
+      let fillHeader = filterRequestHeader(header);
+
+      // 请求前转换
+      let fillUrl = url;
+      const requestTransformer = transformRequest;
+      if (requestTransformer) {
+        const transformed =
+          (await requestTransformer({
+            url: fillUrl,
+            method,
+            header: { ...fillHeader },
+            data: fillData as D,
+          })) || {};
+
+        if (transformed.url !== undefined) fillUrl = transformed.url;
+        if (transformed.header !== undefined) fillHeader = filterRequestHeader(transformed.header);
+        if (transformed.data !== undefined) {
+          const transformedData = transformed.data;
+          fillData = isPlainObject(transformedData)
+            ? filterRequestData(transformedData as Record<string, any>)
+            : transformedData;
+        }
+      }
 
       // 获取 Content-Type (忽略大小写)
       const contentTypeKey = Object.keys(fillHeader).find(
         (k) => k.toLowerCase() === 'content-type',
       );
       const contentType = contentTypeKey ? String(fillHeader[contentTypeKey]).toLowerCase() : '';
+      const isObjectData = isPlainObject(fillData);
+      const isArrayData = !isObjectData && Array.isArray(fillData);
 
       if (!isGet && fillData && (isObjectData || isArrayData) && !contentType) {
         fillHeader['Content-Type'] = 'application/json';
       }
 
       // 2.2 处理 URL 和 Body
-      const fillUrl =
-        isGet && isObjectData ? appendUrlParam(url, fillData as Record<string, unknown>) : url;
+      fillUrl =
+        isGet && isPlainObject(fillData)
+          ? appendUrlParam(fillUrl, fillData as Record<string, unknown>)
+          : fillUrl;
 
       let fillBody: BodyInit | null | undefined;
 
@@ -390,8 +445,8 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         // 隐藏 Loading
         if (showLoading) appConfig.hideLoading?.();
 
-        // 响应拦截
-        const res = resMap ? resMap(resData) : resData;
+        // 响应数据转换
+        const res = transformResponse ? transformResponse(resData) : resData;
 
         // 2.10 业务状态码解析
         const code = getObjectValue(res, codeKey);
@@ -431,7 +486,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         }
 
         if (!isAbortError && toastError)
-          appConfig.toast?.({ status, msg: `请求失败,${String(e)}` });
+          appConfig.toast?.({ status, msg: `请求失败,${JSON.stringify(e)}` });
         logRequestInfo({ status, config: logConfig, startTime, e });
         reject(e);
       } finally {
@@ -471,7 +526,7 @@ export function filterRequestHeader(header: RequestConfigBase['header']) {
  * 日志输出
  */
 function logRequestInfo(options: {
-  config: RequestConfigBase<RequestData> & { url?: string };
+  config: RequestLogConfig;
   fromCache?: boolean;
   startTime: number;
   status: 'success' | 'fail';
@@ -506,7 +561,7 @@ function logRequestInfo(options: {
     info.res = cloneDeep(res); // 深拷贝,避免外部修改对象,造成输出不一致
     log('info', info);
   } else {
-    info.e = e instanceof Error ? { name: e.name, message: e.message, stack: e.stack } : String(e); // Error需转为普通对象,否则发送网络日志会序列化成空对象
+    info.e = e instanceof Error ? { name: e.name, message: e.message, stack: e.stack } : e; // Error需转为普通对象,否则发送网络日志会序列化成空对象
     log('error', info);
   }
 }

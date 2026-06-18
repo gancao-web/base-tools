@@ -31,8 +31,8 @@ export type UniApiConfig<Res = any, Err = any, Task = any> = {
   /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
   logExtra?: Record<string, unknown>;
 
-  /** 响应数据的转换, 如解密操作 (返回值在成功日志中输出'resMap'字段) */
-  resMap?: (res: any) => Res;
+  /** 响应数据的转换, 如解密操作 (返回值在成功日志中输出'transformResponse'字段) */
+  transformResponse?: (res: any) => Res;
 
   /** 获取task对象 (如uni.downloadFile、uni.uploadFile返回的task对象) */
   onTaskReady?: (task: Task) => void;
@@ -57,7 +57,7 @@ export function enhanceUniApi<Option, Res, Err, Task>(
       toastSuccess = false,
       toastError = true,
       showLog = true,
-      resMap,
+      transformResponse,
       logExtra,
     } = config;
 
@@ -75,14 +75,14 @@ export function enhanceUniApi<Option, Res, Err, Task>(
         success(res) {
           if (showLoading) uni.hideLoading();
 
-          const finalRes = resMap ? resMap(res) : res;
+          const finalRes = transformResponse ? transformResponse(res) : res;
 
           if (showLog) {
             const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
 
-            if (resMap) {
+            if (transformResponse) {
               logData.res = res; // 输出原始数据
-              logData.resMap = cloneDeep(finalRes); // 深拷贝处理后数据,避免外部修改对象,造成输出不一致
+              logData.transformResponse = cloneDeep(finalRes); // 深拷贝处理后数据,避免外部修改对象,造成输出不一致
             } else {
               logData.res = cloneDeep(res); // 深拷贝原始数据,避免外部修改对象,造成输出不一致
             }

@@ -93,9 +93,9 @@ export function uploadFile(
     },
     {
       ...config,
-      resMap(res) {
+      transformResponse(res) {
         const data = res.data;
-        return config?.resMap ? config.resMap(data) : data;
+        return config?.transformResponse ? config.transformResponse(data) : data;
       },
     },
   );

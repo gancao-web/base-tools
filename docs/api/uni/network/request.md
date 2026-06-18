@@ -14,7 +14,8 @@ import type { RequestData, RequestConfig } from '@base-web-kits/base-tools-uni';
 export function requestApi<T>(config: RequestConfig) {
   return request<T>({
     header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
-    // resMap: (res) => res, // 响应数据的转换, 如解密操作 (可选)
+    // transformRequest: ({ header, data }) => ({ header, data }), // 请求前转换, 如加密请求头和请求参数 (可选)
+    // transformResponse: (res) => res, // 响应数据的转换, 如解密操作 (可选)
     resKey: 'data',
     msgKey: 'message',
     codeKey: 'status',
@@ -90,16 +91,17 @@ chatTask?.abort();
 - `successKey?: string` - 接口返回成功状态码的字段, 支持"a[0].b.c"的格式 (默认取 codeKey)
 - `successCode: (number | string)[]` - 成功状态码列表
 - `reloginCode: (number | string)[]` - 登录过期状态码列表
-- `resMap?: (data: any) => any` - 响应数据的转换, 如解密操作
-- `showLoading?: boolean` - 是否显示进度条，默认 `true`
+- `transformRequest?: (ctx: { url: string; method?: string; header: Record<string, string | number | boolean>; data?: D }) => Partial<{ url: string; header: Record<string, string | number | boolean>; data?: D }> | Promise<...>` - 请求前的数据转换, 可用于加密 `header`、`data` 或重写 `url`
+- `transformResponse?: (data: any) => any` - 响应数据的转换, 如解密操作
+- `showLoading?: boolean | string` - 是否显示进度条，默认 `true`，支持字符串自定义文案
 - `toastError?: boolean` - 是否提示接口异常，默认 `true`
 - `showLog?: boolean` - 是否输出日志，默认 `true`
 - `cacheTime?: number` - 缓存时间，默认 `0` 不缓存 (单位毫秒)
-- `extraLog?: Record<string, unknown>` - 额外输出的日志数据
+- `logExtra?: Record<string, unknown>` - 额外输出的日志数据
 
 ## 返回值
 
-`Promise<T> & { task?: UniApp.RequestTask }`
+Promise<T>
 
 ## 版本
 
