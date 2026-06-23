@@ -486,7 +486,10 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         }
 
         if (!isAbortError && toastError)
-          appConfig.toast?.({ status, msg: `请求失败,${JSON.stringify(e)}` });
+          appConfig.toast?.({
+            status,
+            msg: `请求失败: ${e instanceof Error ? e.message : JSON.stringify(e)}`,
+          });
         logRequestInfo({ status, config: logConfig, startTime, e });
         reject(e);
       } finally {
