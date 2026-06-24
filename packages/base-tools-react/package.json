@@ -25,6 +25,15 @@
     "src"
   ],
   "dependencies": {
-    "ahooks": "^3.9.6"
+    "ahooks": "^3.9.7"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react-dom": {
+      "optional": true
+    }
   }
 }

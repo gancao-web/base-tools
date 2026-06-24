@@ -8,16 +8,15 @@ const require = (await import('module')).createRequire(import.meta.url);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, '../..');
 
 // @vueuse/core 的 package.json 并不在 export map 中, 因此直接 require 包名可能会失败或解析到错误路径
-// 这里尝试直接从 node_modules 读取
+// 这里退回到仓库根目录下的 node_modules 读取
 let pkg;
 try {
   pkg = require('@vueuse/core/package.json');
 } catch {
-  // 如果 resolve 失败, 尝试相对路径或硬编码路径 (根据项目结构调整)
-  // 由于是 dev 脚本, 可以容忍一些假设
-  const pkgPath = path.resolve(__dirname, '../node_modules/@vueuse/core/package.json');
+  const pkgPath = path.resolve(rootDir, 'node_modules/@vueuse/core/package.json');
   if (fs.existsSync(pkgPath)) {
     pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
   } else {
@@ -37,6 +36,7 @@ const content1 = `/**
  * 版本: ${version}
  * 文档: https://vueuse.nodejs.cn/
  * 目的: 提供hooks能力,收敛依赖版本
+ * 运行时: @vueuse/core 由子包 dependencies 提供, Vue 由宿主项目通过 peerDependencies 提供
  *
  * 注意: 此文件由 scripts/re-export/update-vueuse-exports.ts 生成, 请勿手动修改.
  * 如需更新, 请先升级@vueuse/core, 然后运行: npm run update:vueuse
@@ -61,6 +61,7 @@ const content2 = `/**
  * 版本: ${version}
  * 文档: https://vueuse.nodejs.cn/
  * 目的: 提供hooks能力,收敛依赖版本
+ * 运行时: @vueuse/core 由子包 dependencies 提供, Vue 由宿主项目通过 peerDependencies 提供
  *
  * 注意: 此文件由 scripts/re-export/update-vueuse-exports.ts 生成, 请勿手动修改.
  * 如需更新, 请先升级@vueuse/core, 然后运行: npm run update:vueuse

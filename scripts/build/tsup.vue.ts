@@ -8,9 +8,8 @@ export default defineConfig({
   dts: false,
   splitting: false,
   clean: true,
-  // 为了解决vue2+webpack不支持es6的问题, 需对re-export的第三方库进行打包, 并转为es2015
-  // 在npm的dependencies也需声明依赖,仅提供ts类型资源
-  noExternal: ['@vueuse/core'],
+  // Vue生态依赖必须保持外部化, 避免把多份Vue响应式运行时打进产物
+  external: ['vue', '@vueuse/core', '@vueuse/shared'],
   target: 'es2015',
   outExtension({ format }) {
     return {
