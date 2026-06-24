@@ -24,6 +24,8 @@ const content1 = `/**
  * 文档: https://ahooks.js.org/zh-CN
  * 目的: 提供hooks能力,收敛依赖版本
  * 运行时: ahooks 由子包 dependencies 提供, React/ReactDOM 由宿主项目通过 peerDependencies 提供
+ * 导出策略: 必须使用显式命名导出, 不要使用 export *
+ * 原因: export * 在第三方 re-export 后, 可能在构建或预构建阶段丢失最终入口导出表
  *
  * 注意: 本文件由 scripts/re-export/update-ahooks-exports.ts 生成, 请勿手动修改.
  * 如需更新, 请先升级ahooks, 然后运行: npm run update:ahooks
@@ -49,11 +51,18 @@ const content2 = `/**
  * 文档: https://ahooks.js.org/zh-CN
  * 目的: 提供hooks能力,收敛依赖版本
  * 运行时: ahooks 由子包 dependencies 提供, React/ReactDOM 由宿主项目通过 peerDependencies 提供
+ * 导出策略: 必须使用显式命名导出, 不要使用 export *
+ * 原因: export * 在第三方 re-export 后, 可能在构建或预构建阶段丢失最终入口导出表
  *
  * 注意: 本文件由 scripts/re-export/update-ahooks-exports.ts 生成, 请勿手动修改.
  * 如需更新, 请先升级ahooks, 然后运行: npm run update:ahooks
  */
-export * from 'ahooks';
+export {
+${keys.map((key) => `  ${key},`).join('\n')}
+} from 'ahooks';
+
+// 导出类型
+export type * from 'ahooks';
 `;
 
 fs.writeFileSync(targetFile2, content2, 'utf-8');

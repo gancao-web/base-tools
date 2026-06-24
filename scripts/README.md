@@ -6,12 +6,18 @@
 - docs目录已包含这些第三方库的使用说明, 以实现一站式搜索
 - 升级第三方库时, 先更新根目录的package.json版本, 然后 `npm install`, 再 `npm run build`, 最后发布npm包
 - 更新第三方库文档时, 先运行 `npm run update:xx`, 此时会在 re-export 目录产生 git diff, 查看 diff 就能知道新增的函数, 从而更新 docs 文档
+- 生成源码侧 re-export 文件时, 不要使用 `export * from 'xxx'`, 应统一生成显式命名导出列表, 如 `export { foo, bar } from 'xxx'`
+- 原因是 `export *` 在第三方 re-export 场景下, 经过 `tsup`、`esbuild`、Vite 预构建等工具链后, 可能无法稳定保留到最终入口模块的导出表
+- 这类问题在源码和中间产物里常常表现为“已经引入并参与构建”, 但消费侧仍会报 `does not provide an export named 'xxx'`
+- 显式命名导出可以让构建产物稳定生成最终导出表, 也更利于升级时通过 diff 发现新增、删除和重命名的导出项
+- `export type * from 'xxx'` 可以继续保留, 因为这里只用于类型透出, 不参与运行时导出表
 
 ## 分平台构建约定
 
 - `web`、`uni` 包如需兼容 vue2 + webpack 这类默认不编译 `node_modules` ES 模块的老环境, 可以在 `tsup` 中按需配置 `noExternal`, 并转译为 `es2015`
 - `web` 和 `uni` 目录使用 `ts` 目录下的函数时, 需使用相对路径引入到具体的包, 如 `import { toDayjs } from '../../ts/day'`, 并在 `tsup` 中配置 `dts: true`, 确保构建时把源码打进来, 不产生相互依赖关系
 - `web` 和 `uni` 目录如果使用 `ts` 目录的第三方 re-export 函数, 应直接引用, 如 `import { pickBy } from 'es-toolkit'`, 并按兼容性要求决定是否配置 `noExternal`
+- `ts` 包虽然当前会将 `es-toolkit` 打进产物, 但源码侧 re-export 仍建议使用显式命名导出, 不要依赖 `export *` 的偶然可用性
 - `react` 包不要把 `react`、`react-dom` 以及基于 React 的第三方 hooks 库打进产物
 - `react` 包通过 `peerDependencies` 声明 `react`、`react-dom`, 并在 `tsup` 中将 `react`、`react-dom`、`ahooks` 设为 `external`
 - `react` 包可以在 `dependencies` 中声明 `ahooks`, 让消费者安装本包时自动获得运行时依赖, 但不能将其 bundle 进产物, 否则容易引入多份 React 并触发 `Invalid Hook Call`
