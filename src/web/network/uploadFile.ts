@@ -45,21 +45,65 @@ export type UploadTask = {
 export type UploadConfig = {
   /** 获取task对象 */
   onTaskReady?: (task: UploadTask) => void;
+
+  /** 响应类型, 默认'text' */
+  responseType?: 'text' | 'json';
 };
 
 export type UploadFail = {
   message: string;
   status: number;
+  data?: unknown;
 };
 
-function upload(option: UploadFileOption, config?: UploadConfig) {
-  return new Promise<string>((resolve, reject) => {
+function parseJsonSafe(text: string) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+function getErrorMessage(responseText: string, fallback: string) {
+  const parsed = parseJsonSafe(responseText);
+  if (parsed && typeof parsed === 'object' && 'message' in parsed) {
+    const message = (parsed as { message?: unknown }).message;
+    if (typeof message === 'string' && message.trim()) {
+      return message;
+    }
+  }
+  return fallback;
+}
+
+function upload(
+  option: UploadFileOption,
+  config?: UploadConfig & { responseType?: 'text' },
+): Promise<string>;
+
+function upload<T = unknown>(
+  option: UploadFileOption,
+  config?: UploadConfig & { responseType: 'json' },
+): Promise<T>;
+
+function upload<T = unknown>(option: UploadFileOption, config?: UploadConfig) {
+  return new Promise<string | T>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const { url, file, name = 'file', header, data, timeout = 0 } = option;
+    const responseType = config?.responseType ?? 'text';
 
     const fail = (error: UploadFail) => reject(error);
 
     const success = (responseText: string) => {
+      if (responseType === 'json') {
+        const parsed = parseJsonSafe(responseText);
+        if (parsed === null) {
+          fail({ message: '响应不是合法 JSON', status: xhr.status });
+          return;
+        }
+        resolve(parsed as T);
+        return;
+      }
+
       resolve(responseText);
     };
 
@@ -86,10 +130,15 @@ function upload(option: UploadFileOption, config?: UploadConfig) {
 
     // 监听事件
     xhr.onload = () => {
+      const responseText = xhr.responseText || '';
       if (xhr.status >= 200 && xhr.status < 300) {
-        success(xhr.responseText);
+        success(responseText);
       } else {
-        fail({ message: `上传失败`, status: xhr.status });
+        fail({
+          message: getErrorMessage(responseText, '上传失败'),
+          status: xhr.status,
+          data: parseJsonSafe(responseText),
+        });
       }
     };
     xhr.onerror = () => fail({ message: '网络错误', status: 0 });
@@ -139,9 +188,31 @@ function upload(option: UploadFileOption, config?: UploadConfig) {
  *     task.onProgressUpdate((res) => console.log('上传进度:', res.progress)),
  * });
  *
+ * // 直接返回json对象
+ * const json = await uploadFile({ url: 'https://xx', file: file}, { responseType: 'json' });
+ *
  * // 解析上传结果
  * console.log('uploadFile ok', JSON.parse(res));
  */
-export function uploadFile(option: UploadFileOption, config?: UploadConfig & WebApiConfig) {
-  return enhanceWebApi(upload, 'uploadFile')(option, config);
+export function uploadFile(
+  option: UploadFileOption,
+  config?: UploadConfig & WebApiConfig<string, UploadFail>,
+): Promise<string>;
+
+export function uploadFile<T = unknown>(
+  option: UploadFileOption,
+  config?: UploadConfig & WebApiConfig<T, UploadFail>,
+): Promise<T>;
+
+export function uploadFile<T = string>(
+  option: UploadFileOption,
+  config?: UploadConfig & WebApiConfig<T, UploadFail>,
+): Promise<T> {
+  return enhanceWebApi(
+    upload as (
+      option: UploadFileOption,
+      config?: UploadConfig,
+    ) => Promise<T>,
+    'uploadFile',
+  )(option, config);
 }
