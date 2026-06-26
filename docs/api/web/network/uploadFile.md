@@ -42,11 +42,10 @@ const res = await uploadFile(
 type UploadResult = { status: number; message: string; data: { path: string } | null };
 
 const json = await uploadFile<UploadResult>(
-  { url: 'https://xx', file: file },
-  { responseType: 'json' },
+  { url: 'https://xx', file: file, responseType: 'json' },
 );
 
-// 解析上传结果
+// 默认 responseType 为 text，手动解析返回结果
 console.log('uploadFile ok', JSON.parse(res));
 ```
 
@@ -62,13 +61,13 @@ console.log('uploadFile ok', JSON.parse(res));
 | header | `Record<string, string \| number>` | 否 | - | 请求头 |
 | data | `Record<string, string \| number>` | 否 | - | 请求参数 |
 | timeout | `number` | 否 | `0` | 超时时间，单位 ms，默认 0（不超时） |
+| responseType | `'text' \| 'json'` | 否 | `'text'` | 响应类型。`'text'` 返回原始字符串；`'json'` 会自动执行 `JSON.parse` 后返回对象 |
 
 ### config (UploadConfig & WebApiConfig)
 
 | 参数名 | 类型 | 必填 | 默认值 | 说明 |
 | :-- | :-- | :-- | :-- | :-- |
 | onTaskReady | `(task: UploadTask) => void` | 否 | - | 获取 uploadTask 对象，可用于监听进度或取消上传 |
-| responseType | `'text' \| 'json'` | 否 | `'text'` | 响应类型。`'text'` 返回原始字符串；`'json'` 会自动执行 `JSON.parse` 后返回对象 |
 | showLoading | `boolean \| string` | 否 | `false` | 是否显示加载提示 (支持字符串作为自定义文本) |
 | toastSuccess | `boolean \| string \| ((res) => boolean \| string)` | 否 | `false` | 操作成功的 toast 提示 |
 | toastError | `boolean \| string \| ((err) => boolean \| string)` | 否 | `true` | 是否显示操作失败的详细错误信息 |
@@ -77,7 +76,7 @@ console.log('uploadFile ok', JSON.parse(res));
 ### responseType 说明
 
 - 默认 `responseType: 'text'`，返回值类型为 `string`
-- 传入 `responseType: 'json'` 后，会自动将响应内容按 JSON 解析并返回对象
+- 传入 `responseType: 'json'` 后，可配合泛型使用，自动将响应内容按 JSON 解析并返回对象
 - 如果 `responseType: 'json'` 但服务端返回的不是合法 JSON，会进入失败分支
 - 当上传失败且服务端返回了 JSON 错误体时，会优先读取其中的 `message` 作为错误信息
 
