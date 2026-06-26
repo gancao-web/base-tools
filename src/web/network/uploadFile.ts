@@ -22,6 +22,9 @@ export type UploadFileOption = {
 
   /** 超时时间，单位 ms，默认 0（不超时） */
   timeout?: number;
+
+  /** 响应类型, 默认'text' */
+  responseType?: 'text' | 'json';
 };
 
 export type OnUploadProgressUpdate = (res: UploadProgressEvent) => void;
@@ -45,9 +48,6 @@ export type UploadTask = {
 export type UploadConfig = {
   /** 获取task对象 */
   onTaskReady?: (task: UploadTask) => void;
-
-  /** 响应类型, 默认'text' */
-  responseType?: 'text' | 'json';
 };
 
 export type UploadFail = {
@@ -75,21 +75,10 @@ function getErrorMessage(responseText: string, fallback: string) {
   return fallback;
 }
 
-function upload(
-  option: UploadFileOption,
-  config?: UploadConfig & { responseType?: 'text' },
-): Promise<string>;
-
-function upload<T = unknown>(
-  option: UploadFileOption,
-  config?: UploadConfig & { responseType: 'json' },
-): Promise<T>;
-
 function upload<T = unknown>(option: UploadFileOption, config?: UploadConfig) {
   return new Promise<string | T>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    const { url, file, name = 'file', header, data, timeout = 0 } = option;
-    const responseType = config?.responseType ?? 'text';
+    const { url, file, name = 'file', header, data, timeout = 0, responseType = 'text' } = option;
 
     const fail = (error: UploadFail) => reject(error);
 
@@ -189,30 +178,17 @@ function upload<T = unknown>(option: UploadFileOption, config?: UploadConfig) {
  * });
  *
  * // 直接返回json对象
- * const json = await uploadFile({ url: 'https://xx', file: file}, { responseType: 'json' });
+ * const json = await uploadFile({ url: 'https://xx', file: file, responseType: 'json' });
  *
  * // 解析上传结果
  * console.log('uploadFile ok', JSON.parse(res));
  */
-export function uploadFile(
-  option: UploadFileOption,
-  config?: UploadConfig & WebApiConfig<string, UploadFail>,
-): Promise<string>;
-
-export function uploadFile<T = unknown>(
-  option: UploadFileOption,
-  config?: UploadConfig & WebApiConfig<T, UploadFail>,
-): Promise<T>;
-
 export function uploadFile<T = string>(
   option: UploadFileOption,
   config?: UploadConfig & WebApiConfig<T, UploadFail>,
 ): Promise<T> {
   return enhanceWebApi(
-    upload as (
-      option: UploadFileOption,
-      config?: UploadConfig,
-    ) => Promise<T>,
+    upload as (option: UploadFileOption, config?: UploadConfig) => Promise<T>,
     'uploadFile',
   )(option, config);
 }
