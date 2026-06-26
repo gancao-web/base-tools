@@ -99,7 +99,10 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
           const msg = typeof toastError === 'function' ? toastError(e) : toastError;
           if (msg) {
             toast?.({
-              msg: typeof msg === 'string' ? msg : `${fname} fail: ${JSON.stringify(e)}`,
+              msg:
+                typeof msg === 'string'
+                  ? msg
+                  : `${fname} fail: ${e instanceof Error ? e.message : JSON.stringify(e)}`,
               status: 'fail',
             });
           }
