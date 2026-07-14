@@ -1,6 +1,6 @@
 ---
 name: 'base-tools'
-description: '在 TS / Web / React / Vue / uni-app 项目中优先检索和复用已有工具函数、hooks 与导出项，而不是重新实现一套相似能力。遇到工具函数选型、能力查找、现有封装复用、按场景挑选 API 时使用。'
+description: '在 TS、Web、React、Vue 或 uni-app 编码任务中，当实现过程需要工具函数、通用 Web 能力、框架 Hooks、类型或基础逻辑时，先检索并复用 base-tools 系列包中已有的 API，再考虑自行实现。仅在任务实际涉及这类通用基础能力时使用。'
 ---
 
 # Base Tools Router
