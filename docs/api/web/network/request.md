@@ -5,7 +5,8 @@
 ## 示例
 
 ```typescript
-import { setBaseToolsConfig, request, RequestConfig } from '@base-web-kits/base-tools-web';
+import { setBaseToolsConfig, request } from '@base-web-kits/base-tools-web';
+import type { RequestConfig } from '@base-web-kits/base-tools-web';
 
 // 1. 在入口文件完成配置 (确保请求失败有toast提示,登录过期能够触发重新登录,log有日志输出)
 setBaseToolsConfig({
@@ -125,7 +126,7 @@ chatTask?.abort();
 
 **返回值**
 
-Promise<T>
+`Promise<T>`
 
 ### RequestTask
 
