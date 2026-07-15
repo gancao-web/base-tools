@@ -115,10 +115,13 @@ export type RequestConfigBase<D extends RequestData = RequestData> = {
   /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
   logExtra?: Record<string, unknown>;
 
-  /** 请求前的数据转换, 可用于加密 header、data 或重写 url */
-  transformRequest?: (
+  /**
+   * 请求前的数据转换, 可用于加密 header、data 或重写 url
+   * 使用方法签名，使具体 RequestConfig<D> 可以传入默认 RequestConfig 的二次封装
+   */
+  transformRequest?(
     ctx: TransformRequestContext<D>,
-  ) => TransformRequestResult<D> | Promise<TransformRequestResult<D>>;
+  ): TransformRequestResult<D> | Promise<TransformRequestResult<D>>;
 
   /** 响应数据的转换 */
   transformResponse?: (data: ResponseData) => ResponseData;

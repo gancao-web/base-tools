@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "type": "module",
   "sideEffects": false,
   "scripts": {
@@ -8,6 +8,7 @@
     "lint:lint-staged": "tsc --noEmit && lint-staged",
     "test": "vitest run",
     "build": "node scripts/build/index.mjs",
+    "docs:llms": "npx tsx scripts/generate-llms-txt.ts",
     "version:major": "node scripts/version-bump.mjs major",
     "version:minor": "node scripts/version-bump.mjs minor",
     "version:patch": "node scripts/version-bump.mjs patch",
@@ -26,7 +27,6 @@
     "publish:all": "npm run publish:ts && npm run publish:web && npm run publish:uni && npm run publish:react && npm run publish:vue",
     "publish:all:alpha": "node scripts/publish-alpha.mjs",
     "docs:dev": "vitepress dev docs",
-    "docs:llms": "npx tsx scripts/generate-llms-txt.ts",
     "docs:build": "npm run docs:llms && vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "tag": "node scripts/tag-release.mjs",

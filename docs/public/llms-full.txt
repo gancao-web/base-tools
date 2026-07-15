@@ -1,7 +1,7 @@
 # Base Tools Full Documentation
 
 Project: @base-web-kits/base-tools
-Date: 2026-06-15
+Date: 2026-07-15
 
 
 
@@ -11255,7 +11255,7 @@ File: uni/network/request.md
 
 ```ts
 import { request } from '@base-web-kits/base-tools-uni';
-import type { RequestData, RequestConfig } from '@base-web-kits/base-tools-uni';
+import type { RequestConfig } from '@base-web-kits/base-tools-uni';
 
 // 封装项目的基础请求
 export function requestApi<T>(config: RequestConfig) {
@@ -11348,7 +11348,7 @@ chatTask?.abort();
 
 ## 返回值
 
-Promise<T>
+`Promise<T>`
 
 ## 版本
 
@@ -12938,6 +12938,37 @@ count.set(1, false); // 不触发更新
 
 [VueUse](https://vueuse.org/functions/controlledRef/)
 ````
+
+
+==================================================
+File: vue/hooks/createDisposableDirective.md
+==================================================
+
+# createDisposableDirective
+
+## 描述
+
+创建一个可在指令卸载时自动清理副作用的指令工厂。
+
+## 示例
+
+```ts
+import { createDisposableDirective } from '@base-web-kits/base-tools-vue';
+
+export const vDemo = createDisposableDirective((el) => {
+  const onClick = () => console.log(el);
+
+  el.addEventListener('click', onClick);
+
+  return () => {
+    el.removeEventListener('click', onClick);
+  };
+});
+```
+
+## 来源
+
+[VueUse](https://vueuse.org/shared/createDisposableDirective/)
 
 
 ==================================================
@@ -16215,6 +16246,30 @@ const { count, inc, dec, set, reset } = useCounter(0);
 ## 来源
 
 [VueUse](https://vueuse.org/functions/useCounter/)
+
+
+==================================================
+File: vue/hooks/useCssSupports.md
+==================================================
+
+# useCssSupports
+
+## 描述
+
+响应式检测当前环境是否支持指定的 CSS 属性值或 `@supports` 条件。
+
+## 示例
+
+```ts
+import { useCssSupports } from '@base-web-kits/base-tools-vue';
+
+const supportsGrid = useCssSupports('display', 'grid');
+const supportsBackdrop = useCssSupports('(backdrop-filter: blur(4px))');
+```
+
+## 来源
+
+[VueUse](https://vueuse.org/core/useCssSupports/)
 
 
 ==================================================
@@ -20755,7 +20810,8 @@ File: web/network/request.md
 ## 示例
 
 ```typescript
-import { setBaseToolsConfig, request, RequestConfig } from '@base-web-kits/base-tools-web';
+import { setBaseToolsConfig, request } from '@base-web-kits/base-tools-web';
+import type { RequestConfig } from '@base-web-kits/base-tools-web';
 
 // 1. 在入口文件完成配置 (确保请求失败有toast提示,登录过期能够触发重新登录,log有日志输出)
 setBaseToolsConfig({
@@ -20875,7 +20931,7 @@ chatTask?.abort();
 
 **返回值**
 
-Promise<T>
+`Promise<T>`
 
 ### RequestTask
 
@@ -20931,7 +20987,7 @@ const res = await uploadFile({
   url: 'https://xx',
   file: file,
   name: 'avatar', // 服务端接收的字段名
-  formData: { userId: 123 },
+  data: { userId: 123 },
   header: { Authorization: 'Bearer xxx' },
 });
 
@@ -20954,7 +21010,14 @@ const res = await uploadFile(
   },
 );
 
-// 解析上传结果
+// 直接返回json对象
+type UploadResult = { status: number; message: string; data: { path: string } | null };
+
+const json = await uploadFile<UploadResult>(
+  { url: 'https://xx', file: file, responseType: 'json' },
+);
+
+// 默认 responseType 为 text，手动解析返回结果
 console.log('uploadFile ok', JSON.parse(res));
 ```
 
@@ -20970,6 +21033,7 @@ console.log('uploadFile ok', JSON.parse(res));
 | header | `Record<string, string \| number>` | 否 | - | 请求头 |
 | data | `Record<string, string \| number>` | 否 | - | 请求参数 |
 | timeout | `number` | 否 | `0` | 超时时间，单位 ms，默认 0（不超时） |
+| responseType | `'text' \| 'json'` | 否 | `'text'` | 响应类型。`'text'` 返回原始字符串；`'json'` 会自动执行 `JSON.parse` 后返回对象 |
 
 ### config (UploadConfig & WebApiConfig)
 
@@ -20980,6 +21044,13 @@ console.log('uploadFile ok', JSON.parse(res));
 | toastSuccess | `boolean \| string \| ((res) => boolean \| string)` | 否 | `false` | 操作成功的 toast 提示 |
 | toastError | `boolean \| string \| ((err) => boolean \| string)` | 否 | `true` | 是否显示操作失败的详细错误信息 |
 | showLog | `boolean` | 否 | `true` | 是否在控制台打印日志 |
+
+### responseType 说明
+
+- 默认 `responseType: 'text'`，返回值类型为 `string`
+- 传入 `responseType: 'json'` 后，可配合泛型使用，自动将响应内容按 JSON 解析并返回对象
+- 如果 `responseType: 'json'` 但服务端返回的不是合法 JSON，会进入失败分支
+- 当上传失败且服务端返回了 JSON 错误体时，会优先读取其中的 `message` 作为错误信息
 
 ## UploadTask
 

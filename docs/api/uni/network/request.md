@@ -8,7 +8,7 @@
 
 ```ts
 import { request } from '@base-web-kits/base-tools-uni';
-import type { RequestData, RequestConfig } from '@base-web-kits/base-tools-uni';
+import type { RequestConfig } from '@base-web-kits/base-tools-uni';
 
 // 封装项目的基础请求
 export function requestApi<T>(config: RequestConfig) {
@@ -101,7 +101,7 @@ chatTask?.abort();
 
 ## 返回值
 
-Promise<T>
+`Promise<T>`
 
 ## 版本
 
