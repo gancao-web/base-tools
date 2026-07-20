@@ -59,7 +59,7 @@ console.log('uploadFile ok', JSON.parse(res));
 | file | `File` | 是 | - | 要上传的文件对象 |
 | name | `string` | 否 | `'file'` | 文件对应的 key (服务端通过这个 key 获取文件的二进制内容) |
 | header | `Record<string, string \| number>` | 否 | - | 请求头 |
-| data | `Record<string, string \| number>` | 否 | - | 请求参数 |
+| data | `UploadData`（`Record<string, unknown>`） | 否 | - | 请求参数；忽略 `null`、`undefined`，其余值通过 `String(value)` 写入 `FormData` |
 | timeout | `number` | 否 | `0` | 超时时间，单位 ms，默认 0（不超时） |
 | responseType | `'text' \| 'json'` | 否 | `'text'` | 响应类型。`'text'` 返回原始字符串；`'json'` 会自动执行 `JSON.parse` 后返回对象 |
 
@@ -79,6 +79,7 @@ console.log('uploadFile ok', JSON.parse(res));
 - 传入 `responseType: 'json'` 后，可配合泛型使用，自动将响应内容按 JSON 解析并返回对象
 - 如果 `responseType: 'json'` 但服务端返回的不是合法 JSON，会进入失败分支
 - 当上传失败且服务端返回了 JSON 错误体时，会优先读取其中的 `message` 作为错误信息
+- `data` 中的对象和数组不会自动 JSON 序列化；需要结构化参数时，请按服务端协议提前调用 `JSON.stringify`
 
 ## UploadTask
 

@@ -2,6 +2,13 @@ import { enhanceWebApi } from '../async';
 import type { WebApiConfig } from '../async';
 
 /**
+ * 上传所需的额外参数。
+ * null 和 undefined 会被忽略，其余值会通过 String(value) 写入 FormData；
+ * 对象和数组不会自动 JSON 序列化，调用方应按接口协议提前处理。
+ */
+export type UploadData = Record<string, unknown>;
+
+/**
  * 上传文件的选项
  */
 export type UploadFileOption = {
@@ -18,7 +25,7 @@ export type UploadFileOption = {
   header?: Record<string, string | number>;
 
   /** 请求参数 */
-  data?: Record<string, string | number>;
+  data?: UploadData;
 
   /** 超时时间，单位 ms，默认 0（不超时） */
   timeout?: number;

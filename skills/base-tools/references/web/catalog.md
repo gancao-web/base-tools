@@ -38,7 +38,7 @@
 
 #### uploadFile
 - 来源: `src/web/network/uploadFile.ts`
-- 导出: `OnUploadProgressUpdate`、`UploadConfig`、`UploadFail`、`uploadFile`、`UploadFileOption`、`UploadProgressEvent`、`UploadTask`
+- 导出: `OnUploadProgressUpdate`、`UploadConfig`、`UploadData`、`UploadFail`、`uploadFile`、`UploadFileOption`、`UploadProgressEvent`、`UploadTask`
 
 ### storage
 - 来源: `src/web/storage/index.ts`

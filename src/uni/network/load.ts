@@ -6,6 +6,12 @@ const cache = {
 };
 
 /**
+ * 上传所需的额外参数，最终合并到 uni.uploadFile 的 formData。
+ * 不同目标平台对值的转换规则可能不同；对象和数组应按接口协议提前序列化。
+ */
+export type UploadData = Record<string, unknown>;
+
+/**
  * 下载文件
  * @param path 完整/相对文件地址
  * @param option 选项文档: http://uniapp.dcloud.io/api/request/network-file?id=downloadfile
@@ -79,7 +85,7 @@ export function loadFontFace(
 export function uploadFile(
   option: UniApp.UploadFileOption & {
     /** 与FormData相同, 目的是兼容data的写法, 保持和web端一致 */
-    data?: Record<string, string | number>;
+    data?: UploadData;
   },
   config?: UniApiConfig,
 ) {
