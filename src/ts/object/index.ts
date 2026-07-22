@@ -37,3 +37,18 @@ export const getObjectValue = get;
  * setObjectValue(o, ['users', 1, 'name'], 'jane-doe'); // 数组路径
  */
 export const setObjectValue = set;
+
+/**
+ * 移除对象顶层值为 `undefined` 的可枚举自有字段，不改变原对象。
+ * - `null`、`false`、空字符串和 `0` 会被保留。
+ * - 即使对象中没有值为 `undefined` 的字段，也会返回新的浅拷贝；嵌套对象仍与原对象共享引用。
+ * @param obj 目标对象；传入 `undefined` 时返回空对象
+ * @returns 移除值为 `undefined` 的字段后生成的新对象
+ * @example
+ * const source = { name: 'Alice', age: undefined, enabled: false, score: 0 };
+ * const result = omitUndefined(source); // { name: 'Alice', enabled: false, score: 0 }
+ */
+export function omitUndefined<T extends object>(obj?: T): T {
+  if (!obj) return {} as T;
+  return Object.fromEntries(Object.entries(obj).filter(([, value]) => value !== undefined)) as T;
+}

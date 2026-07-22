@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools",
-  "version": "1.4.9",
+  "version": "1.4.10",
   "type": "module",
   "sideEffects": false,
   "scripts": {
@@ -9,6 +9,7 @@
     "test": "vitest run",
     "build": "node scripts/build/index.mjs",
     "docs:llms": "npx tsx scripts/generate-llms-txt.ts",
+    "skills:generate": "node scripts/generate-skills.mjs",
     "version:major": "node scripts/version-bump.mjs major",
     "version:minor": "node scripts/version-bump.mjs minor",
     "version:patch": "node scripts/version-bump.mjs patch",
@@ -30,7 +31,6 @@
     "docs:build": "npm run docs:llms && vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "tag": "node scripts/tag-release.mjs",
-    "skills:generate": "node scripts/generate-skills.mjs",
     "update:es-toolkit": "npx tsx scripts/re-export/update-es-toolkit-exports.ts",
     "update:ahooks": "npx tsx scripts/re-export/update-ahooks-exports.ts",
     "update:vueuse": "npx tsx scripts/re-export/update-vueuse-exports.ts"
@@ -120,6 +120,7 @@
     "@vueuse/core": "14.3.0",
     "ahooks": "3.9.7",
     "bignumber.js": "^9.1.2",
+    "clsx": "^2.1.1",
     "dayjs": "^1.11.19",
     "es-toolkit": "1.44.0",
     "mitt": "^3.0.1"

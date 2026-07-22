@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { withUnitPx, arrayMove } from '../../../src/ts';
+import { arrayMove, clsx, withUnitPx } from '../../../src/ts';
 
 describe('ts module root exports', () => {
   it('allows importing withUnitPx from ts root', () => {
@@ -8,5 +8,9 @@ describe('ts module root exports', () => {
 
   it('allows importing arrayMove from ts root', () => {
     expect(arrayMove([1, 2, 3], 0, 2)).toEqual([2, 3, 1]);
+  });
+
+  it('re-exports clsx from ts root', () => {
+    expect(clsx('button', { active: true, disabled: false })).toBe('button active');
   });
 });

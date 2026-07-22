@@ -42,6 +42,7 @@ const PACKAGE_SPECS = [
         '来自 `es-toolkit` re-export，优先从 `@base-web-kits/base-tools-ts` 导入。',
       ],
       ['数组移动 / 拖拽排序', '`arrayMove`', '用于把数组元素从一个下标移动到另一个下标。'],
+      ['className 拼接', '`clsx`', '基于 clsx 拼接字符串、数组和条件对象。'],
       ['异步错误元组', '`toAsync`', '用于把 Promise 转成 `[err, data]` 风格结果。'],
       [
         '日期格式化 / dayjs',
@@ -66,6 +67,7 @@ const PACKAGE_SPECS = [
         '数值展示与 CSS 尺寸格式化。',
       ],
       ['手机号 / 姓名脱敏', '`toMaskPhone`、`toMaskName`、`toMaskText`', '文本隐私脱敏。'],
+      ['清理对象 undefined 字段', '`omitUndefined`', '移除值为 undefined 的字段。'],
       [
         '邮箱 / 手机号 / 身份证校验',
         '`isEmail`、`isMobilePhone`、`isIdentityCard`',
