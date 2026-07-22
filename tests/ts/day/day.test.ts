@@ -6,10 +6,12 @@ import {
   getCountdownParts,
   getAgeByBirthdate,
 } from '../../../src/ts';
+import type { Dayjs } from '../../../src/ts';
 
 describe('ts/day utils', () => {
   it('toDayjs parses various formats', () => {
-    expect(toDayjs('2025-11-19').format('YYYY-MM-DD')).toBe('2025-11-19');
+    const value: Dayjs = toDayjs('2025-11-19');
+    expect(value.format('YYYY-MM-DD')).toBe('2025-11-19');
     expect(toDayjs('2025/11/19').format('YYYY/MM/DD')).toBe('2025/11/19');
     expect(toDayjs('2025-11-19 12:34:56').format('YYYY-MM-DD HH:mm:ss')).toBe(
       '2025-11-19 12:34:56',

@@ -11,7 +11,7 @@
 | 数组移动 / 拖拽排序 | `arrayMove` | 用于把数组元素从一个下标移动到另一个下标。 |
 | className 拼接 | `clsx` | 基于 clsx 拼接字符串、数组和条件对象。 |
 | 异步错误元组 | `toAsync` | 用于把 Promise 转成 `[err, data]` 风格结果。 |
-| 日期格式化 / dayjs | `toDayjs`、`dateFormat`、`dayjs` | 日期解析、格式化和 dayjs 统一入口。 |
+| 日期格式化 / dayjs | `toDayjs`、`dateFormat`、`dayjs`、`Dayjs` | 日期解析、格式化、Day.js 实例类型和统一入口。 |
 | 年龄 / 生日 | `getAgeByBirthdate` | 按出生日期计算年龄。 |
 | 日期范围 / 前后几天 | `getDateRangeBefore`、`getDateRangeAfter` | 生成从今天到指定天数之前或之后的日期范围，可按格式补齐整日时间。 |
 | 倒计时 | `getCountdownParts` | 拆分天、时、分、秒等倒计时字段。 |

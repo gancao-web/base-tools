@@ -46,8 +46,8 @@ const PACKAGE_SPECS = [
       ['异步错误元组', '`toAsync`', '用于把 Promise 转成 `[err, data]` 风格结果。'],
       [
         '日期格式化 / dayjs',
-        '`toDayjs`、`dateFormat`、`dayjs`',
-        '日期解析、格式化和 dayjs 统一入口。',
+        '`toDayjs`、`dateFormat`、`dayjs`、`Dayjs`',
+        '日期解析、格式化、Day.js 实例类型和统一入口。',
       ],
       ['年龄 / 生日', '`getAgeByBirthdate`', '按出生日期计算年龄。'],
       [

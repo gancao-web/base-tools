@@ -32,7 +32,7 @@
 
 ### day
 - 来源: `src/ts/day/index.ts`
-- 导出: `dateFormat`、`dayjs`、`getAgeByBirthdate`、`getCountdownParts`、`getDateRangeAfter`、`getDateRangeBefore`、`toDayjs`
+- 导出: `dateFormat`、`dayjs`、`Dayjs`、`getAgeByBirthdate`、`getCountdownParts`、`getDateRangeAfter`、`getDateRangeBefore`、`toDayjs`
 
 ### es-toolkit
 - 来源: `src/ts/es-toolkit/index.ts`
