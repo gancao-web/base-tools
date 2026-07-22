@@ -84,6 +84,10 @@
 - 来源: `src/ts/url/param/index.ts`
 - 导出: `appendUrlParam`
 
+#### path
+- 来源: `src/ts/url/path/index.ts`
+- 导出: `joinUrlPath`
+
 #### qn
 - 来源: `src/ts/url/qn/index.ts`
 - 导出: `getQnAudio`、`getQnHls`、`getQnImg`、`getQnVideo`

@@ -34,7 +34,7 @@
 
 #### request
 - 来源: `src/web/network/request.ts`
-- 导出: `filterRequestData`、`filterRequestHeader`、`request`、`RequestConfig`、`RequestConfigBase`、`RequestData`、`RequestMethod`、`RequestTask`、`ResponseData`
+- 导出: `filterRequestData`、`filterRequestHeader`、`request`、`RequestConfig`、`RequestConfigBase`、`RequestData`、`RequestMethod`、`RequestTask`、`ResponseData`、`TransformRequestContext`、`TransformRequestResult`
 
 #### uploadFile
 - 来源: `src/web/network/uploadFile.ts`
