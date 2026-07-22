@@ -42,6 +42,7 @@ const PACKAGE_SPECS = [
         '来自 `es-toolkit` re-export，优先从 `@base-web-kits/base-tools-ts` 导入。',
       ],
       ['数组移动 / 拖拽排序', '`arrayMove`', '用于把数组元素从一个下标移动到另一个下标。'],
+      ['className 拼接', '`clsx`', '基于 clsx 拼接字符串、数组和条件对象。'],
       ['异步错误元组', '`toAsync`', '用于把 Promise 转成 `[err, data]` 风格结果。'],
       [
         '日期格式化 / dayjs',
@@ -49,20 +50,31 @@ const PACKAGE_SPECS = [
         '日期解析、格式化和 dayjs 统一入口。',
       ],
       ['年龄 / 生日', '`getAgeByBirthdate`', '按出生日期计算年龄。'],
+      [
+        '日期范围 / 前后几天',
+        '`getDateRangeBefore`、`getDateRangeAfter`',
+        '生成从今天到指定天数之前或之后的日期范围，可按格式补齐整日时间。',
+      ],
       ['倒计时', '`getCountdownParts`', '拆分天、时、分、秒等倒计时字段。'],
       [
         '金额精确计算',
         '`mathPlus`、`mathMinus`、`mathTimes`、`mathDiv`',
         '基于 BigNumber，避免浮点误差。',
       ],
-      ['千分位 / 单位 / 补零', '`toThousandth`、`withUnit`、`zeroPad`', '数值展示格式化。'],
+      [
+        '千分位 / 单位 / px / 补零',
+        '`toThousandth`、`withUnit`、`withUnitPx`、`zeroPad`',
+        '数值展示与 CSS 尺寸格式化。',
+      ],
       ['手机号 / 姓名脱敏', '`toMaskPhone`、`toMaskName`、`toMaskText`', '文本隐私脱敏。'],
+      ['清理对象 undefined 字段', '`omitUndefined`', '移除值为 undefined 的字段。'],
       [
         '邮箱 / 手机号 / 身份证校验',
         '`isEmail`、`isMobilePhone`、`isIdentityCard`',
         '常见表单校验。',
       ],
       ['URL 参数拼接', '`appendUrlParam`', '向 URL 追加 query 参数。'],
+      ['URL 路径拼接', '`joinUrlPath`', '拼接 URL 或路径片段，并清理交界处多余的斜杠。'],
       ['文件后缀 / 文件类型', '`getFileSuffix`、`getFileType`', '从文件名或 URL 识别文件信息。'],
       [
         'OSS / 七牛媒体链接',
@@ -274,8 +286,10 @@ function ensureDir(dir) {
 
 function writeFileIfChanged(filePath, content) {
   ensureDir(path.dirname(filePath));
-  const next = content.endsWith('\n') ? content : `${content}\n`;
   const prev = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : null;
+  const lineEnding = prev?.includes('\r\n') ? '\r\n' : '\n';
+  const rendered = content.endsWith('\n') ? content : `${content}\n`;
+  const next = rendered.replace(/\r?\n/g, lineEnding);
   if (prev !== next) fs.writeFileSync(filePath, next, 'utf8');
 }
 
@@ -335,7 +349,8 @@ function parseNamedExports(source) {
   const namedExportMatcher = /export\s*{\s*([^}]+)\s*}(?:\s*from\s*['"]([^'"]+)['"])?/g;
   for (const match of cleanSource.matchAll(namedExportMatcher)) {
     const specifier = match[2];
-    if (specifier && isLocalSpecifier(specifier)) continue;
+    // 带来源的导出由模块遍历或第三方独立索引负责，避免在 catalog 中重复展开超长符号列表。
+    if (specifier) continue;
     for (const item of match[1].split(',')) {
       const part = item.trim();
       if (!part) continue;

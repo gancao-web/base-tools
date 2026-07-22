@@ -1,7 +1,7 @@
 # Base Tools Full Documentation
 
 Project: @base-web-kits/base-tools
-Date: 2026-07-20
+Date: 2026-07-22
 
 
 
@@ -4715,6 +4715,53 @@ export type SSEMessage = {
 
 
 ==================================================
+File: ts/clsx/clsx.md
+==================================================
+
+# clsx
+
+根据字符串、数组和条件对象拼接 CSS 类名。本函数从 `clsx` 包重导出，同时提供 `ClassValue` 输入类型。
+
+## 示例
+
+```ts
+import { clsx, type ClassValue } from '@base-web-kits/base-tools-ts';
+
+const classes: ClassValue[] = [
+  'button',
+  ['button--primary'],
+  { 'button--disabled': true, 'button--loading': false },
+];
+
+clsx(classes);
+// 结果: 'button button--primary button--disabled'
+```
+
+假值会被忽略：
+
+```ts
+clsx('button', false, null, undefined, 0, 'active');
+// 结果: 'button active'
+```
+
+## 参数
+
+- `inputs (...ClassValue[])`: 要拼接的类名，可以是字符串、数字、数组、条件对象或假值。
+
+## 返回值
+
+- `(string)`: 以空格分隔的类名字符串。
+
+## 来源
+
+- [clsx](https://github.com/lukeed/clsx)
+
+## 版本
+
+- 1.4.10 新增
+
+
+==================================================
 File: ts/day/getAgeByBirthdate.md
 ==================================================
 
@@ -6902,6 +6949,63 @@ omitBy(object, isNumber);
 ## 来源
 
 - [es-toolkit omitBy](https://es-toolkit.dev/zh_hans/reference/object/omitBy.html)
+
+
+==================================================
+File: ts/object/omitUndefined.md
+==================================================
+
+# omitUndefined
+
+移除对象顶层值为 `undefined` 的可枚举自有字段，不改变原对象。
+
+- `null`、`false`、空字符串和 `0` 会被保留。
+- 始终返回新的浅拷贝，即使对象中没有值为 `undefined` 的字段。
+- 嵌套对象不会被递归处理，并且仍与原对象共享引用。
+
+## 示例
+
+```ts
+import { omitUndefined } from '@base-web-kits/base-tools-ts';
+
+const source = {
+  name: 'Alice',
+  age: undefined,
+  enabled: false,
+  score: 0,
+  profile: { city: undefined },
+};
+
+const result = omitUndefined(source);
+// 结果: {
+//   name: 'Alice',
+//   enabled: false,
+//   score: 0,
+//   profile: { city: undefined },
+// }
+
+result === source; // false
+result.profile === source.profile; // true
+```
+
+传入 `undefined` 时返回空对象：
+
+```ts
+omitUndefined(undefined);
+// 结果: {}
+```
+
+## 参数
+
+- `obj (Object | undefined)`: 目标对象。
+
+## 返回值
+
+- `(Object)`: 移除值为 `undefined` 的顶层字段后生成的新对象。
+
+## 版本
+
+- 1.4.10 新增
 
 
 ==================================================

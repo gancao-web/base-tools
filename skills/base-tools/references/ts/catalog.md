@@ -26,6 +26,10 @@
 - 来源: `src/ts/buffer/SSEParser.ts`
 - 导出: `MessageCallback`、`SSEMessage`、`SSEParser`
 
+### clsx
+- 来源: `src/ts/clsx/index.ts`
+- re-export: `clsx`
+
 ### day
 - 来源: `src/ts/day/index.ts`
 - 导出: `dateFormat`、`dayjs`、`getAgeByBirthdate`、`getCountdownParts`、`getDateRangeAfter`、`getDateRangeBefore`、`toDayjs`
@@ -50,7 +54,7 @@
 
 ### object
 - 来源: `src/ts/object/index.ts`
-- 导出: `getObjectKeys`、`getObjectValue`、`setObjectValue`
+- 导出: `getObjectKeys`、`getObjectValue`、`omitUndefined`、`setObjectValue`
 
 ### string
 
@@ -84,6 +88,10 @@
 - 来源: `src/ts/url/param/index.ts`
 - 导出: `appendUrlParam`
 
+#### path
+- 来源: `src/ts/url/path/index.ts`
+- 导出: `joinUrlPath`
+
 #### qn
 - 来源: `src/ts/url/qn/index.ts`
 - 导出: `getQnAudio`、`getQnHls`、`getQnImg`、`getQnVideo`
@@ -94,4 +102,5 @@
 
 ## Third-party Re-exports
 
+- `clsx`
 - `es-toolkit`
