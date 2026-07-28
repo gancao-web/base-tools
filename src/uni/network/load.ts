@@ -5,6 +5,20 @@ const cache = {
   downloadFiles: {} as Record<string, string>,
 };
 
+function downloadFileApi(option: UniApp.DownloadFileOption) {
+  const { success, fail } = option;
+  return uni.downloadFile({
+    ...option,
+    success(res) {
+      if (res.statusCode === 200) {
+        success?.(res);
+      } else {
+        fail?.({ errMsg: `downloadFile fail: ${res.statusCode}` });
+      }
+    },
+  });
+}
+
 /**
  * 上传所需的额外参数，最终合并到 uni.uploadFile 的 formData。
  * 不同目标平台对值的转换规则可能不同；对象和数组应按接口协议提前序列化。
@@ -36,10 +50,7 @@ export async function downloadFile(
     return res;
   }
 
-  const { tempFilePath } = await enhanceUniApi(uni.downloadFile, 'downloadFile')(
-    fillOption,
-    config,
-  );
+  const { tempFilePath } = await enhanceUniApi(downloadFileApi, 'downloadFile')(fillOption, config);
 
   if (cacheFile) cache.downloadFiles[url] = tempFilePath;
 
