@@ -32,7 +32,7 @@
 
 ### media
 - 来源: `src/uni/media/index.ts`
-- 导出: `chooseImage`、`chooseMedia`、`chooseVideo`、`saveImageToPhotosAlbum`
+- 导出: `chooseImage`、`chooseMedia`、`ChooseMediaFile`、`chooseVideo`、`saveImageToPhotosAlbum`
 
 ### network
 
