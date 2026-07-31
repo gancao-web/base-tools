@@ -1,22 +1,42 @@
-import { downloadFile, getBaseToolsConfig, authorize, enhanceUniApi } from '../index';
+import {
+  downloadFile,
+  getBaseToolsConfig,
+  authorize,
+  enhanceUniApi,
+  getPlatformUni,
+} from '../index';
 import type { UniApiConfig } from '../index';
 
 const cache = {
   isChooseMedia: false,
 };
 
+/** 跨端媒体选择结果，H5 额外提供上传所需的 File 对象 */
+export type ChooseMediaFile = {
+  tempFilePath: string;
+  file?: File;
+  fileType: 'image' | 'video';
+  size?: number;
+  duration?: number;
+  height?: number;
+  width?: number;
+  thumbTempFilePath?: string;
+};
+
 /**
  * 图片和视频的选择或拍摄
  * - 微信小程序推荐使用chooseMedia, 而chooseImage或chooseVideo已标记过时
- * - 不支持H5 (如需在H5上使用, 请使用chooseImage或chooseVideo)
+ * - H5会根据mediaType自动使用chooseImage或chooseVideo
+ * - H5不支持同时选择图片和视频, mediaType为混选或未指定时默认选择图片
+ * - H5选择视频时只能选择一个文件, count不生效
  * @param option 选项文档 https://uniapp.dcloud.net.cn/api/media/video.html#choosemedia
- * @returns 路径数组 (不是File对象)
+ * @returns 跨端媒体文件对象数组 (H5额外包含file字段)
  * @example
  * const tempFiles = await chooseMedia({ count: 3 }); // 选择图片和视频
  * const tempFiles = await chooseMedia({ count: 2, mediaType: ['image'] }); // 选择图片/拍照
  * const tempFiles = await chooseMedia({ count: 1, mediaType: ['video'] }); // 选择视频/录像
  */
-export async function chooseMedia(option?: UniApp.ChooseMediaOption) {
+export async function chooseMedia(option?: UniApp.ChooseMediaOption): Promise<ChooseMediaFile[]> {
   if (cache.isChooseMedia) {
     const { log } = getBaseToolsConfig();
     const desc = 'Choosing media, please wait..';
@@ -26,6 +46,59 @@ export async function chooseMedia(option?: UniApp.ChooseMediaOption) {
 
   cache.isChooseMedia = true;
   try {
+    const platform = getPlatformUni();
+    if (platform === 'web') {
+      const config = {
+        toastError: (e: { errMsg: string }) => !e.errMsg.includes('cancel'),
+      };
+
+      if (option?.mediaType?.length === 1 && option.mediaType[0] === 'video') {
+        const { tempFilePath, tempFile, size, duration, height, width } = await chooseVideo(
+          {
+            sourceType: option.sourceType,
+            compressed:
+              option.sizeType?.length === 1 ? option.sizeType[0] !== 'original' : undefined,
+            maxDuration: option.maxDuration,
+            camera: option.camera,
+          },
+          config,
+        );
+        return [
+          {
+            tempFilePath,
+            file: tempFile,
+            fileType: 'video',
+            size,
+            duration,
+            height,
+            width,
+          },
+        ];
+      }
+
+      const { tempFilePaths, tempFiles } = await chooseImage(
+        {
+          count: option?.count,
+          sizeType: option?.sizeType,
+          sourceType: option?.sourceType,
+        },
+        config,
+      );
+      const paths = Array.isArray(tempFilePaths) ? tempFilePaths : [tempFilePaths];
+      const files = Array.isArray(tempFiles) ? tempFiles : [tempFiles];
+
+      return paths.map((tempFilePath, index) => {
+        const file = files[index] as File;
+
+        return {
+          tempFilePath,
+          file,
+          fileType: 'image',
+          size: file.size,
+        };
+      });
+    }
+
     const { tempFiles } = await enhanceUniApi(uni.chooseMedia, 'chooseMedia')(option, {
       toastError: (e) => !e.errMsg.includes('cancel'),
     });
