@@ -19,6 +19,10 @@ describe('ts/url oss utils', () => {
     expect(getOSSImg(src, { resize: { w: 100, h: 100 } })).toBe(
       'https://cdn.example.com/a.jpg?x-oss-process=image/resize,w_100,h_100',
     );
+    expect(getOSSImg(src, { resize: { w: 1200, h: Number('100%') } })).toBe(
+      'https://cdn.example.com/a.jpg?x-oss-process=image/resize,w_1200',
+    );
+    expect(getOSSImg(src, { resize: { h: Number('100%') } })).toBe(src);
     const wmText = toBase64Url('水印');
     expect(getOSSImg(src, { watermark: { text: '水印' } })).toBe(
       `https://cdn.example.com/a.jpg?x-oss-process=image/watermark,text_${wmText}`,
