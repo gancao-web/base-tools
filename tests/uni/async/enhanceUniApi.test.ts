@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { enhanceUniApi, setBaseToolsConfig } from '../../../src/uni';
+import { createUniConfig } from '../../helpers/uniConfig';
 
 type MockOption = {
   success?: (res: { data: string }) => void;
@@ -19,7 +20,7 @@ describe('uni/enhanceUniApi', () => {
     const log = vi.fn();
 
     vi.stubGlobal('uni', { showLoading, hideLoading, showToast });
-    setBaseToolsConfig({ log } as Parameters<typeof setBaseToolsConfig>[0]);
+    setBaseToolsConfig(createUniConfig({ log }));
 
     const api = vi.fn((option: MockOption) => {
       option.success?.({ data: 'response' });
@@ -54,7 +55,7 @@ describe('uni/enhanceUniApi', () => {
     const showToast = vi.fn();
 
     vi.stubGlobal('uni', { showToast });
-    setBaseToolsConfig({} as Parameters<typeof setBaseToolsConfig>[0]);
+    setBaseToolsConfig(createUniConfig());
 
     const api = vi.fn((option: MockOption) => {
       option.fail?.({ errMsg: 'network error' });

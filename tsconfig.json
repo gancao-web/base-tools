@@ -38,11 +38,11 @@
       "miniprogram-api-typings",
       // node 相关的 TypeScript 类型(如NodeJS.Timeout,process.env.NODE_ENV)，需要安装 @types/node
       "node"
-    ],
+    ]
   },
 
   // 编译/类型检查包含的源码目录
-  "include": ["src", "vitest.config.ts"],
+  "include": ["src", "tests", "vitest.config.ts"],
 
   // 显式排除无需检查的目录
   "exclude": ["node_modules", "dist"]
