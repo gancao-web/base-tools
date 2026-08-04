@@ -15,6 +15,7 @@
 ## 分平台构建约定
 
 - `web`、`uni` 包如需兼容 vue2 + webpack 这类默认不编译 `node_modules` ES 模块的老环境, 可以在 `tsup` 中按需配置 `noExternal`, 并转译为 `es2015`
+- `uni` 包通过 `peerDependencies` 声明 `vue`, 并在 `tsup` 中将 `vue` 设为 `external`; Vue 必须复用 uni-app 宿主运行时, 禁止打进发布产物
 - `web` 和 `uni` 目录使用 `ts` 目录下的函数时, 需使用相对路径引入到具体的包, 如 `import { toDayjs } from '../../ts/day'`, 并在 `tsup` 中配置 `dts: true`, 确保构建时把源码打进来, 不产生相互依赖关系
 - `web` 和 `uni` 目录如果使用 `ts` 目录的第三方 re-export 函数, 应直接引用, 如 `import { pickBy } from 'es-toolkit'`, 并按兼容性要求决定是否配置 `noExternal`
 - `ts` 包虽然当前会将 `es-toolkit` 打进产物, 但源码侧 re-export 仍建议使用显式命名导出, 不要依赖 `export *` 的偶然可用性

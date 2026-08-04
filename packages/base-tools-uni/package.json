@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-uni",
-  "version": "1.4.18",
+  "version": "1.4.20",
   "sideEffects": false,
   "description": "Independent Uni-app utilities package built from src/uni.",
   "keywords": [
@@ -27,5 +27,8 @@
   "dependencies": {
     "es-toolkit": "^1.44.0",
     "dayjs": "^1.11.19"
+  },
+  "peerDependencies": {
+    "vue": ">=3.0.0 <4"
   }
 }

@@ -6,6 +6,7 @@ const commands = [
   'tsup --config scripts/build/tsup.ts.ts',
   'tsup --config scripts/build/tsup.web.ts',
   'tsup --config scripts/build/tsup.uni.ts',
+  'node scripts/build/verify-uni-build.mjs',
   'tsup --config scripts/build/tsup.react.ts',
   'tsup --config scripts/build/tsup.vue.ts',
   'tsup --config scripts/build/tsup.umd.ts',
