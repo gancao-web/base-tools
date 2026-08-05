@@ -40,7 +40,7 @@ export class ErrorBoundary extends React.Component<
     return { hasError: true };
   }
   componentDidCatch(error: unknown, errorInfo: React.ErrorInfo) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (typeof process === 'undefined' || process.env.NODE_ENV !== 'production') {
       console.error('ErrorBoundary caught:', error, errorInfo);
     }
   }

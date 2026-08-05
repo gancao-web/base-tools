@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { getOSSImg, getOSSAudio, getOSSVideo, getOSSHls, buildOSSUrl } from '../../../src/ts';
 
 function toBase64Url(s: string) {
@@ -7,6 +7,10 @@ function toBase64Url(s: string) {
 }
 
 describe('ts/url oss utils', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('buildOSSUrl base guards', () => {
     expect(buildOSSUrl('', 'image', { info: true })).toBe('');
     expect(buildOSSUrl('blob:abc', 'image', { info: true })).toBe('blob:abc');
@@ -80,6 +84,17 @@ describe('ts/url oss utils', () => {
     );
     expect(getOSSImg(src, { rotate: 0 })).toBe(
       'https://cdn.example.com/a.jpg?x-oss-process=image/rotate,0',
+    );
+  });
+
+  it('encodes watermarks without Node or browser Base64 globals', () => {
+    const src = 'https://cdn.example.com/a.jpg';
+    const wmText = toBase64Url('水印');
+    vi.stubGlobal('Buffer', undefined);
+    vi.stubGlobal('btoa', undefined);
+
+    expect(getOSSImg(src, { watermark: { text: '水印' } })).toBe(
+      `https://cdn.example.com/a.jpg?x-oss-process=image/watermark,text_${wmText}`,
     );
   });
 

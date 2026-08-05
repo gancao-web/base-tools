@@ -1,3 +1,5 @@
+import { toBase64Url } from '../base64';
+
 import type {
   OSSOption,
   OSSAudioOption,
@@ -146,22 +148,4 @@ function getWatermark(w?: OSSWatermarkOption) {
   if (w.text) w.text = toBase64Url(w.text);
   if (w.type) w.type = toBase64Url(w.type);
   return getOSSSegs('watermark', w);
-}
-
-/**
- * Base64编码
- */
-function toBase64Url(s: string) {
-  let b64 = '';
-  if (typeof Buffer !== 'undefined') {
-    const buf = Buffer.from(s, 'utf-8');
-    b64 = buf.toString('base64');
-  } else {
-    try {
-      b64 = btoa(unescape(encodeURIComponent(s)));
-    } catch {
-      b64 = '';
-    }
-  }
-  return b64.replace(/=+$/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 }

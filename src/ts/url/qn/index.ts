@@ -1,3 +1,5 @@
+import { toBase64Url } from '../base64';
+
 import type { QnImgOption, QnMogr2Option, QnWatermarkOption, QnImageView2Option } from './index.d';
 
 export * from './index.d';
@@ -178,21 +180,6 @@ function getWatermark(w?: QnWatermarkOption) {
   if (typeof w.dy === 'number') segs.push(`dy/${w.dy}`);
   if (typeof w.dissolve === 'number') segs.push(`dissolve/${w.dissolve}`);
   return segs.join('/');
-}
-
-function toBase64Url(s: string) {
-  let b64 = '';
-  if (typeof Buffer !== 'undefined') {
-    const buf = Buffer.from(s, 'utf-8');
-    b64 = buf.toString('base64');
-  } else {
-    try {
-      b64 = btoa(unescape(encodeURIComponent(s)));
-    } catch {
-      b64 = '';
-    }
-  }
-  return b64.replace(/=+$/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 }
 
 function getAvthumb(opt: import('.').QnAvthumbOption) {
