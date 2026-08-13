@@ -4,6 +4,10 @@ import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
 import relativeTime from 'dayjs/plugin/relativeTime.js';
 import advancedFormat from 'dayjs/plugin/advancedFormat.js';
+import localeData from 'dayjs/plugin/localeData.js';
+import weekOfYear from 'dayjs/plugin/weekOfYear.js';
+import weekYear from 'dayjs/plugin/weekYear.js';
+import weekday from 'dayjs/plugin/weekday.js';
 import 'dayjs/locale/zh-cn.js';
 import { zeroPad } from '../number';
 
@@ -15,6 +19,10 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(relativeTime);
 dayjs.extend(advancedFormat);
+dayjs.extend(localeData);
+dayjs.extend(weekOfYear);
+dayjs.extend(weekYear);
+dayjs.extend(weekday);
 dayjs.locale('zh-cn');
 
 type BaseTime = number | string | Date | Dayjs | null | undefined;

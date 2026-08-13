@@ -14,7 +14,10 @@
 
 ## 分平台构建约定
 
-- `web`、`uni` 包如需兼容 vue2 + webpack 这类默认不编译 `node_modules` ES 模块的老环境, 可以在 `tsup` 中按需配置 `noExternal`, 并转译为 `es2015`
+- `ts`、`web`、`uni` 包中的工具型运行时依赖采用 `dependencies + noExternal` 的发布策略, 两处必须同步维护, 不能二选一
+- `dependencies` 负责声明安装关系、版本和类型解析; `noExternal` 负责将运行时代码内联到发布产物, `dependencies` 本身不会完成内联
+- 内联工具型依赖有两个历史兼容原因: 一是让依赖随本包统一转译为 ES2015, 兼容 Vue 2 + Webpack 等默认不转译 `node_modules` 现代 ES 代码的旧构建链; 二是让发布产物在 pnpm 严格布局下保持自包含, 避免消费侧无法解析产物残留的运行时依赖
+- React、Vue 等必须共享宿主实例的框架依赖是例外, 应使用 `external + peerDependencies`, 禁止内联到发布产物
 - `uni` 包通过 `peerDependencies` 声明 `vue`, 并在 `tsup` 中将 `vue` 设为 `external`; Vue 必须复用 uni-app 宿主运行时, 禁止打进发布产物
 - `web` 和 `uni` 目录使用 `ts` 目录下的函数时, 需使用相对路径引入到具体的包, 如 `import { toDayjs } from '../../ts/day'`, 并在 `tsup` 中配置 `dts: true`, 确保构建时把源码打进来, 不产生相互依赖关系
 - `web` 和 `uni` 目录如果使用 `ts` 目录的第三方 re-export 函数, 应直接引用, 如 `import { pickBy } from 'es-toolkit'`, 并按兼容性要求决定是否配置 `noExternal`
