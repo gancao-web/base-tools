@@ -20,7 +20,7 @@
 
 ### device
 - 来源: `src/web/device/index.ts`
-- 导出: `getBrowserName`、`getBrowserVersion`、`getDevicePixelRatio`、`getOS`、`getUA`、`isAndroid`、`isChrome`、`isIOS`、`isMobile`、`isPC`、`isTablet`、`isTouchSupported`、`isWeChat`
+- 导出: `getBrowserName`、`getBrowserVersion`、`getDevicePixelRatio`、`getOS`、`getUA`、`isAndroid`、`isAndroidTablet`、`isAppleOS`、`isChrome`、`isIOS`、`isIPad`、`isMobile`、`isPC`、`isTablet`、`isTouchSupported`、`isWeChat`
 
 ### dom
 - 来源: `src/web/dom/index.ts`

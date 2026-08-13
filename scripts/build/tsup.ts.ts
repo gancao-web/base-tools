@@ -8,8 +8,12 @@ export default defineConfig({
   dts: false,
   splitting: false,
   clean: true,
-  // 为了解决vue2+webpack不支持es6的问题, 需对re-export的第三方库进行打包, 并转为es2015
-  // 为了在 pnpm 严格布局下, dependencies依赖丢失的问题, 需对运行时依赖打包到库里 (dependencies仅提供ts声明文件, 不提供运行时代码)
+  // 工具型运行时依赖必须同时维护在发布包 dependencies 和此处 noExternal 中：
+  // 1. dependencies 声明安装关系、版本及类型解析；noExternal 则将运行时代码内联到发布产物。
+  // 2. 内联后会随本包统一转译为 ES2015，兼容 Vue 2 + Webpack 等默认不转译 node_modules 的旧构建链。
+  // 3. 内联还能让产物在 pnpm 严格布局下保持自包含，避免消费侧无法解析产物残留的运行时依赖。
+  // 新增或删除下列依赖时，必须同步修改对应发布包的 dependencies。React、Vue 等需共享宿主实例的
+  // 框架依赖不适用此规则，应使用 external + peerDependencies，禁止打入产物。
   noExternal: ['es-toolkit', 'bignumber.js', 'clsx', 'dayjs', 'mitt'],
   target: 'es2015',
   outExtension({ format }) {

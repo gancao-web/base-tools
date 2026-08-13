@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
+  dayjs,
   toDayjs,
   getDateRangeBefore,
   getDateRangeAfter,
@@ -18,6 +19,14 @@ describe('ts/day utils', () => {
     );
     expect(toDayjs('1765337596').format('X')).toBe('1765337596');
     expect(toDayjs('1765337596913').format('x')).toBe('1765337596913');
+  });
+
+  it('dayjs exposes zh-cn locale data required by date pickers', () => {
+    const value = dayjs('2026-10-31').locale('zh-cn');
+    expect(value.localeData().weekdaysMin()).toEqual(['日', '一', '二', '三', '四', '五', '六']);
+    expect(value.localeData().monthsShort()[9]).toBe('10月');
+    expect(value.weekday()).toBe(5);
+    expect(value.week()).toBeGreaterThan(0);
   });
 
   it('getDateRangeBefore/After with date format', () => {
