@@ -102,6 +102,19 @@ function copySourceFiles() {
   }
 }
 
+// 只将唯一维护源同步到 TS 包，避免每个平台包重复携带同一份 skill
+function copySkillToTsPackage() {
+  const skillSource = path.join(process.cwd(), 'skills/base-tools');
+  const skillTarget = path.join(process.cwd(), 'packages/base-tools-ts/skill');
+
+  if (!fs.existsSync(path.join(skillSource, 'SKILL.md'))) {
+    throw new Error('Skill source not found: skills/base-tools/SKILL.md');
+  }
+
+  copyDir(skillSource, skillTarget);
+  console.log('Copied skill to packages/base-tools-ts');
+}
+
 // 修复Source Map路径
 function fixSourceMaps() {
   const distDirs = [
@@ -151,6 +164,9 @@ copyReadmeToPackages();
 
 // 复制源码
 copySourceFiles();
+
+// 复制 Agent Skill
+copySkillToTsPackage();
 
 // 修复Source Map
 fixSourceMaps();

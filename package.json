@@ -1,13 +1,13 @@
 {
   "name": "@base-web-kits/base-tools",
-  "version": "1.4.20",
+  "version": "1.5.0",
   "type": "module",
   "sideEffects": false,
   "scripts": {
     "lint": "tsc --noEmit && eslint ./src --ext .ts,.js --fix && prettier --write .",
     "lint:lint-staged": "tsc --noEmit && lint-staged",
     "test": "vitest run",
-    "build": "node scripts/build/index.mjs && npm run docs:llms && npm run skills:generate",
+    "build": "npm run skills:generate && node scripts/build/index.mjs && npm run docs:llms",
     "version:major": "node scripts/version-bump.mjs major",
     "version:minor": "node scripts/version-bump.mjs minor",
     "version:patch": "node scripts/version-bump.mjs patch",

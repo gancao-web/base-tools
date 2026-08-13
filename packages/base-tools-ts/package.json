@@ -1,6 +1,6 @@
 {
   "name": "@base-web-kits/base-tools-ts",
-  "version": "1.4.20",
+  "version": "1.5.0",
   "sideEffects": false,
   "description": "Independent TS utilities package built from src/ts.",
   "keywords": [
@@ -22,7 +22,8 @@
   "files": [
     "dist",
     "README.md",
-    "src"
+    "src",
+    "skill"
   ],
   "dependencies": {
     "es-toolkit": "^1.44.0",
