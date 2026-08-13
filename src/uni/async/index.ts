@@ -70,38 +70,59 @@ export function enhanceUniApi<Option, Res, Err, Task>(
     }
 
     return new Promise<Res>((resolve, reject) => {
+      let loadingHidden = false;
+
+      const hideLoading = () => {
+        if (!showLoading || loadingHidden) return;
+        loadingHidden = true;
+        uni.hideLoading();
+      };
+
+      const handleFail = (e: unknown) => {
+        hideLoading();
+        // 先确定 Promise 状态，避免自定义日志或 toastError 抛错后调用方一直等待。
+        reject(e);
+        if (showLog) log?.('error', { name: fname, status: 'fail', option, e, ...logExtra });
+
+        const msg = typeof toastError === 'function' ? toastError(e as Err) : toastError;
+        if (msg) {
+          const errorMsg = e instanceof Error ? e.message : JSON.stringify(e);
+          toast(typeof msg === 'string' ? msg : `${fname} fail: ${errorMsg}`);
+        }
+      };
+
       const task = uniApi({
         ...(option as Option),
         success(res) {
-          if (showLoading) uni.hideLoading();
+          hideLoading();
 
-          const finalRes = transformResponse ? transformResponse(res) : res;
+          // uni API 的 success 只代表平台调用成功，响应转换仍可能因业务错误而抛出异常。
+          try {
+            const finalRes = transformResponse ? transformResponse(res) : res;
 
-          if (showLog) {
-            const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
+            if (showLog) {
+              const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
 
-            if (transformResponse) {
-              logData.res = res; // 输出原始数据
-              logData.transformResponse = cloneDeep(finalRes); // 深拷贝处理后数据,避免外部修改对象,造成输出不一致
-            } else {
-              logData.res = cloneDeep(res); // 深拷贝原始数据,避免外部修改对象,造成输出不一致
+              if (transformResponse) {
+                logData.res = res; // 输出原始数据
+                logData.transformResponse = cloneDeep(finalRes); // 深拷贝处理后数据,避免外部修改对象,造成输出不一致
+              } else {
+                logData.res = cloneDeep(res); // 深拷贝原始数据,避免外部修改对象,造成输出不一致
+              }
+
+              log?.('info', logData);
             }
 
-            log?.('info', logData);
+            const msg = typeof toastSuccess === 'function' ? toastSuccess(finalRes) : toastSuccess;
+
+            resolve(finalRes);
+            if (msg) toast(msg);
+          } catch (e) {
+            handleFail(e);
           }
-
-          resolve(finalRes);
-
-          const msg = typeof toastSuccess === 'function' ? toastSuccess(finalRes) : toastSuccess;
-          if (msg) toast(msg);
         },
         fail(e) {
-          if (showLoading) uni.hideLoading();
-          if (showLog) log?.('error', { name: fname, status: 'fail', option, e, ...logExtra });
-          reject(e);
-
-          const msg = typeof toastError === 'function' ? toastError(e) : toastError;
-          if (msg) toast(typeof msg === 'string' ? msg : `${fname} fail: ${JSON.stringify(e)}`);
+          handleFail(e);
         },
       });
 

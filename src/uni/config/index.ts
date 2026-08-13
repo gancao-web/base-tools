@@ -1,3 +1,5 @@
+import { registerUniAppConfigBridge } from '../../shared/config/uniAppBridge';
+
 export type AppConfig = {
   /**
    * 首页路径 (使toHome方法能够跳转首页)
@@ -126,4 +128,17 @@ export function getBaseToolsConfig() {
  */
 export function setBaseToolsConfig(newConfig: AppConfig) {
   Object.assign(appConfig, newConfig);
+
+  // 仅在 uni-app H5 注册桥接，让 Web 工具复用 Uni 的提示、加载、登录和日志能力。
+  registerUniAppConfigBridge<typeof uni>((uniApi) => ({
+    toast: (msg) => uniApi.showToast({ icon: 'none', title: msg, duration: 1000 }),
+    showLoading: (title) => uniApi.showLoading({ title: title || '请稍后...', mask: true }),
+    hideLoading: () => uniApi.hideLoading(),
+    toLogin: () => {
+      const { pathLogin, onBeforeHref } = appConfig;
+      if (!pathLogin || onBeforeHref?.(pathLogin) === false) return;
+      uniApi.navigateTo({ url: pathLogin });
+    },
+    log: (level, data) => appConfig.log?.(level, data),
+  }));
 }

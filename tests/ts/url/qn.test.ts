@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { getQnImg, getQnVideo, getQnAudio, getQnHls } from '../../../src/ts';
 
 function toBase64Url(s: string) {
@@ -7,6 +7,10 @@ function toBase64Url(s: string) {
 }
 
 describe('ts/url qn utils', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('imageView2 example from docs', () => {
     const src = 'http://dn-odum9helk.qbox.me/qiniu-picture1.jpg';
     expect(getQnImg(src, { imageView2: { mode: 0, w: 48, h: 48 } })).toBe(
@@ -64,6 +68,17 @@ describe('ts/url qn utils', () => {
     const wmB64 = toBase64Url(wmText);
     expect(getQnImg(src, { watermark: { type: 'text', text: wmText, fontsize: 18 } })).toBe(
       `https://cdn.example.com/a.jpg?watermark/2/text/${wmB64}/fontsize/18`,
+    );
+  });
+
+  it('encodes watermarks without Node or browser Base64 globals', () => {
+    const src = 'https://cdn.example.com/a.jpg';
+    const wmText = toBase64Url('水印');
+    vi.stubGlobal('Buffer', undefined);
+    vi.stubGlobal('btoa', undefined);
+
+    expect(getQnImg(src, { watermark: { type: 'text', text: '水印' } })).toBe(
+      `https://cdn.example.com/a.jpg?watermark/2/text/${wmText}`,
     );
   });
 

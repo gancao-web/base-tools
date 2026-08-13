@@ -10,6 +10,8 @@ export default defineConfig({
   clean: true,
   // 为了在 pnpm 严格布局下, dependencies依赖丢失的问题, 需对运行时依赖打包到库里 (dependencies仅提供ts声明文件, 不提供运行时代码)
   noExternal: ['es-toolkit', 'dayjs'],
+  // Vue 由 uni-app 宿主提供，打进产物会产生重复运行时，并意外带入编译器及 Node.js API。
+  external: ['vue'],
   target: 'es2015',
   outExtension({ format }) {
     return {

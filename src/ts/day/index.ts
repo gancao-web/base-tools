@@ -7,6 +7,9 @@ import advancedFormat from 'dayjs/plugin/advancedFormat.js';
 import 'dayjs/locale/zh-cn.js';
 import { zeroPad } from '../number';
 
+/** Day.js 实例类型 */
+export type Dayjs = dayjs.Dayjs;
+
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -14,7 +17,7 @@ dayjs.extend(relativeTime);
 dayjs.extend(advancedFormat);
 dayjs.locale('zh-cn');
 
-type BaseTime = number | string | Date | dayjs.Dayjs | null | undefined;
+type BaseTime = number | string | Date | Dayjs | null | undefined;
 
 /**
  * 创建 dayjs 实例

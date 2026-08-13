@@ -43,3 +43,4 @@ packages/*/*.umd.global.js
 packages/*/*.map
 packages/*/README.md
 packages/*/src
+packages/*/skill

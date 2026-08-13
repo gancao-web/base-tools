@@ -1,3 +1,5 @@
+import { getUniAppConfigBridge } from '../../shared/config/uniAppBridge';
+
 export type AppConfig = {
   /** 全局 Toast 提示 */
   toast?: (option: { msg: string; status: 'success' | 'fail' }) => void;
@@ -36,11 +38,25 @@ export type AppLogInfo = {
 
 const appConfig: AppConfig = {};
 
+function getUniAppConfig(): AppConfig {
+  const bridge = getUniAppConfigBridge();
+  if (!bridge) return {};
+
+  return {
+    toast: ({ msg }) => bridge.toast(msg),
+    showLoading: ({ title } = {}) => bridge.showLoading(title),
+    hideLoading: bridge.hideLoading,
+    toLogin: bridge.toLogin,
+    log: bridge.log,
+  };
+}
+
 /**
  * 获取应用配置
  */
 export function getBaseToolsConfig() {
-  return appConfig;
+  // uni-app H5 默认复用 uni 能力，显式 Web 配置可按字段覆盖默认适配。
+  return { ...getUniAppConfig(), ...appConfig };
 }
 
 /**
