@@ -407,20 +407,32 @@ export function isHexColor(s: string) {
   return /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(v);
 }
 
+export type URLValidationOptions = {
+  /** 允许的协议，可省略末尾冒号；默认 http、https、ftp */
+  protocols?: readonly string[];
+};
+
 /**
- * 校验 URL（要求含协议，支持 http/https/ftp）。
+ * 校验 URL（要求含协议和主机名，默认支持 http/https/ftp）。
  * @param s 待校验的地址
+ * @param options 校验选项
  * @returns 是否为合法 URL
  * @example
  * isURL('https://example.com/path?a=1') // true
+ * isURL('ftp://example.com', { protocols: ['http', 'https'] }) // false
  * isURL('example.com') // false（缺少协议）
  */
-export function isURL(s: string) {
+export function isURL(s: string, options: URLValidationOptions = {}) {
   const v = String(s ?? '').trim();
   if (v === '') return false;
   try {
+    const PROTOCOLS = ['http:', 'https:', 'ftp:'];
     const u = new URL(v);
-    return ['http:', 'https:', 'ftp:'].includes(u.protocol) && !!u.hostname;
+    const protocols = (options.protocols ?? PROTOCOLS).map((protocol) => {
+      const normalized = protocol.trim().toLowerCase();
+      return normalized.endsWith(':') ? normalized : `${normalized}:`;
+    });
+    return protocols.includes(u.protocol) && !!u.hostname;
   } catch {
     return false;
   }

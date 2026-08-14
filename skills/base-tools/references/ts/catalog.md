@@ -46,7 +46,7 @@
 
 #### format
 - 来源: `src/ts/number/format.ts`
-- 导出: `toChineseCurrency`、`toChineseNum`、`toThousandth`、`withDistance`、`withUnit`、`withUnitPx`、`zeroPad`
+- 导出: `FileSizeUnit`、`formatFileSize`、`FormatFileSizeOptions`、`toChineseCurrency`、`toChineseNum`、`toThousandth`、`withDistance`、`withUnit`、`withUnitPx`、`zeroPad`
 
 #### random
 - 来源: `src/ts/number/random.ts`
@@ -70,6 +70,10 @@
 - 来源: `src/ts/string/random.ts`
 - 导出: `createTimeRandId`、`createUUID`、`createViewRandId`
 
+### tree
+- 来源: `src/ts/tree/index.ts`
+- 导出: `findTreeNode`、`findTreePath`、`flattenTree`、`TreeChildrenGetter`
+
 ### typing
 - 来源: `src/ts/typing/index.ts`
 - 导出: `Brand`、`DeepPartial`、`DeepRequired`、`Exact`、`JsonArray`、`JsonObject`、`JsonPrimitive`、`JsonValue`、`KeysOfType`、`Merge`、`Mutable`、`Nullable`、`OptionalKeys`、`PickByType`、`ReadonlyDeep`、`RequiredKeys`、`SetOptional`、`SetRequired`、`UnionToIntersection`、`ValueOf`
@@ -78,7 +82,7 @@
 
 #### file
 - 来源: `src/ts/url/file/index.ts`
-- 导出: `getFileSuffix`、`getFileType`
+- 导出: `getFileSuffix`、`getFileType`、`normalizeFileExtension`
 
 #### oss
 - 来源: `src/ts/url/oss/index.ts`
@@ -98,7 +102,7 @@
 
 ### validator
 - 来源: `src/ts/validator/index.ts`
-- 导出: `isBankCard`、`isChinese`、`isChineseName`、`isDigits`、`isEmail`、`isHexColor`、`isHKMOPermit`、`isIdentityCard`、`isIP`、`isIPRange`、`isIPv6`、`isLandline`、`isLatitude`、`isLetter`、`isLicensePlate`、`isLongitude`、`isMilitaryId`、`isMobilePhone`、`isNumeric`、`isOfficerId`、`isPassport`、`isPhone`、`isPortNumber`、`isSoldierId`、`isTaiwanPermit`、`isTaxID`、`isURL`
+- 导出: `isBankCard`、`isChinese`、`isChineseName`、`isDigits`、`isEmail`、`isHexColor`、`isHKMOPermit`、`isIdentityCard`、`isIP`、`isIPRange`、`isIPv6`、`isLandline`、`isLatitude`、`isLetter`、`isLicensePlate`、`isLongitude`、`isMilitaryId`、`isMobilePhone`、`isNumeric`、`isOfficerId`、`isPassport`、`isPhone`、`isPortNumber`、`isSoldierId`、`isTaiwanPermit`、`isTaxID`、`isURL`、`URLValidationOptions`
 
 ## Third-party Re-exports
 

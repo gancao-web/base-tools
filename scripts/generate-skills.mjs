@@ -66,6 +66,12 @@ const PACKAGE_SPECS = [
         '`toThousandth`、`withUnit`、`withUnitPx`、`zeroPad`',
         '数值展示与 CSS 尺寸格式化。',
       ],
+      ['文件体积格式化', '`formatFileSize`', '将字节数转换为 B、KB、MB、GB、TB 或 PB。'],
+      [
+        '树查找 / 路径 / 展平',
+        '`findTreeNode`、`findTreePath`、`flattenTree`',
+        '遍历 children 树，也支持自定义子节点读取函数。',
+      ],
       ['手机号 / 姓名脱敏', '`toMaskPhone`、`toMaskName`、`toMaskText`', '文本隐私脱敏。'],
       ['清理对象 undefined 字段', '`omitUndefined`', '移除值为 undefined 的字段。'],
       [
@@ -75,7 +81,12 @@ const PACKAGE_SPECS = [
       ],
       ['URL 参数拼接', '`appendUrlParam`', '向 URL 追加 query 参数。'],
       ['URL 路径拼接', '`joinUrlPath`', '拼接 URL 或路径片段，并清理交界处多余的斜杠。'],
-      ['文件后缀 / 文件类型', '`getFileSuffix`、`getFileType`', '从文件名或 URL 识别文件信息。'],
+      [
+        '文件后缀 / 文件类型',
+        '`getFileSuffix`、`getFileType`、`normalizeFileExtension`',
+        '识别文件信息或将扩展名规范为带点的小写格式。',
+      ],
+      ['URL 校验 / HTTP URL', '`isURL`', '校验 URL，并可通过 protocols 限制允许的协议。'],
       [
         'OSS / 七牛媒体链接',
         '`getOSSImg`、`getQnImg`、`getOSSHls`、`getQnHls`',

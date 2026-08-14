@@ -93,6 +93,9 @@ describe('ts/validator', () => {
     it('isURL', () => {
       expect(isURL('https://example.com/path?a=1')).toBe(true);
       expect(isURL('ftp://example.com')).toBe(true);
+      expect(isURL('https://example.com', { protocols: ['http', 'https'] })).toBe(true);
+      expect(isURL('ftp://example.com', { protocols: ['http:', 'https:'] })).toBe(false);
+      expect(isURL('https://example.com', { protocols: [] })).toBe(false);
       expect(isURL('example.com')).toBe(false);
     });
 
