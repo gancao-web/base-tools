@@ -1,5 +1,28 @@
 import { describe, it, expect } from 'vitest';
-import { toChineseCurrency } from '../../../src/ts';
+import { formatFileSize, toChineseCurrency } from '../../../src/ts';
+
+describe('ts/number format - file size', () => {
+  it('formats bytes with binary units', () => {
+    expect(formatFileSize(0)).toBe('0B');
+    expect(formatFileSize(0.5)).toBe('0.5B');
+    expect(formatFileSize(1023)).toBe('1023B');
+    expect(formatFileSize(1536)).toBe('1.5KB');
+    expect(formatFileSize(1024 ** 3)).toBe('1GB');
+    expect(formatFileSize(1024 ** 5)).toBe('1PB');
+  });
+
+  it('supports decimal units and precision', () => {
+    expect(formatFileSize(1_500_000, { base: 1000 })).toBe('1.5MB');
+    expect(formatFileSize(1536, { decimals: 0 })).toBe('2KB');
+  });
+
+  it('returns the configured fallback for invalid input', () => {
+    expect(formatFileSize()).toBe('-');
+    expect(formatFileSize(Number.NaN)).toBe('-');
+    expect(formatFileSize(Number.POSITIVE_INFINITY)).toBe('-');
+    expect(formatFileSize(-1, { fallback: '' })).toBe('');
+  });
+});
 
 describe('ts/number format - currency upper', () => {
   it('basic integers', () => {

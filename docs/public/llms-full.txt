@@ -1,7 +1,7 @@
 # Base Tools Full Documentation
 
 Project: @base-web-kits/base-tools
-Date: 2026-08-13
+Date: 2026-08-14
 
 
 
@@ -6039,6 +6039,36 @@ sumBy(objects, (o) => o.n);
 
 
 ==================================================
+File: ts/number/formatFileSize.md
+==================================================
+
+# formatFileSize
+
+将字节数格式化为易读的文件体积，自动选择 B、KB、MB、GB、TB 或 PB。
+
+## 示例
+
+```ts
+import { formatFileSize } from '@base-web-kits/base-tools-ts';
+
+formatFileSize(1536); // '1.5KB'
+formatFileSize(1_500_000, { base: 1000 }); // '1.5MB'
+formatFileSize(undefined); // '-'
+```
+
+## 参数
+
+- `bytes (number | undefined)`：字节数；负数和非有限数按无效输入处理。
+- `options.base (1000 | 1024)`：换算进制，默认 `1024`。
+- `options.decimals (number)`：最多保留的小数位，默认 `2`，末尾的 0 会被移除。
+- `options.fallback (string)`：无效输入的返回值，默认 `'-'`。
+
+## 版本
+
+- 1.6.0 新增
+
+
+==================================================
 File: ts/number/mathCompare.md
 ==================================================
 
@@ -9551,6 +9581,76 @@ words('fred, barney, & pebbles');
 
 
 ==================================================
+File: ts/tree/findTreeNode.md
+==================================================
+
+# findTreeNode
+
+按先序深度优先遍历，返回第一个满足条件的节点；未命中时返回 `undefined`。
+
+## 示例
+
+```ts
+import { findTreeNode } from '@base-web-kits/base-tools-ts';
+
+const tree = [{ id: 1, children: [{ id: 2 }] }];
+findTreeNode(tree, (node) => node.id === 2); // { id: 2 }
+```
+
+## 版本
+
+- 1.6.0 新增
+
+
+==================================================
+File: ts/tree/findTreePath.md
+==================================================
+
+# findTreePath
+
+查找第一个满足条件的节点，并返回从根节点到该节点的完整节点路径。
+
+## 示例
+
+```ts
+import { findTreePath } from '@base-web-kits/base-tools-ts';
+
+const tree = [{ id: 1, children: [{ id: 2 }] }];
+findTreePath(tree, (node) => node.id === 2)?.map((node) => node.id); // [1, 2]
+```
+
+未命中时返回 `undefined`。
+
+## 版本
+
+- 1.6.0 新增
+
+
+==================================================
+File: ts/tree/flattenTree.md
+==================================================
+
+# flattenTree
+
+按先序深度优先遍历将树展开为一维数组，默认读取节点的 `children` 字段。
+
+## 示例
+
+```ts
+import { flattenTree } from '@base-web-kits/base-tools-ts';
+
+const tree = [{ id: 1, children: [{ id: 2 }] }];
+flattenTree(tree).map((node) => node.id); // [1, 2]
+```
+
+第二个参数可传入子节点读取函数，以适配 `items` 等自定义字段。
+
+## 版本
+
+- 1.6.0 新增
+
+
+==================================================
 File: ts/typing/Brand.md
 ==================================================
 
@@ -10279,6 +10379,29 @@ joinUrlPath('', null, undefined);
 
 
 ==================================================
+File: ts/url/normalizeFileExtension.md
+==================================================
+
+# normalizeFileExtension
+
+将文件扩展名规范为仅含一个前导点的小写格式。空字符串或仅包含点时返回空字符串。
+
+## 示例
+
+```ts
+import { normalizeFileExtension } from '@base-web-kits/base-tools-ts';
+
+normalizeFileExtension(' PDF '); // '.pdf'
+normalizeFileExtension('..JPG'); // '.jpg'
+normalizeFileExtension(''); // ''
+```
+
+## 版本
+
+- 1.6.0 新增
+
+
+==================================================
 File: ts/validator/isBankCard.md
 ==================================================
 
@@ -10863,19 +10986,27 @@ File: ts/validator/isURL.md
 
 # isURL
 
-校验 URL（要求含协议，支持 http/https/ftp）。
+校验 URL，要求包含协议和主机名。默认支持 http、https 和 ftp，可限制允许的协议。
 
 ## 示例
 
 ```ts
 import { isURL } from '@base-web-kits/base-tools-ts';
 isURL('https://example.com/path?a=1'); // true
+isURL('ftp://example.com'); // true
+isURL('ftp://example.com', { protocols: ['http', 'https'] }); // false
 isURL('example.com'); // false（缺少协议）
 ```
+
+## 参数
+
+- `s (string)`：待校验的 URL。
+- `options.protocols (readonly string[])`：允许的协议，可省略末尾冒号。
 
 ## 版本
 
 - 1.0.0 新增
+- 1.6.0 支持配置允许的协议
 
 
 ==================================================
@@ -20374,12 +20505,16 @@ File: web/device/getBrowserName.md
 
 # getBrowserName
 
-获取浏览器名字
+获取浏览器名称，无法识别时返回 `null`。
+
+可能的返回值包括 `chrome`、`edge`、`opera`、`firefox`、`safari`、`ie`、`samsung` 和 `whale`。
 
 ## 示例
 
 ```ts
 import { getBrowserName } from '@base-web-kits/base-tools-web';
+
+const browser = getBrowserName();
 ```
 
 ## 版本
@@ -20393,12 +20528,14 @@ File: web/device/getBrowserVersion.md
 
 # getBrowserVersion
 
-获取浏览器版本号
+获取浏览器版本号，无法识别时返回 `null`。
 
 ## 示例
 
 ```ts
 import { getBrowserVersion } from '@base-web-kits/base-tools-web';
+
+const version = getBrowserVersion();
 ```
 
 ## 版本
@@ -20412,12 +20549,14 @@ File: web/device/getDevicePixelRatio.md
 
 # getDevicePixelRatio
 
-获取设备像素比
+获取当前窗口的设备像素比。SSR 环境或浏览器未提供该值时返回 `1`。
 
 ## 示例
 
 ```ts
 import { getDevicePixelRatio } from '@base-web-kits/base-tools-web';
+
+const ratio = getDevicePixelRatio();
 ```
 
 ## 版本
@@ -20431,12 +20570,16 @@ File: web/device/getOS.md
 
 # getOS
 
-获取操作系统信息
+获取当前网页所在的操作系统，无法识别时返回 `unknown`。
+
+可能的返回值为 `ios`、`android`、`windows`、`chromeos`、`macos`、`linux` 和 `unknown`。iPadOS 归入 `ios`。
 
 ## 示例
 
 ```ts
 import { getOS } from '@base-web-kits/base-tools-web';
+
+const os = getOS();
 ```
 
 ## 版本
@@ -20450,12 +20593,14 @@ File: web/device/getUA.md
 
 # getUA
 
-获取用户代理字符串（UA）
+获取转换为小写的用户代理字符串（UA）。SSR 等无 `navigator` 的环境返回空字符串。
 
 ## 示例
 
 ```ts
 import { getUA } from '@base-web-kits/base-tools-web';
+
+const ua = getUA();
 ```
 
 ## 版本
@@ -20469,12 +20614,16 @@ File: web/device/isAndroid.md
 
 # isAndroid
 
-是否为 Android 系统
+判断当前网页是否运行在 Android 设备上，包含 Android 手机和平板。
 
 ## 示例
 
 ```ts
 import { isAndroid } from '@base-web-kits/base-tools-web';
+
+if (isAndroid()) {
+  // Android 兼容逻辑
+}
 ```
 
 ## 版本
@@ -20483,17 +20632,71 @@ import { isAndroid } from '@base-web-kits/base-tools-web';
 
 
 ==================================================
+File: web/device/isAndroidTablet.md
+==================================================
+
+# isAndroidTablet
+
+判断当前网页是否运行在 Android 平板上。
+
+该函数依据 Android 平板 UA 通常包含 `Android`、但不包含 `Mobile` 的约定进行近似判断。
+
+## 示例
+
+```ts
+import { isAndroidTablet } from '@base-web-kits/base-tools-web';
+
+if (isAndroidTablet()) {
+  // Android 平板兼容逻辑
+}
+```
+
+## 版本
+
+- 1.5.1 新增
+
+
+==================================================
+File: web/device/isAppleOS.md
+==================================================
+
+# isAppleOS
+
+判断当前网页是否运行在 Apple 平台，包含 iOS、iPadOS 和 macOS 浏览器环境。
+
+## 示例
+
+```ts
+import { isAppleOS } from '@base-web-kits/base-tools-web';
+
+if (isAppleOS()) {
+  // Apple 平台兼容逻辑
+}
+```
+
+## 版本
+
+- 1.5.1 新增
+
+
+==================================================
 File: web/device/isChrome.md
 ==================================================
 
 # isChrome
 
-是否为 Chrome 浏览器
+判断当前网页是否运行在 Chrome 浏览器中。
+
+支持桌面和 iOS Chrome，并排除 Edge、Opera、Samsung Internet 和 Whale 等 Chromium 衍生浏览器。
 
 ## 示例
 
 ```ts
 import { isChrome } from '@base-web-kits/base-tools-web';
+
+if (isChrome()) {
+  // Chrome 兼容逻辑
+}
 ```
 
 ## 版本
@@ -20507,12 +20710,18 @@ File: web/device/isIOS.md
 
 # isIOS
 
-是否为 iOS 系统
+判断当前网页是否运行在 iPhone、iPad 或 iPod touch 上。
+
+包含使用桌面模式 UA 的 iPadOS，不包含 macOS。
 
 ## 示例
 
 ```ts
 import { isIOS } from '@base-web-kits/base-tools-web';
+
+if (isIOS()) {
+  // iOS 或 iPadOS 兼容逻辑
+}
 ```
 
 ## 版本
@@ -20521,17 +20730,46 @@ import { isIOS } from '@base-web-kits/base-tools-web';
 
 
 ==================================================
+File: web/device/isIPad.md
+==================================================
+
+# isIPad
+
+判断当前网页是否运行在 iPad 上，包含使用桌面模式 UA 的 iPadOS。
+
+## 示例
+
+```ts
+import { isIPad } from '@base-web-kits/base-tools-web';
+
+if (isIPad()) {
+  // iPad 兼容逻辑
+}
+```
+
+## 版本
+
+- 1.5.1 新增
+
+
+==================================================
 File: web/device/isMobile.md
 ==================================================
 
 # isMobile
 
-是否为移动端设备（含平板）
+判断当前网页是否运行在移动设备上，包含手机和平板。
+
+该结果基于 UA 近似判断。响应式布局应优先使用 CSS 媒体查询。
 
 ## 示例
 
 ```ts
 import { isMobile } from '@base-web-kits/base-tools-web';
+
+if (isMobile()) {
+  // 移动设备逻辑
+}
 ```
 
 ## 版本
@@ -20545,12 +20783,16 @@ File: web/device/isPC.md
 
 # isPC
 
-是否为 PC 设备
+判断当前网页是否运行在非手机、非平板设备上。SSR 或 UA 为空时返回 `false`。
 
 ## 示例
 
 ```ts
 import { isPC } from '@base-web-kits/base-tools-web';
+
+if (isPC()) {
+  // 桌面设备逻辑
+}
 ```
 
 ## 版本
@@ -20564,12 +20806,18 @@ File: web/device/isTablet.md
 
 # isTablet
 
-是否为平板设备
+判断当前网页是否运行在平板设备上，包含 iPad、Android 平板和带有 `Tablet` 标识的设备。
+
+该结果基于 UA 近似判断。需要区分平台时可使用 `isIPad()` 或 `isAndroidTablet()`。
 
 ## 示例
 
 ```ts
 import { isTablet } from '@base-web-kits/base-tools-web';
+
+if (isTablet()) {
+  // 平板设备逻辑
+}
 ```
 
 ## 版本
@@ -20583,12 +20831,16 @@ File: web/device/isTouchSupported.md
 
 # isTouchSupported
 
-检测是否支持触摸事件
+检测当前浏览器环境是否支持触摸输入。SSR 等无 `window` 或 `navigator` 的环境返回 `false`。
 
 ## 示例
 
 ```ts
 import { isTouchSupported } from '@base-web-kits/base-tools-web';
+
+if (isTouchSupported()) {
+  // 启用触摸交互
+}
 ```
 
 ## 版本
@@ -20602,12 +20854,16 @@ File: web/device/isWeChat.md
 
 # isWeChat
 
-是否微信内置浏览器
+判断当前网页是否运行在微信内置浏览器中。
 
 ## 示例
 
 ```ts
 import { isWeChat } from '@base-web-kits/base-tools-web';
+
+if (isWeChat()) {
+  // 微信内置浏览器逻辑
+}
 ```
 
 ## 版本

@@ -1,5 +1,44 @@
 import { BigNumber } from './big';
 
+const FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'] as const;
+
+export type FileSizeUnit = (typeof FILE_SIZE_UNITS)[number];
+
+export type FormatFileSizeOptions = {
+  /** 进制，默认按二进制容量使用 1024 */
+  base?: 1000 | 1024;
+  /** 最多保留的小数位，默认 2，末尾的 0 会被移除 */
+  decimals?: number;
+  /** 输入无效时的返回值，默认 '-' */
+  fallback?: string;
+};
+
+/**
+ * 将字节数格式化为易读的文件体积，自动选择 B 到 PB。
+ * @example
+ * formatFileSize(1536) // '1.5KB'
+ * formatFileSize(1_500_000, { base: 1000 }) // '1.5MB'
+ */
+export function formatFileSize(bytes?: number, options: FormatFileSizeOptions = {}) {
+  const { base = 1024, decimals = 2, fallback = '-' } = options;
+  if (bytes === null || bytes === undefined || !Number.isFinite(bytes) || bytes < 0) {
+    return fallback;
+  }
+
+  const precision = Number.isFinite(decimals) ? Math.min(20, Math.max(0, Math.trunc(decimals))) : 2;
+  const unitIndex =
+    bytes === 0
+      ? 0
+      : Math.min(
+          Math.max(0, Math.floor(Math.log(bytes) / Math.log(base))),
+          FILE_SIZE_UNITS.length - 1,
+        );
+  const value = bytes / base ** unitIndex;
+  const formatted = Number(value.toFixed(precision));
+
+  return `${formatted}${FILE_SIZE_UNITS[unitIndex]}`;
+}
+
 /**
  * 开头补零
  * @param n 数字

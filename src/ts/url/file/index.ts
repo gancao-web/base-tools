@@ -17,6 +17,17 @@ const FILE_TYPE = {
 };
 
 /**
+ * 规范化文件扩展名：移除多余前导点、转为小写，并补充一个前导点。
+ * 空字符串或仅包含点时返回空字符串。
+ * @example normalizeFileExtension(' PDF ') // '.pdf'
+ * @example normalizeFileExtension('..JPG') // '.jpg'
+ */
+export function normalizeFileExtension(extension: string) {
+  const normalized = extension.trim().toLowerCase().replace(/^\.+/, '');
+  return normalized ? `.${normalized}` : '';
+}
+
+/**
  * 获取文件后缀（不含点，返回小写）。
  * 当文件名不包含点（'.'）时，返回空字符串。
  * @param fileName 文件名，例如 `avatar.PNG`
