@@ -1,16 +1,21 @@
 ---
 name: 'base-tools'
-description: '在 TS、Web、React、Vue 或 uni-app 编码任务中，当实现过程需要工具函数、通用 Web 能力、框架 Hooks、类型或基础逻辑时，先检索并复用 base-tools 系列包中已有的 API，再考虑自行实现。仅在任务实际涉及这类通用基础能力时使用。'
+description: '检索并复用 base-tools 系列包提供的通用 TS/JS 工具、浏览器与 H5 能力、React Hooks、Vue 组合式函数、uni-app 能力及其公共类型。仅当任务准备新增或选用可跨业务复用的上述能力时触发；普通业务组件、页面交互、业务流程、领域模型或类型，以及仅使用语言基础语法的修改不触发。'
 ---
 
 # Base Tools Router
 
+## Applicability
+
+- 先判断任务是否需要可跨业务复用的基础能力；不要仅因项目使用 TS、Web、React、Vue 或 uni-app 就触发本 skill。
+- 普通业务组件、页面交互、业务流程、领域模型或类型、接口字段映射和一次性局部逻辑不属于本 skill；其中确实需要日期、金额、URL、存储、防抖、请求状态等通用能力时，只针对该通用能力执行后续检索。
+
 ## Routing Rules
 
-- 通用 TS / JS 能力，先查 `references/ts/`。
+- 可跨业务复用的通用 TS / JS 工具需求，先查 `references/ts/`。
 - web 项目仅允许查 `references/web/`、`references/ts/`，以及与当前框架匹配的目录。
-- web + React 项目遇到 React 组件逻辑或 hooks，先查 `references/react/`，再补查 `references/web/` 和 `references/ts/`。
-- web + Vue 3 项目遇到 Vue 3 组合式 API 或组件逻辑，先查 `references/vue/`，再补查 `references/web/` 和 `references/ts/`。
+- web + React 项目需要可复用 Hooks 或组件基础设施时，先查 `references/react/`，再补查 `references/web/` 和 `references/ts/`。
+- web + Vue 3 项目需要可复用组合式函数或组件基础设施时，先查 `references/vue/`，再补查 `references/web/` 和 `references/ts/`。
 - uni-app 项目仅允许查 `references/uni/` 和 `references/ts/`，除非当前场景存在明确的 web 平台信号，才允许补查 `references/web/`。
 - 优先复用现有函数、hooks、类型和导出项；只有在现有能力不覆盖需求时再新增实现。
 - 需要快速定位时，先读对应目录下的 `lookup.md`；命中候选 API 后，再读 `catalog.md` 确认真实导出。
@@ -19,22 +24,22 @@ description: '在 TS、Web、React、Vue 或 uni-app 编码任务中，当实现
 
 ## References
 
-- `references/ts/catalog.md`
-- `references/ts/lookup.md`
-- `references/ts/es-toolkit.md`
-- `references/web/catalog.md`
-- `references/web/lookup.md`
-- `references/react/catalog.md`
-- `references/react/lookup.md`
-- `references/react/ahooks.md`
-- `references/vue/catalog.md`
-- `references/vue/lookup.md`
-- `references/vue/vueuse.md`
-- `references/uni/catalog.md`
-- `references/uni/lookup.md`
+- [`references/ts/catalog.md`](references/ts/catalog.md)
+- [`references/ts/lookup.md`](references/ts/lookup.md)
+- [`references/ts/es-toolkit.md`](references/ts/es-toolkit.md)
+- [`references/web/catalog.md`](references/web/catalog.md)
+- [`references/web/lookup.md`](references/web/lookup.md)
+- [`references/react/catalog.md`](references/react/catalog.md)
+- [`references/react/lookup.md`](references/react/lookup.md)
+- [`references/react/ahooks.md`](references/react/ahooks.md)
+- [`references/vue/catalog.md`](references/vue/catalog.md)
+- [`references/vue/lookup.md`](references/vue/lookup.md)
+- [`references/vue/vueuse.md`](references/vue/vueuse.md)
+- [`references/uni/catalog.md`](references/uni/catalog.md)
+- [`references/uni/lookup.md`](references/uni/lookup.md)
 
 ## Feedback
 
 当出现未命中、不匹配、扩展性不足、明显缺陷或能力缺失时，应主动触发反馈流程。
 
-- 问题分类、触发条件、询问话术、反馈模板和提交流程见 `references/feedback.md`。
+- 问题分类、触发条件、询问话术、反馈模板和提交流程见 [`references/feedback.md`](references/feedback.md)。
