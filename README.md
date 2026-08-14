@@ -105,14 +105,10 @@ setBaseToolsConfig({
 
 #### 方式一：随 TS 包使用
 
-大多数项目会安装 `@base-web-kits/base-tools-ts`。从`1.5.0`起，该 npm 包内置了与当前版本匹配的 Agent Skill，安装或升级后会同步更新。请将下面的规则加入项目的 `AGENTS.md`：
+大多数项目会安装 `@base-web-kits/base-tools-ts`。从`1.5.0`起，该 npm 包内置了与当前版本匹配的 Agent Skill，安装或升级后会同步更新。请将以下规则加到项目的 `AGENTS.md`：
 
 ```md
-## base-tools
-
-在 TS、Web、React、Vue 或 uni-app 编码任务中，需要工具函数、通用 Web 能力、框架 Hooks、类型或基础逻辑时，先读取并遵循 `node_modules/@base-web-kits/base-tools-ts/skill/SKILL.md`，再考虑自行实现。
-
-该文件引用的 `references/` 文档均相对于 `node_modules/@base-web-kits/base-tools-ts/skill/` 解析。
+- 新增或选用可跨业务复用的 TS/JS 工具、浏览器与 H5 能力、React Hooks、Vue 组合式函数、uni-app 能力或公共类型前，读取 `node_modules/@base-web-kits/base-tools-ts/skill/SKILL.md`，检索已有能力；业务专属逻辑和领域类型不触发。
 ```
 
 #### 方式二：单独安装 Skill
