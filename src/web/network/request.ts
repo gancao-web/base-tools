@@ -4,6 +4,7 @@ import { getObjectValue } from '../../ts/object';
 import { appendUrlParam } from '../../ts/url';
 import { getBaseToolsConfig } from '../config';
 import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
+import type { ApiResponseConfig } from '../../shared/network/response';
 import type { AppLogInfo } from '../config';
 
 /** 请求方法类型 */
@@ -60,7 +61,7 @@ export type RequestConfig<D extends RequestData = RequestData> = Partial<Request
 /**
  * 自定义请求的配置 (接口字段参数必填)
  */
-export type RequestConfigBase<D extends RequestData = RequestData> = {
+export type RequestConfigBase<D extends RequestData = RequestData> = ApiResponseConfig & {
   /** 接口地址 */
   url: string;
 
@@ -76,23 +77,8 @@ export type RequestConfigBase<D extends RequestData = RequestData> = {
   /** 超时时间 (毫秒), 默认 60000 */
   timeout?: number;
 
-  /** 接口返回响应数据的字段, 支持"a[0].b.c"的格式, 当配置false时返回完整的响应数据 */
-  resKey: string | false;
-
-  /** 接口返回响应消息的字段, 支持"a[0].b.c"的格式 */
-  msgKey: string;
-
-  /** 接口返回响应状态码的字段, 支持"a[0].b.c"的格式 */
-  codeKey: string;
-
-  /** 接口返回成功状态码的字段, 支持"a[0].b.c"的格式 (默认取 codeKey) */
-  successKey?: string;
-
-  /** 成功状态码 */
-  successCode: (number | string)[];
-
-  /** 登录过期状态码 */
-  reloginCode: (number | string)[];
+  /** 原生 Fetch 配置扩展 */
+  fetchOptions?: Omit<RequestInit, 'method' | 'headers' | 'body' | 'signal'>;
 
   /** 是否开启流式传输 (如 SSE) */
   enableChunked?: boolean;
@@ -273,6 +259,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     transformResponse,
     responseType = 'json',
     timeout = 60000,
+    fetchOptions,
     onTaskReady,
     onMessage,
   } = config;
@@ -371,7 +358,16 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 
       // 2.4 检查缓存
       const isCache = cacheTime && cacheTime > 0;
-      const cacheKey = isCache ? JSON.stringify({ url: fillUrl, data: fillData }) : '';
+      const cacheKey = isCache
+        ? JSON.stringify({
+            url: fillUrl,
+            method,
+            header: fillHeader,
+            data: fillData,
+            fetchOptions,
+            responseType,
+          })
+        : '';
 
       if (isCache) {
         const res = checkCache(cacheKey);
@@ -402,12 +398,14 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 
       try {
         // 2.7 发起请求
-        let response = await fetch(fillUrl, {
+        const requestInit: RequestInit = {
+          ...fetchOptions,
           method,
           headers: fillHeader,
           body: fillBody,
           signal,
-        });
+        };
+        let response = await fetch(fillUrl, requestInit);
 
         // HTTP异常处理
         if (!response.ok) {

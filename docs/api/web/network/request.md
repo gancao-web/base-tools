@@ -108,6 +108,7 @@ chatTask?.abort();
 | header | `Record<string, string>` | 否 | - | 请求头 (会自动过滤undefined, null, "";不过滤0和false; 数字和布尔值会自动转换为字符串) |
 | data | `D` | 否 | - | 请求参数 |
 | timeout | `number` | 否 | `60000` | 超时时间 (毫秒) |
+| fetchOptions | `Omit<RequestInit, 'method' \| 'headers' \| 'body' \| 'signal'>` | 否 | - | 额外的原生 Fetch 配置；核心请求参数仍由 `method`、`header`、`data` 和内部取消逻辑控制 |
 | resKey | `string \| false` | 是 | - | 接口返回响应数据的字段，支持 "a[0].b.c" 格式，false 返回完整响应 |
 | msgKey | `string` | 是 | - | 接口返回响应消息的字段 |
 | codeKey | `string` | 是 | - | 接口返回响应状态码的字段 |
@@ -123,6 +124,14 @@ chatTask?.abort();
 | responseType | `'text' \| 'arraybuffer' \| 'json'` | 否 | `'json'` | 响应类型 |
 | transformRequest | `(ctx: { url: string; method: RequestMethod; header: Record<string, string>; data?: D }) => Partial<{ url: string; header: Record<string, string>; data?: D }> \| Promise<...>` | 否 | - | 请求前的数据转换, 可用于加密 `header`、`data` 或重写 `url` |
 | transformResponse | `(data: unknown) => unknown` | 否 | - | 响应数据的转换, 如解密操作 |
+| onTaskReady | `(task: RequestTask) => void` | 否 | - | 获取请求任务，可用于主动取消请求 |
+| onMessage | `MessageCallback` | 否 | - | 接收已完成基础解析的 SSE 消息；使用流式请求时配置 |
+
+### 缓存说明
+
+- `cacheTime > 0` 时仅缓存业务成功的响应，缓存位于内存中，页面刷新后失效。
+- 缓存键由转换后的 `url`、`method`、`header`、`data`，以及 `fetchOptions`、`responseType` 共同生成，配置不同的请求不会共用缓存。
+- 不建议为包含大段文本、Base64 或其他大体积数据的请求开启缓存。
 
 **返回值**
 
@@ -130,16 +139,12 @@ chatTask?.abort();
 
 ### RequestTask
 
-请求任务对象，用于取消请求或监听流式数据。
+请求任务对象，用于主动取消请求。
 
 ```typescript
 interface RequestTask {
   /** 取消请求 */
   abort: () => void;
-  /** 监听流式数据块接收事件 */
-  onChunkReceived: (callback: ChunkCallback) => void;
-  /** 取消监听流式数据块接收事件 */
-  offChunkReceived: () => void;
 }
 ```
 

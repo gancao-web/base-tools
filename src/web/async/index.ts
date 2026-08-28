@@ -67,10 +67,18 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
       showLoadingFn?.({ title });
     }
 
+    // 响应转换也可能抛错，确保成功分支和失败分支不会重复关闭同一次 Loading。
+    let loadingHidden = false;
+    const hideLoading = () => {
+      if (!showLoading || loadingHidden) return;
+      loadingHidden = true;
+      hideLoadingFn?.();
+    };
+
     return new Promise<Res>((resolve, reject) => {
       webApi(option, finalConfig)
         .then((res) => {
-          if (showLoading) hideLoadingFn?.();
+          hideLoading();
 
           const finalRes = transformResponse ? transformResponse(res) : res;
 
@@ -93,7 +101,7 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
           if (msg) toast?.({ msg, status: 'success' });
         })
         .catch((e) => {
-          if (showLoading) hideLoadingFn?.();
+          hideLoading();
           if (showLog) log?.('error', { name: fname, status: 'fail', option, e, ...logExtra });
 
           const msg = typeof toastError === 'function' ? toastError(e) : toastError;

@@ -38,7 +38,7 @@
 
 #### load
 - 来源: `src/uni/network/load.ts`
-- 导出: `downloadFile`、`loadFontFace`、`UploadData`、`uploadFile`
+- 导出: `downloadFile`、`loadFontFace`、`UploadBusinessError`、`UploadConfig`、`UploadData`、`UploadError`、`uploadFile`
 
 #### request
 - 来源: `src/uni/network/request.ts`

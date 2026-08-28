@@ -1,4 +1,12 @@
 import { getBaseToolsConfig, getFileUrl, enhanceUniApi } from '../index';
+import { toLogin } from '../router';
+import {
+  hasUploadResponseConfig,
+  resolveUploadToastError,
+  transformUploadResponse,
+  UploadBusinessError,
+} from '../../shared/network/upload';
+import type { ApiResponseConfigOptions } from '../../shared/network/response';
 import type { UniApiConfig } from '../index';
 
 const cache = {
@@ -24,6 +32,15 @@ function downloadFileApi(option: UniApp.DownloadFileOption) {
  * 不同目标平台对值的转换规则可能不同；对象和数组应按接口协议提前序列化。
  */
 export type UploadData = Record<string, unknown>;
+
+/** 上传可能产生的传输错误或业务错误。 */
+export type UploadError = UniApp.GeneralCallbackResult | UploadBusinessError;
+
+/** 上传配置，除任务能力外支持与 request 一致的业务响应解析。 */
+export type UploadConfig = UniApiConfig<any, UploadError, UniApp.UploadTask> &
+  ApiResponseConfigOptions;
+
+export { UploadBusinessError };
 
 /**
  * 下载文件
@@ -93,14 +110,19 @@ export function loadFontFace(
  * // 解析上传结果
  * console.log('uploadFile ok', JSON.parse(res));
  */
-export function uploadFile(
+export function uploadFile<T = string>(
   option: UniApp.UploadFileOption & {
     /** 与FormData相同, 目的是兼容data的写法, 保持和web端一致 */
     data?: UploadData;
   },
-  config?: UniApiConfig,
-) {
-  return enhanceUniApi(uni.uploadFile, 'uploadFile')(
+  config?: UploadConfig,
+): Promise<T> {
+  const hasResponseConfig = hasUploadResponseConfig(config);
+
+  return enhanceUniApi<UniApp.UploadFileOption, any, UploadError, UniApp.UploadTask>(
+    uni.uploadFile,
+    'uploadFile',
+  )(
     {
       ...option,
       formData: {
@@ -110,10 +132,19 @@ export function uploadFile(
     },
     {
       ...config,
-      transformResponse(res) {
-        const data = res.data;
-        return config?.transformResponse ? config.transformResponse(data) : data;
-      },
+      transformResponse: (res) => transformUploadResponse(res.data, config),
+      ...(hasResponseConfig
+        ? {
+            // 业务错误的提示与 request 保持一致；登录失效只跳转登录，不重复弹错误提示。
+            toastError: (error: unknown) => resolveUploadToastError(error, config?.toastError),
+          }
+        : {}),
     },
-  );
+  ).catch((error) => {
+    if (error instanceof UploadBusinessError) {
+      if (error.relogin) toLogin();
+      return Promise.reject(error.response);
+    }
+    return Promise.reject(error);
+  }) as Promise<T>;
 }
