@@ -8,6 +8,7 @@ import {
 } from '../../shared/network/upload';
 import type { ApiResponseConfigOptions } from '../../shared/network/response';
 import type { WebApiConfig } from '../async';
+import type { ApiTaskConfig } from '../../shared/network/action';
 
 /**
  * 上传所需的额外参数。
@@ -69,15 +70,12 @@ export type UploadFail = {
 /** 上传可能产生的传输错误或业务错误。 */
 export type UploadError = UploadFail | UploadBusinessError;
 
-export type UploadConfig = ApiResponseConfigOptions & {
-  /** 获取task对象 */
-  onTaskReady?: (task: UploadTask) => void;
-};
+export type UploadConfig = ApiResponseConfigOptions & ApiTaskConfig<UploadTask>;
 
 /** 上传文件的完整增强配置。 */
 export type UploadFileConfig<T = string> = UploadConfig &
   Omit<WebApiConfig<T, UploadError>, 'transformResponse'> & {
-    /** 原始响应转换；配置业务响应解析时，转换结果会继续按 codeKey 等字段解析。 */
+    /** 原始响应转换；配置业务响应解析时，转换结果不是最终的Res，会继续按 codeKey 等字段解析出Res */
     transformResponse?: (response: any) => unknown;
   };
 
@@ -93,7 +91,12 @@ function tryParseJson(text: string): { success: true; data: unknown } | { succes
 
 function getErrorMessage(responseText: string, fallback: string) {
   const parsed = tryParseJson(responseText);
-  if (parsed.success && parsed.data && typeof parsed.data === 'object' && 'message' in parsed.data) {
+  if (
+    parsed.success &&
+    parsed.data &&
+    typeof parsed.data === 'object' &&
+    'message' in parsed.data
+  ) {
     const message = (parsed.data as { message?: unknown }).message;
     if (typeof message === 'string' && message.trim()) {
       return message;
@@ -103,7 +106,7 @@ function getErrorMessage(responseText: string, fallback: string) {
 }
 
 function upload<T = unknown>(option: UploadFileOption, config?: UploadConfig) {
-  return new Promise<string | T>((resolve, reject) => {
+  return new Promise<T>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const { url, file, name = 'file', header, data, timeout = 0, responseType = 'text' } = option;
 
@@ -120,7 +123,7 @@ function upload<T = unknown>(option: UploadFileOption, config?: UploadConfig) {
         return;
       }
 
-      resolve(responseText);
+      resolve(responseText as T);
     };
 
     // 构造任务对象
@@ -239,16 +242,8 @@ export function uploadFile<T = string>(
       : {}),
   };
 
-  return enhanceWebApi<
-    UploadFileOption,
-    T,
-    UploadError,
-    Pick<UploadConfig, 'onTaskReady'>
-  >(
-    upload as (
-      option: UploadFileOption,
-      config?: Pick<UploadConfig, 'onTaskReady'>,
-    ) => Promise<T>,
+  return enhanceWebApi<UploadFileOption, T, UploadError, UploadConfig>(
+    upload,
     'uploadFile',
   )(option, finalConfig).catch((error) => {
     if (error instanceof UploadBusinessError) {

@@ -6,6 +6,20 @@
 
 ## Modules
 
+### ..
+
+#### shared
+
+##### network
+
+###### action
+- 来源: `src/shared/network/action.ts`
+- 导出: `ApiActionConfig`、`ApiTaskConfig`
+
+###### response
+- 来源: `src/shared/network/response.ts`
+- 导出: `ApiResponseConfig`、`ApiResponseConfigOptions`
+
 ### clipboard
 - 来源: `src/web/clipboard/index.ts`
 - 导出: `copyBlob`、`copyHtml`、`copyImage`、`copyNode`、`copyRtf`、`copyTable`、`copyText`、`copyUrl`

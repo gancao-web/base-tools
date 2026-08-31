@@ -5,6 +5,7 @@ import { appendUrlParam } from '../../ts/url';
 import { getBaseToolsConfig } from '../config';
 import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
 import type { ApiResponseConfig } from '../../shared/network/response';
+import type { ApiTaskConfig } from '../../shared/network/action';
 import type { AppLogInfo } from '../config';
 
 /** 请求方法类型 */
@@ -61,7 +62,8 @@ export type RequestConfig<D extends RequestData = RequestData> = Partial<Request
 /**
  * 自定义请求的配置 (接口字段参数必填)
  */
-export type RequestConfigBase<D extends RequestData = RequestData> = ApiResponseConfig & {
+export type RequestConfigBase<D extends RequestData = RequestData> = ApiResponseConfig &
+  ApiTaskConfig<RequestTask> & {
   /** 接口地址 */
   url: string;
 
@@ -111,9 +113,6 @@ export type RequestConfigBase<D extends RequestData = RequestData> = ApiResponse
 
   /** 响应数据的转换 */
   transformResponse?: (data: ResponseData) => ResponseData;
-
-  /** 获取请求对象, 用于取消请求 */
-  onTaskReady?: (task: RequestTask) => void;
 
   /**
    * 流式数据接收事件回调 (已完成基础流式解析,返回消息对象)

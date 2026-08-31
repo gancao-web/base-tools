@@ -7,6 +7,7 @@ import { getPlatformOs } from '../system';
 import { toast } from '../ui';
 import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
 import type { ApiResponseConfig } from '../../shared/network/response';
+import type { ApiTaskConfig } from '../../shared/network/action';
 import type { AppLogInfo } from '../config';
 
 /** 请求参数 */
@@ -34,7 +35,8 @@ type UniRequestOptions = Omit<UniApp.RequestOptions, 'success' | 'fail' | 'compl
 type RequestResponseConfig = UniRequestOptions & ApiResponseConfig;
 
 /** 自定义请求的配置 (接口字段参数必填) */
-export type RequestConfigBase<D extends RequestData = RequestData> = RequestResponseConfig & {
+export type RequestConfigBase<D extends RequestData = RequestData> = RequestResponseConfig &
+  ApiTaskConfig<UniApp.RequestTask> & {
   /** 请求参数 */
   data?: D;
 
@@ -65,9 +67,6 @@ export type RequestConfigBase<D extends RequestData = RequestData> = RequestResp
   transformResponse?: (
     data: UniApp.RequestSuccessCallbackResult['data'],
   ) => UniApp.RequestSuccessCallbackResult['data'];
-
-  /** 获取请求对象, 用于取消请求 */
-  onTaskReady?: (task: UniApp.RequestTask) => void;
 
   /**
    * 流式数据接收事件回调 (已完成基础流式解析,返回消息对象)

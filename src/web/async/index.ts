@@ -1,6 +1,7 @@
 import { cloneDeep } from 'es-toolkit';
 import { getBaseToolsConfig } from '../index';
 import type { AppLogInfo } from '../index';
+import type { ApiActionConfig } from '../../shared/network/action';
 
 type WebApi<Option = any, Res = any, Config = any> = (
   option: Option,
@@ -10,25 +11,7 @@ type WebApi<Option = any, Res = any, Config = any> = (
 /**
  * web api 的调用配置
  */
-export type WebApiConfig<Res = any, Err = any> = {
-  /** 是否显示加载提示, 默认 false. (支持字符串,自定义文本) */
-  showLoading?: boolean | string;
-
-  /** 操作成功的toast提示, 默认不显示 */
-  toastSuccess?: ((res: Res) => false | string) | false | string;
-
-  /** 是否显示操作失败的详细错误信息, 默认 true. (支持字符串,自定义文本; 支持根据errMsg判断是否显示, 例如: (e) => !e.errMsg.includes('cancel') */
-  toastError?: ((e: Err) => boolean | string) | boolean | string;
-
-  /** 是否显示日志, 默认 true */
-  showLog?: boolean;
-
-  /** 响应数据的转换, 如解密操作 (返回值在成功日志中输出'transformResponse'字段) */
-  transformResponse?: (res: any) => Res;
-
-  /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
-  logExtra?: Record<string, unknown>;
-};
+export type WebApiConfig<Res = any, Err = any> = ApiActionConfig<Res, Err>;
 
 /**
  * 拓展 web api, 使其支持loading,toast,log能力

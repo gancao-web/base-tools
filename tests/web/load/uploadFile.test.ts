@@ -105,6 +105,48 @@ describe('web/uploadFile', () => {
     ).resolves.toBe(42);
   });
 
+  it('允许 transformResponse 返回业务解析前的中间响应对象', async () => {
+    class MockFormData {
+      append() {}
+    }
+
+    class MockXMLHttpRequest {
+      upload = { onprogress: null };
+      status = 200;
+      responseText = 'encrypted-response';
+      timeout = 0;
+      onload?: () => void;
+
+      open() {}
+
+      setRequestHeader() {}
+
+      send() {
+        this.onload?.();
+      }
+    }
+
+    vi.stubGlobal('FormData', MockFormData);
+    vi.stubGlobal('XMLHttpRequest', MockXMLHttpRequest);
+
+    const result = await uploadFile<number>(
+      { url: '/upload', file: new File(['content'], 'test.txt') },
+      {
+        // 这里返回的是业务响应对象，而不是最终的 number 结果；类型上应当允许这种中间值。
+        transformResponse: () => ({ code: 0, message: 'ok', data: 42 }),
+        resKey: 'data',
+        msgKey: 'message',
+        codeKey: 'code',
+        successCode: [0],
+        reloginCode: [],
+        showLog: false,
+        toastError: false,
+      },
+    );
+
+    expect(result).toBe(42);
+  });
+
   it('业务失败时按 msgKey reject 原始响应', async () => {
     class MockFormData {
       append() {}
