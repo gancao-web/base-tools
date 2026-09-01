@@ -45,6 +45,18 @@ const json = await uploadFile<UploadResult>(
   { url: 'https://xx', file: file, responseType: 'json' },
 );
 
+// 按业务状态码解析并直接提取 data.path
+const path = await uploadFile<string>(
+  { url: 'https://xx', file },
+  {
+    resKey: 'data.path',
+    msgKey: 'message',
+    codeKey: 'status',
+    successCode: [1],
+    reloginCode: [-10],
+  },
+);
+
 // 默认 responseType 为 text，手动解析返回结果
 console.log('uploadFile ok', JSON.parse(res));
 ```
@@ -72,13 +84,25 @@ console.log('uploadFile ok', JSON.parse(res));
 | toastSuccess | `boolean \| string \| ((res) => boolean \| string)` | 否 | `false` | 操作成功的 toast 提示 |
 | toastError | `boolean \| string \| ((err) => boolean \| string)` | 否 | `true` | 是否显示操作失败的详细错误信息 |
 | showLog | `boolean` | 否 | `true` | 是否在控制台打印日志 |
+| logExtra | `Record<string, unknown>` | 否 | - | 成功和失败日志中附加的数据 |
+| transformResponse | `(response: unknown) => unknown` | 否 | - | 转换原始响应；配置业务响应解析时，转换结果会继续按状态码配置解析 |
+| resKey | `string \| false` | 条件必填 | - | 业务成功时提取结果的字段；`false` 返回完整响应 |
+| msgKey | `string` | 条件必填 | - | 业务响应消息字段 |
+| codeKey | `string` | 条件必填 | - | 业务响应状态码字段 |
+| successKey | `string` | 否 | `codeKey` | 用于判断成功状态码的字段 |
+| successCode | `(number \| string)[]` | 条件必填 | - | 业务成功状态码列表 |
+| reloginCode | `(number \| string)[]` | 条件必填 | - | 登录失效状态码列表 |
 
-### responseType 说明
+### 响应解析说明
 
 - 默认 `responseType: 'text'`，返回值类型为 `string`
 - 传入 `responseType: 'json'` 后，可配合泛型使用，自动将响应内容按 JSON 解析并返回对象
 - 如果 `responseType: 'json'` 但服务端返回的不是合法 JSON，会进入失败分支
 - 当上传失败且服务端返回了 JSON 错误体时，会优先读取其中的 `message` 作为错误信息
+- 只要配置任一业务响应字段，就必须同时提供 `resKey`、`msgKey`、`codeKey`、`successCode` 和 `reloginCode`；`successKey` 可选
+- 配置业务响应解析后，文本响应会先执行 `JSON.parse`；业务成功时提取 `resKey`，业务失败时 Promise reject 服务端原始响应
+- 非 2xx 的合法 JSON 响应仍会进入业务状态码解析；命中 `reloginCode` 时调用全局 `toLogin`，且不重复显示失败提示
+- `toastError` 函数在业务失败时接收 `UploadBusinessError`，可读取 `message`、`code`、`response` 和 `relogin`
 - `data` 中的对象和数组不会自动 JSON 序列化；需要结构化参数时，请按服务端协议提前调用 `JSON.stringify`
 
 ## UploadTask

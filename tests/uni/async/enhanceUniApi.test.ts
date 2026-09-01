@@ -13,7 +13,7 @@ describe('uni/enhanceUniApi', () => {
     vi.unstubAllGlobals();
   });
 
-  it('响应转换抛错时结束 loading、记录失败、提示错误并 reject', async () => {
+  it('不再在通用增强器中转换响应，调用方可自行处理结果', async () => {
     const showLoading = vi.fn();
     const hideLoading = vi.fn();
     const showToast = vi.fn();
@@ -26,29 +26,15 @@ describe('uni/enhanceUniApi', () => {
       option.success?.({ data: 'response' });
     });
     const request = enhanceUniApi(api, 'uploadFile');
-    const error = new Error('不存在有效的token，请先登录');
-
-    await expect(
-      request(undefined, {
-        showLoading: true,
-        transformResponse: () => {
-          throw error;
-        },
-      }),
-    ).rejects.toBe(error);
+    await expect(request(undefined, { showLoading: true })).resolves.toEqual({ data: 'response' });
 
     expect(showLoading).toHaveBeenCalledOnce();
     expect(hideLoading).toHaveBeenCalledOnce();
-    expect(showToast).toHaveBeenCalledWith({
-      icon: 'none',
-      title: 'uploadFile fail: 不存在有效的token，请先登录',
-      duration: 1000,
-    });
+    expect(showToast).not.toHaveBeenCalled();
     expect(log).toHaveBeenCalledWith(
-      'error',
-      expect.objectContaining({ name: 'uploadFile', status: 'fail', e: error }),
+      'info',
+      expect.objectContaining({ name: 'uploadFile', status: 'success', res: { data: 'response' } }),
     );
-    expect(log).not.toHaveBeenCalledWith('info', expect.objectContaining({ name: 'uploadFile' }));
   });
 
   it('底层失败仍支持自定义错误提示', async () => {

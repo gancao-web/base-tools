@@ -1,6 +1,7 @@
 import { cloneDeep } from 'es-toolkit';
 import { getBaseToolsConfig } from '../index';
 import type { AppLogInfo } from '../index';
+import type { ApiActionConfig } from '../../shared/network/action';
 
 type WebApi<Option = any, Res = any, Config = any> = (
   option: Option,
@@ -10,25 +11,7 @@ type WebApi<Option = any, Res = any, Config = any> = (
 /**
  * web api 的调用配置
  */
-export type WebApiConfig<Res = any, Err = any> = {
-  /** 是否显示加载提示, 默认 false. (支持字符串,自定义文本) */
-  showLoading?: boolean | string;
-
-  /** 操作成功的toast提示, 默认不显示 */
-  toastSuccess?: ((res: Res) => false | string) | false | string;
-
-  /** 是否显示操作失败的详细错误信息, 默认 true. (支持字符串,自定义文本; 支持根据errMsg判断是否显示, 例如: (e) => !e.errMsg.includes('cancel') */
-  toastError?: ((e: Err) => boolean | string) | boolean | string;
-
-  /** 是否显示日志, 默认 true */
-  showLog?: boolean;
-
-  /** 响应数据的转换, 如解密操作 (返回值在成功日志中输出'transformResponse'字段) */
-  transformResponse?: (res: any) => Res;
-
-  /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
-  logExtra?: Record<string, unknown>;
-};
+export type WebApiConfig<Res = any, Err = any> = ApiActionConfig<Res, Err>;
 
 /**
  * 拓展 web api, 使其支持loading,toast,log能力
@@ -50,7 +33,6 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
       toastSuccess = false,
       toastError = true,
       showLog = true,
-      transformResponse,
       logExtra,
     } = finalConfig;
 
@@ -67,33 +49,33 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
       showLoadingFn?.({ title });
     }
 
+    // 成功处理也可能抛错，确保成功分支和失败分支不会重复关闭同一次 Loading。
+    let loadingHidden = false;
+    const hideLoading = () => {
+      if (!showLoading || loadingHidden) return;
+      loadingHidden = true;
+      hideLoadingFn?.();
+    };
+
     return new Promise<Res>((resolve, reject) => {
       webApi(option, finalConfig)
         .then((res) => {
-          if (showLoading) hideLoadingFn?.();
-
-          const finalRes = transformResponse ? transformResponse(res) : res;
+          hideLoading();
 
           if (showLog) {
             const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
-
-            if (transformResponse) {
-              logData.res = res; // 输出原始数据
-              logData.transformResponse = cloneDeep(finalRes); // 深拷贝处理后数据,避免外部修改对象,造成输出不一致
-            } else {
-              logData.res = cloneDeep(res); // 深拷贝原始数据,避免外部修改对象,造成输出不一致
-            }
+            logData.res = cloneDeep(res); // 深拷贝响应数据,避免外部修改对象,造成输出不一致
 
             log?.('info', logData);
           }
 
-          resolve(finalRes);
+          resolve(res);
 
-          const msg = typeof toastSuccess === 'function' ? toastSuccess(finalRes) : toastSuccess;
+          const msg = typeof toastSuccess === 'function' ? toastSuccess(res) : toastSuccess;
           if (msg) toast?.({ msg, status: 'success' });
         })
         .catch((e) => {
-          if (showLoading) hideLoadingFn?.();
+          hideLoading();
           if (showLog) log?.('error', { name: fname, status: 'fail', option, e, ...logExtra });
 
           const msg = typeof toastError === 'function' ? toastError(e) : toastError;

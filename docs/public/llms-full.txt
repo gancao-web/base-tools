@@ -1,7 +1,7 @@
 # Base Tools Full Documentation
 
 Project: @base-web-kits/base-tools
-Date: 2026-08-14
+Date: 2026-09-01
 
 
 
@@ -11092,7 +11092,6 @@ await enhanceUniApi(uni.downloadFile, 'downloadFile')(
     - `toastSuccess` - 操作成功的toast提示，默认 `false`（支持函数返回自定义文本）
     - `toastError` - 是否显示操作失败的详细错误信息，默认 `true`（支持函数判断是否显示）
     - `showLog` - 是否显示日志，默认 `true`
-    - `transformResponse` - 响应数据的转换, 如解密操作 (返回值在成功日志中输出'transformResponse'字段)
     - `logExtra` - 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name')
     - `onTaskReady` - 初始化task对象时的回调函数，默认 `undefined`（支持自定义task事件监听）
 
@@ -11645,27 +11644,74 @@ File: uni/network/uploadFile.md
 
 # uploadFile
 
-上传文件到服务器
+上传文件到服务器，支持进度任务、增强提示以及与 `request` 一致的业务响应解析。
 
 ## 示例
 
 ```ts
 import { uploadFile } from '@base-web-kits/base-tools-uni';
 
-// 上传
-const res = await uploadFile({ url: 'https://xx', file, data: {} });
+// 上传；默认返回 uni.uploadFile 响应中的 data 字符串
+const res = await uploadFile({
+  url: 'https://xx',
+  filePath: '/tmp/avatar.jpg',
+  name: 'file',
+  data: { userId: 123 },
+});
 
 // 监听上传进度
 const res = await uploadFile(
-  { url: 'https://xx', file, data: {} },
+  { url: 'https://xx', filePath: '/tmp/avatar.jpg', name: 'file' },
   {
     onTaskReady: (task) => task.onProgressUpdate((res) => console.log('上传进度:', res.progress)),
+  },
+);
+
+// 按业务状态码解析并提取 data.path
+const path = await uploadFile<string>(
+  { url: 'https://xx', filePath: '/tmp/avatar.jpg', name: 'file' },
+  {
+    resKey: 'data.path',
+    msgKey: 'message',
+    codeKey: 'status',
+    successCode: [1],
+    reloginCode: [-10],
   },
 );
 
 // 解析上传结果
 console.log('uploadFile ok', JSON.parse(res));
 ```
+
+## 参数说明
+
+`option` 继承 `UniApp.UploadFileOption`，并额外支持 `data`。`data` 与原生 `formData` 会合并到最终的 `formData` 中；同名字段以 `formData` 为准。对象和数组应按接口协议提前序列化。
+
+### config (UploadConfig)
+
+| 参数名 | 类型 | 必填 | 默认值 | 说明 |
+| :-- | :-- | :-- | :-- | :-- |
+| onTaskReady | `(task: UniApp.UploadTask) => void` | 否 | - | 获取上传任务，可用于监听进度或取消上传 |
+| showLoading | `boolean \| string` | 否 | `false` | 是否显示加载提示 |
+| toastSuccess | `boolean \| string \| ((res) => false \| string)` | 否 | `false` | 操作成功提示 |
+| toastError | `boolean \| string \| ((err) => boolean \| string)` | 否 | `true` | 操作失败提示 |
+| showLog | `boolean` | 否 | `true` | 是否输出日志 |
+| logExtra | `Record<string, unknown>` | 否 | - | 成功和失败日志中附加的数据 |
+| transformResponse | `(response: unknown) => unknown` | 否 | - | 转换原始 `data`；配置业务响应解析时，转换结果会继续按状态码配置解析 |
+| resKey | `string \| false` | 条件必填 | - | 业务成功时提取结果的字段；`false` 返回完整响应 |
+| msgKey | `string` | 条件必填 | - | 业务响应消息字段 |
+| codeKey | `string` | 条件必填 | - | 业务响应状态码字段 |
+| successKey | `string` | 否 | `codeKey` | 用于判断成功状态码的字段 |
+| successCode | `(number \| string)[]` | 条件必填 | - | 业务成功状态码列表 |
+| reloginCode | `(number \| string)[]` | 条件必填 | - | 登录失效状态码列表 |
+
+## 响应与错误处理
+
+- 未配置业务响应字段时，返回 `uni.uploadFile` 成功响应中的原始 `data`，默认类型为 `string`
+- 只要配置任一业务响应字段，就必须同时提供 `resKey`、`msgKey`、`codeKey`、`successCode` 和 `reloginCode`；`successKey` 可选
+- 文本响应会先执行 `JSON.parse`；业务成功时提取 `resKey`，业务失败时 Promise reject 服务端原始响应
+- 命中 `reloginCode` 时跳转登录页，且不重复显示失败提示
+- `toastError` 函数在业务失败时接收 `UploadBusinessError`，可读取 `message`、`code`、`response` 和 `relogin`
 
 ## 版本
 
@@ -21322,6 +21368,7 @@ chatTask?.abort();
 | header | `Record<string, string>` | 否 | - | 请求头 (会自动过滤undefined, null, "";不过滤0和false; 数字和布尔值会自动转换为字符串) |
 | data | `D` | 否 | - | 请求参数 |
 | timeout | `number` | 否 | `60000` | 超时时间 (毫秒) |
+| fetchOptions | `Omit<RequestInit, 'method' \| 'headers' \| 'body' \| 'signal'>` | 否 | - | 额外的原生 Fetch 配置；核心请求参数仍由 `method`、`header`、`data` 和内部取消逻辑控制 |
 | resKey | `string \| false` | 是 | - | 接口返回响应数据的字段，支持 "a[0].b.c" 格式，false 返回完整响应 |
 | msgKey | `string` | 是 | - | 接口返回响应消息的字段 |
 | codeKey | `string` | 是 | - | 接口返回响应状态码的字段 |
@@ -21337,6 +21384,14 @@ chatTask?.abort();
 | responseType | `'text' \| 'arraybuffer' \| 'json'` | 否 | `'json'` | 响应类型 |
 | transformRequest | `(ctx: { url: string; method: RequestMethod; header: Record<string, string>; data?: D }) => Partial<{ url: string; header: Record<string, string>; data?: D }> \| Promise<...>` | 否 | - | 请求前的数据转换, 可用于加密 `header`、`data` 或重写 `url` |
 | transformResponse | `(data: unknown) => unknown` | 否 | - | 响应数据的转换, 如解密操作 |
+| onTaskReady | `(task: RequestTask) => void` | 否 | - | 获取请求任务，可用于主动取消请求 |
+| onMessage | `MessageCallback` | 否 | - | 接收已完成基础解析的 SSE 消息；使用流式请求时配置 |
+
+### 缓存说明
+
+- `cacheTime > 0` 时仅缓存业务成功的响应，缓存位于内存中，页面刷新后失效。
+- 缓存键由转换后的 `url`、`method`、`header`、`data`，以及 `fetchOptions`、`responseType` 共同生成，配置不同的请求不会共用缓存。
+- 不建议为包含大段文本、Base64 或其他大体积数据的请求开启缓存。
 
 **返回值**
 
@@ -21344,16 +21399,12 @@ chatTask?.abort();
 
 ### RequestTask
 
-请求任务对象，用于取消请求或监听流式数据。
+请求任务对象，用于主动取消请求。
 
 ```typescript
 interface RequestTask {
   /** 取消请求 */
   abort: () => void;
-  /** 监听流式数据块接收事件 */
-  onChunkReceived: (callback: ChunkCallback) => void;
-  /** 取消监听流式数据块接收事件 */
-  offChunkReceived: () => void;
 }
 ```
 
@@ -21426,6 +21477,18 @@ const json = await uploadFile<UploadResult>(
   { url: 'https://xx', file: file, responseType: 'json' },
 );
 
+// 按业务状态码解析并直接提取 data.path
+const path = await uploadFile<string>(
+  { url: 'https://xx', file },
+  {
+    resKey: 'data.path',
+    msgKey: 'message',
+    codeKey: 'status',
+    successCode: [1],
+    reloginCode: [-10],
+  },
+);
+
 // 默认 responseType 为 text，手动解析返回结果
 console.log('uploadFile ok', JSON.parse(res));
 ```
@@ -21453,13 +21516,25 @@ console.log('uploadFile ok', JSON.parse(res));
 | toastSuccess | `boolean \| string \| ((res) => boolean \| string)` | 否 | `false` | 操作成功的 toast 提示 |
 | toastError | `boolean \| string \| ((err) => boolean \| string)` | 否 | `true` | 是否显示操作失败的详细错误信息 |
 | showLog | `boolean` | 否 | `true` | 是否在控制台打印日志 |
+| logExtra | `Record<string, unknown>` | 否 | - | 成功和失败日志中附加的数据 |
+| transformResponse | `(response: unknown) => unknown` | 否 | - | 转换原始响应；配置业务响应解析时，转换结果会继续按状态码配置解析 |
+| resKey | `string \| false` | 条件必填 | - | 业务成功时提取结果的字段；`false` 返回完整响应 |
+| msgKey | `string` | 条件必填 | - | 业务响应消息字段 |
+| codeKey | `string` | 条件必填 | - | 业务响应状态码字段 |
+| successKey | `string` | 否 | `codeKey` | 用于判断成功状态码的字段 |
+| successCode | `(number \| string)[]` | 条件必填 | - | 业务成功状态码列表 |
+| reloginCode | `(number \| string)[]` | 条件必填 | - | 登录失效状态码列表 |
 
-### responseType 说明
+### 响应解析说明
 
 - 默认 `responseType: 'text'`，返回值类型为 `string`
 - 传入 `responseType: 'json'` 后，可配合泛型使用，自动将响应内容按 JSON 解析并返回对象
 - 如果 `responseType: 'json'` 但服务端返回的不是合法 JSON，会进入失败分支
 - 当上传失败且服务端返回了 JSON 错误体时，会优先读取其中的 `message` 作为错误信息
+- 只要配置任一业务响应字段，就必须同时提供 `resKey`、`msgKey`、`codeKey`、`successCode` 和 `reloginCode`；`successKey` 可选
+- 配置业务响应解析后，文本响应会先执行 `JSON.parse`；业务成功时提取 `resKey`，业务失败时 Promise reject 服务端原始响应
+- 非 2xx 的合法 JSON 响应仍会进入业务状态码解析；命中 `reloginCode` 时调用全局 `toLogin`，且不重复显示失败提示
+- `toastError` 函数在业务失败时接收 `UploadBusinessError`，可读取 `message`、`code`、`response` 和 `relogin`
 - `data` 中的对象和数组不会自动 JSON 序列化；需要结构化参数时，请按服务端协议提前调用 `JSON.stringify`
 
 ## UploadTask

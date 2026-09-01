@@ -6,6 +6,8 @@ import { toLogin } from '../router';
 import { getPlatformOs } from '../system';
 import { toast } from '../ui';
 import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
+import type { ApiResponseConfig } from '../../shared/network/response';
+import type { ApiTaskConfig } from '../../shared/network/action';
 import type { AppLogInfo } from '../config';
 
 /** 请求参数 */
@@ -29,31 +31,14 @@ export type TransformRequestResult<D extends RequestData = RequestData> = Partia
  */
 export type RequestConfig<D extends RequestData = RequestData> = Partial<RequestConfigBase<D>>;
 
+type UniRequestOptions = Omit<UniApp.RequestOptions, 'success' | 'fail' | 'complete' | 'data'>;
+type RequestResponseConfig = UniRequestOptions & ApiResponseConfig;
+
 /** 自定义请求的配置 (接口字段参数必填) */
-export type RequestConfigBase<D extends RequestData = RequestData> = Omit<
-  UniApp.RequestOptions,
-  'success' | 'fail' | 'complete' | 'data'
-> & {
+export type RequestConfigBase<D extends RequestData = RequestData> = RequestResponseConfig &
+  ApiTaskConfig<UniApp.RequestTask> & {
   /** 请求参数 */
   data?: D;
-
-  /** 接口返回响应数据的字段, 支持"a[0].b.c"的格式, 当配置false时返回完整的响应数据 */
-  resKey: string | false;
-
-  /** 接口返回响应消息的字段, 支持"a[0].b.c"的格式 */
-  msgKey: string;
-
-  /** 接口返回响应状态码的字段, 支持"a[0].b.c"的格式 */
-  codeKey: string;
-
-  /** 接口返回成功状态码的字段, 支持"a[0].b.c"的格式 (默认取 codeKey) */
-  successKey?: string;
-
-  /** 成功状态码 */
-  successCode: (number | string)[];
-
-  /** 登录过期状态码 */
-  reloginCode: (number | string)[];
 
   /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
   cacheTime?: number;
@@ -82,9 +67,6 @@ export type RequestConfigBase<D extends RequestData = RequestData> = Omit<
   transformResponse?: (
     data: UniApp.RequestSuccessCallbackResult['data'],
   ) => UniApp.RequestSuccessCallbackResult['data'];
-
-  /** 获取请求对象, 用于取消请求 */
-  onTaskReady?: (task: UniApp.RequestTask) => void;
 
   /**
    * 流式数据接收事件回调 (已完成基础流式解析,返回消息对象)

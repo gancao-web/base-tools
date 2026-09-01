@@ -1,6 +1,7 @@
 import { cloneDeep } from 'es-toolkit';
 import { getBaseToolsConfig, toast } from '../index';
 import type { AppLogInfo } from '../index';
+import type { ApiActionConfig, ApiTaskConfig } from '../../shared/network/action';
 
 type UniCallbacks<Res, Err> = {
   success?: (res: Res) => void;
@@ -15,28 +16,8 @@ type OmitOption<T> = Omit<T, 'success' | 'fail' | 'complete'>;
 /**
  * uni api 的调用配置
  */
-export type UniApiConfig<Res = any, Err = any, Task = any> = {
-  /** 操作成功的toast提示, 默认不显示 */
-  toastSuccess?: ((res: Res) => false | string) | false | string;
-
-  /** 是否显示操作失败的详细错误信息, 默认 true. (支持字符串,自定义文本; 支持根据errMsg判断是否显示, 例如: (e) => !e.errMsg.includes('cancel') */
-  toastError?: ((e: Err) => boolean | string) | boolean | string;
-
-  /** 是否显示加载提示, 默认 false. (支持字符串,自定义文本) */
-  showLoading?: boolean | string;
-
-  /** 是否显示日志, 默认 true */
-  showLog?: boolean;
-
-  /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
-  logExtra?: Record<string, unknown>;
-
-  /** 响应数据的转换, 如解密操作 (返回值在成功日志中输出'transformResponse'字段) */
-  transformResponse?: (res: any) => Res;
-
-  /** 获取task对象 (如uni.downloadFile、uni.uploadFile返回的task对象) */
-  onTaskReady?: (task: Task) => void;
-};
+export type UniApiConfig<Res = any, Err = any, Task = any> = ApiActionConfig<Res, Err> &
+  ApiTaskConfig<Task>;
 
 /**
  * 把 uni api 包装为 Promise 形式
@@ -57,7 +38,6 @@ export function enhanceUniApi<Option, Res, Err, Task>(
       toastSuccess = false,
       toastError = true,
       showLog = true,
-      transformResponse,
       logExtra,
     } = config;
 
@@ -96,26 +76,18 @@ export function enhanceUniApi<Option, Res, Err, Task>(
         success(res) {
           hideLoading();
 
-          // uni API 的 success 只代表平台调用成功，响应转换仍可能因业务错误而抛出异常。
+          // 成功回调中的日志或提示处理可能抛出异常，统一按失败处理。
           try {
-            const finalRes = transformResponse ? transformResponse(res) : res;
-
             if (showLog) {
               const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
-
-              if (transformResponse) {
-                logData.res = res; // 输出原始数据
-                logData.transformResponse = cloneDeep(finalRes); // 深拷贝处理后数据,避免外部修改对象,造成输出不一致
-              } else {
-                logData.res = cloneDeep(res); // 深拷贝原始数据,避免外部修改对象,造成输出不一致
-              }
+              logData.res = cloneDeep(res); // 深拷贝响应数据,避免外部修改对象,造成输出不一致
 
               log?.('info', logData);
             }
 
-            const msg = typeof toastSuccess === 'function' ? toastSuccess(finalRes) : toastSuccess;
+            const msg = typeof toastSuccess === 'function' ? toastSuccess(res) : toastSuccess;
 
-            resolve(finalRes);
+            resolve(res);
             if (msg) toast(msg);
           } catch (e) {
             handleFail(e);
