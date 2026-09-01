@@ -18,7 +18,7 @@
 
 ###### response
 - 来源: `src/shared/network/response.ts`
-- 导出: `ApiResponseConfig`、`ApiResponseConfigOptions`
+- 导出: `ApiResponseConfig`、`ApiResponseConfigOptions`、`ResponseTransformer`
 
 ### clipboard
 - 来源: `src/web/clipboard/index.ts`

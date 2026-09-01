@@ -6,7 +6,7 @@ import { toLogin } from '../router';
 import { getPlatformOs } from '../system';
 import { toast } from '../ui';
 import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
-import type { ApiResponseConfig } from '../../shared/network/response';
+import type { ApiResponseConfig, ResponseTransformer } from '../../shared/network/response';
 import type { ApiTaskConfig } from '../../shared/network/action';
 import type { AppLogInfo } from '../config';
 
@@ -32,54 +32,51 @@ export type TransformRequestResult<D extends RequestData = RequestData> = Partia
 export type RequestConfig<D extends RequestData = RequestData> = Partial<RequestConfigBase<D>>;
 
 type UniRequestOptions = Omit<UniApp.RequestOptions, 'success' | 'fail' | 'complete' | 'data'>;
-type RequestResponseConfig = UniRequestOptions & ApiResponseConfig;
+type RequestResponseConfig = UniRequestOptions &
+  ApiResponseConfig &
+  ResponseTransformer<UniApp.RequestSuccessCallbackResult['data']>;
 
 /** 自定义请求的配置 (接口字段参数必填) */
 export type RequestConfigBase<D extends RequestData = RequestData> = RequestResponseConfig &
   ApiTaskConfig<UniApp.RequestTask> & {
-  /** 请求参数 */
-  data?: D;
+    /** 请求参数 */
+    data?: D;
 
-  /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
-  cacheTime?: number;
+    /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
+    cacheTime?: number;
 
-  /** 是否提示接口异常 (默认true) */
-  toastError?: boolean;
+    /** 是否提示接口异常 (默认true) */
+    toastError?: boolean;
 
-  /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
-  showLoading?: boolean | string;
+    /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
+    showLoading?: boolean | string;
 
-  /** 是否输出日志 (默认true) */
-  showLog?: boolean;
+    /** 是否输出日志 (默认true) */
+    showLog?: boolean;
 
-  /** 额外输出的日志数据 */
-  logExtra?: Record<string, unknown>;
+    /** 额外输出的日志数据 */
+    logExtra?: Record<string, unknown>;
 
-  /**
-   * 请求前的数据转换, 可用于加密 header、data 或重写 url
-   * 使用方法签名，使具体 RequestConfig<D> 可以传入默认 RequestConfig 的二次封装
-   */
-  transformRequest?(
-    ctx: TransformRequestContext<D>,
-  ): TransformRequestResult<D> | Promise<TransformRequestResult<D>>;
+    /**
+     * 请求前的数据转换, 可用于加密 header、data 或重写 url
+     * 使用方法签名，使具体 RequestConfig<D> 可以传入默认 RequestConfig 的二次封装
+     */
+    transformRequest?(
+      ctx: TransformRequestContext<D>,
+    ): TransformRequestResult<D> | Promise<TransformRequestResult<D>>;
 
-  /** 响应数据的转换 */
-  transformResponse?: (
-    data: UniApp.RequestSuccessCallbackResult['data'],
-  ) => UniApp.RequestSuccessCallbackResult['data'];
-
-  /**
-   * 流式数据接收事件回调 (已完成基础流式解析,返回消息对象)
-   * @example
-   * function onMessage(msg: SSEMessage) {
-   *   console.log(msg);
-   *   if(msg.type === 'DONE') { } // 流式传输结束
-   *   if(msg.type === 'thinking') { } // 思考中
-   *   if(msg.type === 'xx') { } // 各种消息类型
-   * }
-   */
-  onMessage?: MessageCallback;
-};
+    /**
+     * 流式数据接收事件回调 (已完成基础流式解析,返回消息对象)
+     * @example
+     * function onMessage(msg: SSEMessage) {
+     *   console.log(msg);
+     *   if(msg.type === 'DONE') { } // 流式传输结束
+     *   if(msg.type === 'thinking') { } // 思考中
+     *   if(msg.type === 'xx') { } // 各种消息类型
+     * }
+     */
+    onMessage?: MessageCallback;
+  };
 
 /** 日志请求 */
 type RequestLogConfig = {

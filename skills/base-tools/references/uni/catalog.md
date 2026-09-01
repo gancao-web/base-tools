@@ -18,7 +18,7 @@
 
 ###### response
 - 来源: `src/shared/network/response.ts`
-- 导出: `ApiResponseConfig`、`ApiResponseConfigOptions`
+- 导出: `ApiResponseConfig`、`ApiResponseConfigOptions`、`ResponseTransformer`
 
 ### async
 - 来源: `src/uni/async/index.ts`

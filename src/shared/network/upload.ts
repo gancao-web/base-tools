@@ -1,11 +1,9 @@
 import { getObjectValue } from '../../ts/object';
 import type { ApiActionConfig } from './action';
-import type { ApiResponseConfig, ApiResponseConfigOptions } from './response';
+import type { ApiResponseConfig, ApiResponseConfigOptions, ResponseTransformer } from './response';
 
 /** 上传响应及业务响应解析配置。 */
-export type UploadResponseConfig = ApiResponseConfigOptions & {
-  transformResponse?: (response: unknown) => unknown;
-};
+export type UploadResponseConfig = ApiResponseConfigOptions & ResponseTransformer;
 
 type UploadToastError<Error> = ApiActionConfig<unknown, Error>['toastError'];
 

@@ -1,3 +1,9 @@
+/** 响应转换配置。默认保持输入、输出类型一致。 */
+export type ResponseTransformer<Input = unknown, Output = Input> = {
+  /** 响应数据的转换。 */
+  transformResponse?: (response: Input) => Output;
+};
+
 /** API 业务响应字段配置。 */
 export type ApiResponseConfig = {
   /** 接口返回响应数据的字段，支持 "a[0].b.c" 格式；配置 false 时返回完整响应。 */
