@@ -38,7 +38,6 @@ export function enhanceUniApi<Option, Res, Err, Task>(
       toastSuccess = false,
       toastError = true,
       showLog = true,
-      transformResponse,
       logExtra,
     } = config;
 
@@ -77,26 +76,18 @@ export function enhanceUniApi<Option, Res, Err, Task>(
         success(res) {
           hideLoading();
 
-          // uni API 的 success 只代表平台调用成功，响应转换仍可能因业务错误而抛出异常。
+          // 成功回调中的日志或提示处理可能抛出异常，统一按失败处理。
           try {
-            const finalRes = transformResponse ? transformResponse(res) : res;
-
             if (showLog) {
               const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
-
-              if (transformResponse) {
-                logData.res = res; // 输出原始数据
-                logData.transformResponse = cloneDeep(finalRes); // 深拷贝处理后数据,避免外部修改对象,造成输出不一致
-              } else {
-                logData.res = cloneDeep(res); // 深拷贝原始数据,避免外部修改对象,造成输出不一致
-              }
+              logData.res = cloneDeep(res); // 深拷贝响应数据,避免外部修改对象,造成输出不一致
 
               log?.('info', logData);
             }
 
-            const msg = typeof toastSuccess === 'function' ? toastSuccess(finalRes) : toastSuccess;
+            const msg = typeof toastSuccess === 'function' ? toastSuccess(res) : toastSuccess;
 
-            resolve(finalRes);
+            resolve(res);
             if (msg) toast(msg);
           } catch (e) {
             handleFail(e);

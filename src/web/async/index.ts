@@ -33,7 +33,6 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
       toastSuccess = false,
       toastError = true,
       showLog = true,
-      transformResponse,
       logExtra,
     } = finalConfig;
 
@@ -50,7 +49,7 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
       showLoadingFn?.({ title });
     }
 
-    // 响应转换也可能抛错，确保成功分支和失败分支不会重复关闭同一次 Loading。
+    // 成功处理也可能抛错，确保成功分支和失败分支不会重复关闭同一次 Loading。
     let loadingHidden = false;
     const hideLoading = () => {
       if (!showLoading || loadingHidden) return;
@@ -63,24 +62,16 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
         .then((res) => {
           hideLoading();
 
-          const finalRes = transformResponse ? transformResponse(res) : res;
-
           if (showLog) {
             const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
-
-            if (transformResponse) {
-              logData.res = res; // 输出原始数据
-              logData.transformResponse = cloneDeep(finalRes); // 深拷贝处理后数据,避免外部修改对象,造成输出不一致
-            } else {
-              logData.res = cloneDeep(res); // 深拷贝原始数据,避免外部修改对象,造成输出不一致
-            }
+            logData.res = cloneDeep(res); // 深拷贝响应数据,避免外部修改对象,造成输出不一致
 
             log?.('info', logData);
           }
 
-          resolve(finalRes);
+          resolve(res);
 
-          const msg = typeof toastSuccess === 'function' ? toastSuccess(finalRes) : toastSuccess;
+          const msg = typeof toastSuccess === 'function' ? toastSuccess(res) : toastSuccess;
           if (msg) toast?.({ msg, status: 'success' });
         })
         .catch((e) => {

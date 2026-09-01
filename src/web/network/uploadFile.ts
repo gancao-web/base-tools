@@ -5,8 +5,8 @@ import {
   resolveUploadToastError,
   transformUploadResponse,
   UploadBusinessError,
+  type UploadResponseConfig,
 } from '../../shared/network/upload';
-import type { ApiResponseConfigOptions } from '../../shared/network/response';
 import type { WebApiConfig } from '../async';
 import type { ApiTaskConfig } from '../../shared/network/action';
 
@@ -70,14 +70,10 @@ export type UploadFail = {
 /** 上传可能产生的传输错误或业务错误。 */
 export type UploadError = UploadFail | UploadBusinessError;
 
-export type UploadConfig = ApiResponseConfigOptions & ApiTaskConfig<UploadTask>;
+export type UploadConfig = UploadResponseConfig & ApiTaskConfig<UploadTask>;
 
 /** 上传文件的完整增强配置。 */
-export type UploadFileConfig<T = string> = UploadConfig &
-  Omit<WebApiConfig<T, UploadError>, 'transformResponse'> & {
-    /** 原始响应转换；配置业务响应解析时，转换结果不是最终的Res，会继续按 codeKey 等字段解析出Res */
-    transformResponse?: (response: any) => unknown;
-  };
+export type UploadFileConfig<T = string> = UploadConfig & WebApiConfig<T, UploadError>;
 
 export { UploadBusinessError };
 
@@ -223,29 +219,24 @@ export function uploadFile<T = string>(
   option: UploadFileOption,
   config?: UploadFileConfig<T>,
 ): Promise<T> {
-  const hasResponseConfig = hasUploadResponseConfig(config);
-  const userTransformResponse = config?.transformResponse;
-  const { transformResponse: _transformResponse, ...configWithoutTransform } = config || {};
-  const finalConfig = {
-    ...configWithoutTransform,
-    ...(userTransformResponse || hasResponseConfig
-      ? {
-          transformResponse: (response: unknown) => transformUploadResponse<T>(response, config),
-        }
-      : {}),
-    ...(hasResponseConfig
-      ? {
-          // 业务错误的提示与 request 保持一致；登录失效只跳转登录，不重复弹错误提示。
-          toastError: (error: unknown) =>
-            resolveUploadToastError<UploadError>(error, config?.toastError),
-        }
-      : {}),
+  const uploadApi = async (uploadOption: UploadFileOption, uploadConfig?: UploadConfig) => {
+    const res = await upload(uploadOption, uploadConfig);
+    return transformUploadResponse<T>(res, config);
   };
 
-  return enhanceWebApi<UploadFileOption, T, UploadError, UploadConfig>(
-    upload,
-    'uploadFile',
-  )(option, finalConfig).catch((error) => {
+  const finalConfig = hasUploadResponseConfig(config)
+    ? {
+        ...config,
+        // 业务错误的提示与 request 保持一致；登录失效只跳转登录，不重复弹错误提示。
+        toastError: (error: unknown) =>
+          resolveUploadToastError<UploadError>(error, config?.toastError),
+      }
+    : config;
+
+  return enhanceWebApi<UploadFileOption, T, UploadError, UploadConfig>(uploadApi, 'uploadFile')(
+    option,
+    finalConfig,
+  ).catch((error) => {
     if (error instanceof UploadBusinessError) {
       if (error.relogin) getBaseToolsConfig().toLogin?.();
       return Promise.reject(error.response as T);

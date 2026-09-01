@@ -34,6 +34,51 @@ function copyDir(src, dst) {
   copyRecursive(src, dst);
 }
 
+// 复制平台声明依赖的共享类型文件；这些文件只参与类型解析，不重复发布运行时代码。
+function copyDeclarationFiles(src, dst) {
+  if (!fs.existsSync(src)) {
+    throw new Error(`Declaration dependency not found: ${src}`);
+  }
+
+  function copyRecursive(currentSrc, currentDst) {
+    const entries = fs.readdirSync(currentSrc, { withFileTypes: true });
+    for (const ent of entries) {
+      const sp = path.join(currentSrc, ent.name);
+      const dp = path.join(currentDst, ent.name);
+
+      if (ent.isDirectory()) {
+        copyRecursive(sp, dp);
+      } else if (ent.name.endsWith('.d.ts')) {
+        fs.mkdirSync(currentDst, { recursive: true });
+        fs.copyFileSync(sp, dp);
+      }
+    }
+  }
+
+  copyRecursive(src, dst);
+}
+
+// 平台声明复制到子包 dist 后，原本基于根 dist 的 shared/ts 相对路径需要缩短一层。
+function fixDeclarationImports(distDir) {
+  function processDir(currentDir) {
+    const entries = fs.readdirSync(currentDir, { withFileTypes: true });
+    for (const ent of entries) {
+      const filePath = path.join(currentDir, ent.name);
+      if (ent.isDirectory()) {
+        processDir(filePath);
+        continue;
+      }
+
+      if (!ent.name.endsWith('.d.ts')) continue;
+      const content = fs.readFileSync(filePath, 'utf8');
+      const fixed = content.replace(/(['"])\.\.\/\.\.\/(shared|ts)\//g, '$1../$2/');
+      if (fixed !== content) fs.writeFileSync(filePath, fixed);
+    }
+  }
+
+  processDir(distDir);
+}
+
 // 复制UMD文件到子包根目录
 function copyUMDFiles() {
   // 复制TS包的UMD文件
@@ -154,6 +199,14 @@ function fixSourceMaps() {
 for (const key of Object.keys(map)) {
   const [src, dst] = map[key];
   copyDir(src, dst);
+}
+
+// Web/uni 的声明文件会引用 shared 与 ts 中的类型；复制到子包后保持原相对路径可解析。
+for (const key of ['web', 'uni']) {
+  const packageDist = path.join(process.cwd(), `packages/base-tools-${key}/dist`);
+  copyDeclarationFiles(path.join(process.cwd(), 'dist/shared'), path.join(packageDist, 'shared'));
+  copyDeclarationFiles(path.join(process.cwd(), 'dist/ts'), path.join(packageDist, 'ts'));
+  fixDeclarationImports(packageDist);
 }
 
 // 复制UMD文件

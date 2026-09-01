@@ -19,9 +19,6 @@ export type ApiActionConfig<Res = unknown, Err = unknown> = {
 
   /** 成功和失败时额外输出的日志数据。 */
   logExtra?: Record<string, unknown>;
-
-  /** 响应数据转换，原始响应和转换后的结果可以是不同类型。 */
-  transformResponse?: (response: any) => Res;
 };
 
 /**

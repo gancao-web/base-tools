@@ -1,11 +1,13 @@
 import { getObjectValue } from '../../ts/object';
+import type { ApiActionConfig } from './action';
 import type { ApiResponseConfig, ApiResponseConfigOptions } from './response';
 
-type UploadTransformConfig = ApiResponseConfigOptions & {
+/** 上传响应及业务响应解析配置。 */
+export type UploadResponseConfig = ApiResponseConfigOptions & {
   transformResponse?: (response: unknown) => unknown;
 };
 
-type UploadToastError<Error> = ((error: Error) => boolean | string) | boolean | string;
+type UploadToastError<Error> = ApiActionConfig<unknown, Error>['toastError'];
 
 /** 上传接口返回的业务错误。response 保留服务端原始响应，便于调用方继续处理。 */
 export class UploadBusinessError extends Error {
@@ -83,7 +85,7 @@ export function parseUploadResponse(response: unknown, config: ApiResponseConfig
 /** 先执行调用方转换，再按上传接口的业务响应配置提取结果。 */
 export function transformUploadResponse<T = unknown>(
   response: unknown,
-  config?: UploadTransformConfig,
+  config?: UploadResponseConfig,
 ): T {
   const transformed = config?.transformResponse ? config.transformResponse(response) : response;
   return (

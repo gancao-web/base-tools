@@ -5,8 +5,8 @@ import {
   resolveUploadToastError,
   transformUploadResponse,
   UploadBusinessError,
+  type UploadResponseConfig,
 } from '../../shared/network/upload';
-import type { ApiResponseConfigOptions } from '../../shared/network/response';
 import type { UniApiConfig } from '../index';
 
 const cache = {
@@ -37,8 +37,7 @@ export type UploadData = Record<string, unknown>;
 export type UploadError = UniApp.GeneralCallbackResult | UploadBusinessError;
 
 /** 上传配置，除任务能力外支持与 request 一致的业务响应解析。 */
-export type UploadConfig = UniApiConfig<any, UploadError, UniApp.UploadTask> &
-  ApiResponseConfigOptions;
+export type UploadConfig = UniApiConfig<any, UploadError, UniApp.UploadTask> & UploadResponseConfig;
 
 export { UploadBusinessError };
 
@@ -119,8 +118,26 @@ export function uploadFile<T = string>(
 ): Promise<T> {
   const hasResponseConfig = hasUploadResponseConfig(config);
 
-  return enhanceUniApi<UniApp.UploadFileOption, any, UploadError, UniApp.UploadTask>(
-    uni.uploadFile,
+  const uploadApi = (
+    uploadOption: UniApp.UploadFileOption & {
+      success?: (response: T) => void;
+      fail?: (error: UniApp.GeneralCallbackResult) => void;
+    },
+  ) =>
+    uni.uploadFile({
+      ...uploadOption,
+      success(response) {
+        try {
+          const data = transformUploadResponse<T>(response.data, config);
+          uploadOption.success?.(data);
+        } catch (error) {
+          uploadOption.fail?.(error as UniApp.GeneralCallbackResult);
+        }
+      },
+    });
+
+  return enhanceUniApi<UniApp.UploadFileOption, T, UploadError, UniApp.UploadTask>(
+    uploadApi,
     'uploadFile',
   )(
     {
@@ -132,7 +149,6 @@ export function uploadFile<T = string>(
     },
     {
       ...config,
-      transformResponse: (res) => transformUploadResponse(res.data, config),
       ...(hasResponseConfig
         ? {
             // 业务错误的提示与 request 保持一致；登录失效只跳转登录，不重复弹错误提示。
@@ -143,8 +159,8 @@ export function uploadFile<T = string>(
   ).catch((error) => {
     if (error instanceof UploadBusinessError) {
       if (error.relogin) toLogin();
-      return Promise.reject(error.response);
+      return Promise.reject(error.response as T);
     }
     return Promise.reject(error);
-  }) as Promise<T>;
+  });
 }
