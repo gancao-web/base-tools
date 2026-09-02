@@ -25,7 +25,7 @@ export type ChooseMediaFile = {
 
 /**
  * 图片和视频的选择或拍摄
- * - 微信小程序推荐使用chooseMedia, 而chooseImage或chooseVideo已标记过时
+ * - 微信小程序推荐使用chooseMedia, 因为chooseImage或chooseVideo已过时
  * - H5会根据mediaType自动使用chooseImage或chooseVideo
  * - H5不支持同时选择图片和视频, mediaType为混选或未指定时默认选择图片
  * - H5选择视频时只能选择一个文件, count不生效
@@ -110,7 +110,7 @@ export async function chooseMedia(option?: UniApp.ChooseMediaOption): Promise<Ch
 
 /**
  * 图片的选择或拍摄
- * - 微信小程序推荐使用chooseMedia, 而chooseImage已标记过时
+ * - 微信小程序推荐使用chooseMedia, 因为chooseImage已过时
  * - 支持h5 (小程序上传取tempFilePaths, 而H5取tempFiles)
  * @param option 选项文档 https://uniapp.dcloud.net.cn/api/media/image.html
  * @returns 图片路径和File对象数组 {tempFilePaths, tempFiles}
