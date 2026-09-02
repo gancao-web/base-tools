@@ -1,12 +1,15 @@
 import { cloneDeep, isPlainObject, pickBy } from 'es-toolkit';
 import { toDayjs } from '../../ts/day';
-import { getObjectValue } from '../../ts/object';
 import { getBaseToolsConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformOs } from '../system';
 import { toast } from '../ui';
 import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
-import type { ApiResponseConfig, ResponseTransformer } from '../../shared/network/response';
+import {
+  getResponseValue,
+  type ApiResponseConfig,
+  type ResponseTransformer,
+} from '../../shared/network/response';
 import type { ApiTaskConfig } from '../../shared/network/action';
 import type { AppLogInfo } from '../config';
 
@@ -236,7 +239,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
               startTime,
               res,
             });
-            resolve(getResult(res, resKey)); // 返回缓存数据
+            resolve(getResult(res, resKey) as T); // 返回缓存数据
             return;
           }
           requestCache.delete(cacheKey); // 删除过期缓存
@@ -261,11 +264,12 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
           const res = transformResponse ? transformResponse(xhr.data) : xhr.data;
 
           // 解析数据 (分块传输会先不断执行task.onChunkReceived回调,流式传输完毕才执行success回调)
-          const code = enableChunked ? '' : getObjectValue(res, codeKey);
-          const scode = enableChunked ? '' : successKey ? getObjectValue(res, successKey) : code;
-          const msg = enableChunked ? '' : getObjectValue(res, msgKey);
-          const isSuccess = enableChunked ? true : successCode.includes(scode);
-          const isRelogin = enableChunked ? false : reloginCode.includes(code);
+          const code = enableChunked ? '' : getResponseValue(res, codeKey);
+          const scode = enableChunked ? '' : successKey ? getResponseValue(res, successKey) : code;
+          const msgValue = enableChunked ? undefined : getResponseValue(res, msgKey);
+          const msg = String(msgValue ?? '');
+          const isSuccess = enableChunked ? true : successCode.includes(scode as string | number);
+          const isRelogin = enableChunked ? false : reloginCode.includes(code as string | number);
 
           // 缓存数据
           if (isSuccess && isCache) {
@@ -277,7 +281,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 
           if (isSuccess) {
             // 业务正常
-            resolve(getResult(res, resKey));
+            resolve(getResult(res, resKey) as T);
           } else if (isRelogin) {
             // 重新登录
             toLogin();
@@ -392,5 +396,5 @@ function logRequestInfo(options: {
 function getResult(res: unknown, resKey?: RequestConfigBase['resKey']) {
   if (!res || !resKey || typeof res !== 'object') return res;
 
-  return getObjectValue(res, resKey);
+  return getResponseValue(res, resKey);
 }

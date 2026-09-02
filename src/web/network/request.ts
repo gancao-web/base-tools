@@ -1,10 +1,13 @@
 import { cloneDeep, isPlainObject } from 'es-toolkit';
 import { toDayjs } from '../../ts/day';
-import { getObjectValue } from '../../ts/object';
 import { appendUrlParam } from '../../ts/url';
 import { getBaseToolsConfig } from '../config';
 import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
-import type { ApiResponseConfig, ResponseTransformer } from '../../shared/network/response';
+import {
+  getResponseValue,
+  type ApiResponseConfig,
+  type ResponseTransformer,
+} from '../../shared/network/response';
 import type { ApiTaskConfig } from '../../shared/network/action';
 import type { AppLogInfo } from '../config';
 
@@ -448,11 +451,12 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         const res = transformResponse ? transformResponse(resData) : resData;
 
         // 2.10 业务状态码解析
-        const code = getObjectValue(res, codeKey);
-        const scode = successKey ? getObjectValue(res, successKey) : code;
-        const msg = getObjectValue(res, msgKey);
-        const isSuccess = successCode.includes(scode);
-        const isRelogin = reloginCode.includes(code);
+        const code = getResponseValue(res, codeKey);
+        const scode = successKey ? getResponseValue(res, successKey) : code;
+        const msgValue = getResponseValue(res, msgKey);
+        const msg = msgValue === undefined || msgValue === null ? '' : String(msgValue);
+        const isSuccess = successCode.includes(scode as string | number);
+        const isRelogin = reloginCode.includes(code as string | number);
 
         logRequestInfo({ status: 'success', config: logConfig, startTime, res });
 
@@ -573,7 +577,7 @@ function logRequestInfo(options: {
  */
 function getResult(res: unknown, resKey?: RequestConfigBase['resKey']) {
   if (!res || !resKey || typeof res !== 'object') return res;
-  return getObjectValue(res, resKey);
+  return getResponseValue(res, resKey);
 }
 
 /**
