@@ -67,15 +67,13 @@ export type UploadFail = {
   data?: unknown;
 };
 
-/** 上传可能产生的传输错误或业务错误。 */
-export type UploadError = UploadFail | UploadBusinessError;
+/** 对外错误与 request 一致：业务失败为原始响应，传输失败为 UploadFail。 */
+export type UploadError = UploadFail | Record<string, unknown>;
 
 export type UploadConfig = UploadResponseConfig & ApiTaskConfig<UploadTask>;
 
 /** 上传文件的完整增强配置。 */
 export type UploadFileConfig<T = string> = UploadConfig & WebApiConfig<T, UploadError>;
-
-export { UploadBusinessError };
 
 function tryParseJson(text: string): { success: true; data: unknown } | { success: false } {
   try {
@@ -238,8 +236,9 @@ export function uploadFile<T = string>(
     finalConfig,
   ).catch((error) => {
     if (error instanceof UploadBusinessError) {
+      const rejected = Promise.reject(error.response as T);
       if (error.relogin) getBaseToolsConfig().toLogin?.();
-      return Promise.reject(error.response as T);
+      return rejected;
     }
     return Promise.reject(error);
   });

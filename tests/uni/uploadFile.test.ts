@@ -64,7 +64,6 @@ describe('uni/uploadFile', () => {
         },
       ),
     ).rejects.toEqual(response);
-
     expect(navigateTo).toHaveBeenCalledWith({ url: '/pages/login/index' });
     expect(showToast).not.toHaveBeenCalled();
   });
