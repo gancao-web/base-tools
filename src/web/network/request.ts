@@ -1,10 +1,13 @@
 import { cloneDeep, isPlainObject } from 'es-toolkit';
 import { toDayjs } from '../../ts/day';
-import { getObjectValue } from '../../ts/object';
 import { appendUrlParam } from '../../ts/url';
 import { getBaseToolsConfig } from '../config';
 import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
-import type { ApiResponseConfig } from '../../shared/network/response';
+import {
+  getResponseValue,
+  type ApiResponseConfig,
+  type ResponseTransformer,
+} from '../../shared/network/response';
 import type { ApiTaskConfig } from '../../shared/network/action';
 import type { AppLogInfo } from '../config';
 
@@ -41,6 +44,8 @@ export type RequestData =
  */
 export type ResponseData = string | ArrayBuffer | Blob | Record<string, unknown> | unknown[] | null;
 
+type RequestResponseConfig = ApiResponseConfig & ResponseTransformer<ResponseData>;
+
 /** 请求前转换上下文 */
 export type TransformRequestContext<D extends RequestData = RequestData> = {
   url: string;
@@ -62,70 +67,67 @@ export type RequestConfig<D extends RequestData = RequestData> = Partial<Request
 /**
  * 自定义请求的配置 (接口字段参数必填)
  */
-export type RequestConfigBase<D extends RequestData = RequestData> = ApiResponseConfig &
+export type RequestConfigBase<D extends RequestData = RequestData> = RequestResponseConfig &
   ApiTaskConfig<RequestTask> & {
-  /** 接口地址 */
-  url: string;
+    /** 接口地址 */
+    url: string;
 
-  /** 请求方法 */
-  method?: RequestMethod;
+    /** 请求方法 */
+    method?: RequestMethod;
 
-  /** 请求头(会自动过滤undefined, null, "";不过滤0和false; 数字和布尔值会自动转换为字符串) */
-  header?: Record<string, string | number | boolean | null | undefined>;
+    /** 请求头(会自动过滤undefined, null, "";不过滤0和false; 数字和布尔值会自动转换为字符串) */
+    header?: Record<string, string | number | boolean | null | undefined>;
 
-  /** 请求参数 */
-  data?: D;
+    /** 请求参数 */
+    data?: D;
 
-  /** 超时时间 (毫秒), 默认 60000 */
-  timeout?: number;
+    /** 超时时间 (毫秒), 默认 60000 */
+    timeout?: number;
 
-  /** 原生 Fetch 配置扩展 */
-  fetchOptions?: Omit<RequestInit, 'method' | 'headers' | 'body' | 'signal'>;
+    /** 原生 Fetch 配置扩展 */
+    fetchOptions?: Omit<RequestInit, 'method' | 'headers' | 'body' | 'signal'>;
 
-  /** 是否开启流式传输 (如 SSE) */
-  enableChunked?: boolean;
+    /** 是否开启流式传输 (如 SSE) */
+    enableChunked?: boolean;
 
-  /** 响应类型 (默认 json, enableChunked为true时忽略) */
-  responseType?: 'text' | 'arraybuffer' | 'json';
+    /** 响应类型 (默认 json, enableChunked为true时忽略) */
+    responseType?: 'text' | 'arraybuffer' | 'json';
 
-  /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
-  cacheTime?: number;
+    /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
+    cacheTime?: number;
 
-  /** 是否提示接口异常 (默认true) */
-  toastError?: boolean;
+    /** 是否提示接口异常 (默认true) */
+    toastError?: boolean;
 
-  /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
-  showLoading?: boolean | string;
+    /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
+    showLoading?: boolean | string;
 
-  /** 是否输出日志 (默认true) */
-  showLog?: boolean;
+    /** 是否输出日志 (默认true) */
+    showLog?: boolean;
 
-  /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
-  logExtra?: Record<string, unknown>;
+    /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
+    logExtra?: Record<string, unknown>;
 
-  /**
-   * 请求前的数据转换, 可用于加密 header、data 或重写 url
-   * 使用方法签名，使具体 RequestConfig<D> 可以传入默认 RequestConfig 的二次封装
-   */
-  transformRequest?(
-    ctx: TransformRequestContext<D>,
-  ): TransformRequestResult<D> | Promise<TransformRequestResult<D>>;
+    /**
+     * 请求前的数据转换, 可用于加密 header、data 或重写 url
+     * 使用方法签名，使具体 RequestConfig<D> 可以传入默认 RequestConfig 的二次封装
+     */
+    transformRequest?(
+      ctx: TransformRequestContext<D>,
+    ): TransformRequestResult<D> | Promise<TransformRequestResult<D>>;
 
-  /** 响应数据的转换 */
-  transformResponse?: (data: ResponseData) => ResponseData;
-
-  /**
-   * 流式数据接收事件回调 (已完成基础流式解析,返回消息对象)
-   * @example
-   * function onMessage(msg: SSEMessage) {
-   *   console.log(msg);
-   *   if(msg.type === 'DONE') { } // 流式传输结束
-   *   if(msg.type === 'thinking') { } // 思考中
-   *   if(msg.type === 'xx') { } // 各种消息类型
-   * }
-   */
-  onMessage?: MessageCallback;
-};
+    /**
+     * 流式数据接收事件回调 (已完成基础流式解析,返回消息对象)
+     * @example
+     * function onMessage(msg: SSEMessage) {
+     *   console.log(msg);
+     *   if(msg.type === 'DONE') { } // 流式传输结束
+     *   if(msg.type === 'thinking') { } // 思考中
+     *   if(msg.type === 'xx') { } // 各种消息类型
+     * }
+     */
+    onMessage?: MessageCallback;
+  };
 
 /** 请求任务对象 (用于取消请求) */
 export type RequestTask = {
@@ -449,11 +451,12 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         const res = transformResponse ? transformResponse(resData) : resData;
 
         // 2.10 业务状态码解析
-        const code = getObjectValue(res, codeKey);
-        const scode = successKey ? getObjectValue(res, successKey) : code;
-        const msg = getObjectValue(res, msgKey);
-        const isSuccess = successCode.includes(scode);
-        const isRelogin = reloginCode.includes(code);
+        const code = getResponseValue(res, codeKey);
+        const scode = successKey ? getResponseValue(res, successKey) : code;
+        const msgValue = getResponseValue(res, msgKey);
+        const msg = msgValue === undefined || msgValue === null ? '' : String(msgValue);
+        const isSuccess = successCode.includes(scode as string | number);
+        const isRelogin = reloginCode.includes(code as string | number);
 
         logRequestInfo({ status: 'success', config: logConfig, startTime, res });
 
@@ -574,7 +577,7 @@ function logRequestInfo(options: {
  */
 function getResult(res: unknown, resKey?: RequestConfigBase['resKey']) {
   if (!res || !resKey || typeof res !== 'object') return res;
-  return getObjectValue(res, resKey);
+  return getResponseValue(res, resKey);
 }
 
 /**

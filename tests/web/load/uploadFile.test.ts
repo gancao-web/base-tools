@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { setBaseToolsConfig, UploadBusinessError, uploadFile } from '../../../src/web';
+import { setBaseToolsConfig, uploadFile } from '../../../src/web';
+import { UploadBusinessError } from '../../../src/shared/network/upload';
 
 describe('web/uploadFile', () => {
   afterEach(() => {

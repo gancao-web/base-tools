@@ -18,7 +18,7 @@
 
 ###### response
 - 来源: `src/shared/network/response.ts`
-- 导出: `ApiResponseConfig`、`ApiResponseConfigOptions`
+- 导出: `ApiResponseConfig`、`ApiResponseConfigOptions`、`getResponseValue`、`ResponseKey`、`ResponseTransformer`
 
 ### async
 - 来源: `src/uni/async/index.ts`
@@ -52,7 +52,7 @@
 
 #### load
 - 来源: `src/uni/network/load.ts`
-- 导出: `downloadFile`、`loadFontFace`、`UploadBusinessError`、`UploadConfig`、`UploadData`、`UploadError`、`uploadFile`
+- 导出: `downloadFile`、`loadFontFace`、`UploadConfig`、`UploadData`、`UploadError`、`uploadFile`
 
 #### request
 - 来源: `src/uni/network/request.ts`

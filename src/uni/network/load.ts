@@ -33,13 +33,11 @@ function downloadFileApi(option: UniApp.DownloadFileOption) {
  */
 export type UploadData = Record<string, unknown>;
 
-/** 上传可能产生的传输错误或业务错误。 */
-export type UploadError = UniApp.GeneralCallbackResult | UploadBusinessError;
+/** 对外错误与 request 一致：业务失败为原始响应，传输失败为平台错误。 */
+export type UploadError = UniApp.GeneralCallbackResult | Record<string, unknown>;
 
 /** 上传配置，除任务能力外支持与 request 一致的业务响应解析。 */
 export type UploadConfig = UniApiConfig<any, UploadError, UniApp.UploadTask> & UploadResponseConfig;
-
-export { UploadBusinessError };
 
 /**
  * 下载文件
@@ -158,8 +156,9 @@ export function uploadFile<T = string>(
     },
   ).catch((error) => {
     if (error instanceof UploadBusinessError) {
+      const rejected = Promise.reject(error.response as T);
       if (error.relogin) toLogin();
-      return Promise.reject(error.response as T);
+      return rejected;
     }
     return Promise.reject(error);
   });

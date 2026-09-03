@@ -1,12 +1,15 @@
 import { cloneDeep, isPlainObject, pickBy } from 'es-toolkit';
 import { toDayjs } from '../../ts/day';
-import { getObjectValue } from '../../ts/object';
 import { getBaseToolsConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformOs } from '../system';
 import { toast } from '../ui';
 import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
-import type { ApiResponseConfig } from '../../shared/network/response';
+import {
+  getResponseValue,
+  type ApiResponseConfig,
+  type ResponseTransformer,
+} from '../../shared/network/response';
 import type { ApiTaskConfig } from '../../shared/network/action';
 import type { AppLogInfo } from '../config';
 
@@ -32,54 +35,51 @@ export type TransformRequestResult<D extends RequestData = RequestData> = Partia
 export type RequestConfig<D extends RequestData = RequestData> = Partial<RequestConfigBase<D>>;
 
 type UniRequestOptions = Omit<UniApp.RequestOptions, 'success' | 'fail' | 'complete' | 'data'>;
-type RequestResponseConfig = UniRequestOptions & ApiResponseConfig;
+type RequestResponseConfig = UniRequestOptions &
+  ApiResponseConfig &
+  ResponseTransformer<UniApp.RequestSuccessCallbackResult['data']>;
 
 /** 自定义请求的配置 (接口字段参数必填) */
 export type RequestConfigBase<D extends RequestData = RequestData> = RequestResponseConfig &
   ApiTaskConfig<UniApp.RequestTask> & {
-  /** 请求参数 */
-  data?: D;
+    /** 请求参数 */
+    data?: D;
 
-  /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
-  cacheTime?: number;
+    /** 响应数据的缓存时间, 单位毫秒。仅在成功时缓存；仅缓存在内存，应用退出,缓存消失。(默认0,不开启缓存) */
+    cacheTime?: number;
 
-  /** 是否提示接口异常 (默认true) */
-  toastError?: boolean;
+    /** 是否提示接口异常 (默认true) */
+    toastError?: boolean;
 
-  /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
-  showLoading?: boolean | string;
+    /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
+    showLoading?: boolean | string;
 
-  /** 是否输出日志 (默认true) */
-  showLog?: boolean;
+    /** 是否输出日志 (默认true) */
+    showLog?: boolean;
 
-  /** 额外输出的日志数据 */
-  logExtra?: Record<string, unknown>;
+    /** 额外输出的日志数据 */
+    logExtra?: Record<string, unknown>;
 
-  /**
-   * 请求前的数据转换, 可用于加密 header、data 或重写 url
-   * 使用方法签名，使具体 RequestConfig<D> 可以传入默认 RequestConfig 的二次封装
-   */
-  transformRequest?(
-    ctx: TransformRequestContext<D>,
-  ): TransformRequestResult<D> | Promise<TransformRequestResult<D>>;
+    /**
+     * 请求前的数据转换, 可用于加密 header、data 或重写 url
+     * 使用方法签名，使具体 RequestConfig<D> 可以传入默认 RequestConfig 的二次封装
+     */
+    transformRequest?(
+      ctx: TransformRequestContext<D>,
+    ): TransformRequestResult<D> | Promise<TransformRequestResult<D>>;
 
-  /** 响应数据的转换 */
-  transformResponse?: (
-    data: UniApp.RequestSuccessCallbackResult['data'],
-  ) => UniApp.RequestSuccessCallbackResult['data'];
-
-  /**
-   * 流式数据接收事件回调 (已完成基础流式解析,返回消息对象)
-   * @example
-   * function onMessage(msg: SSEMessage) {
-   *   console.log(msg);
-   *   if(msg.type === 'DONE') { } // 流式传输结束
-   *   if(msg.type === 'thinking') { } // 思考中
-   *   if(msg.type === 'xx') { } // 各种消息类型
-   * }
-   */
-  onMessage?: MessageCallback;
-};
+    /**
+     * 流式数据接收事件回调 (已完成基础流式解析,返回消息对象)
+     * @example
+     * function onMessage(msg: SSEMessage) {
+     *   console.log(msg);
+     *   if(msg.type === 'DONE') { } // 流式传输结束
+     *   if(msg.type === 'thinking') { } // 思考中
+     *   if(msg.type === 'xx') { } // 各种消息类型
+     * }
+     */
+    onMessage?: MessageCallback;
+  };
 
 /** 日志请求 */
 type RequestLogConfig = {
@@ -239,7 +239,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
               startTime,
               res,
             });
-            resolve(getResult(res, resKey)); // 返回缓存数据
+            resolve(getResult(res, resKey) as T); // 返回缓存数据
             return;
           }
           requestCache.delete(cacheKey); // 删除过期缓存
@@ -264,11 +264,12 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
           const res = transformResponse ? transformResponse(xhr.data) : xhr.data;
 
           // 解析数据 (分块传输会先不断执行task.onChunkReceived回调,流式传输完毕才执行success回调)
-          const code = enableChunked ? '' : getObjectValue(res, codeKey);
-          const scode = enableChunked ? '' : successKey ? getObjectValue(res, successKey) : code;
-          const msg = enableChunked ? '' : getObjectValue(res, msgKey);
-          const isSuccess = enableChunked ? true : successCode.includes(scode);
-          const isRelogin = enableChunked ? false : reloginCode.includes(code);
+          const code = enableChunked ? '' : getResponseValue(res, codeKey);
+          const scode = enableChunked ? '' : successKey ? getResponseValue(res, successKey) : code;
+          const msgValue = enableChunked ? undefined : getResponseValue(res, msgKey);
+          const msg = String(msgValue ?? '');
+          const isSuccess = enableChunked ? true : successCode.includes(scode as string | number);
+          const isRelogin = enableChunked ? false : reloginCode.includes(code as string | number);
 
           // 缓存数据
           if (isSuccess && isCache) {
@@ -280,7 +281,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 
           if (isSuccess) {
             // 业务正常
-            resolve(getResult(res, resKey));
+            resolve(getResult(res, resKey) as T);
           } else if (isRelogin) {
             // 重新登录
             toLogin();
@@ -395,5 +396,5 @@ function logRequestInfo(options: {
 function getResult(res: unknown, resKey?: RequestConfigBase['resKey']) {
   if (!res || !resKey || typeof res !== 'object') return res;
 
-  return getObjectValue(res, resKey);
+  return getResponseValue(res, resKey);
 }

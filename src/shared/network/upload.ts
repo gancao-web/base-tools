@@ -1,11 +1,13 @@
-import { getObjectValue } from '../../ts/object';
+import {
+  getResponseValue,
+  type ApiResponseConfig,
+  type ApiResponseConfigOptions,
+  type ResponseTransformer,
+} from './response';
 import type { ApiActionConfig } from './action';
-import type { ApiResponseConfig, ApiResponseConfigOptions } from './response';
 
 /** 上传响应及业务响应解析配置。 */
-export type UploadResponseConfig = ApiResponseConfigOptions & {
-  transformResponse?: (response: unknown) => unknown;
-};
+export type UploadResponseConfig = ApiResponseConfigOptions & ResponseTransformer;
 
 type UploadToastError<Error> = ApiActionConfig<unknown, Error>['toastError'];
 
@@ -65,16 +67,16 @@ export function parseUploadResponse(response: unknown, config: ApiResponseConfig
     }
   }
 
-  const code = getObjectValue(res, config.codeKey!);
-  const successCode = config.successKey ? getObjectValue(res, config.successKey) : code;
-  const msgValue = getObjectValue(res, config.msgKey!);
+  const code = getResponseValue(res, config.codeKey);
+  const successCode = config.successKey ? getResponseValue(res, config.successKey) : code;
+  const msgValue = getResponseValue(res, config.msgKey);
   const msg = msgValue === undefined || msgValue === null ? '上传失败' : String(msgValue);
 
-  if (config.successCode!.includes(successCode)) {
+  if (config.successCode!.includes(successCode as string | number)) {
     return getResult(res, config.resKey);
   }
 
-  const relogin = config.reloginCode!.includes(code);
+  const relogin = config.reloginCode!.includes(code as string | number);
   throw new UploadBusinessError(msg, {
     code: typeof code === 'number' || typeof code === 'string' ? code : undefined,
     response: res,
@@ -117,7 +119,7 @@ export function resolveUploadToastError<Error = unknown>(
   return toastError === false ? false : error.message;
 }
 
-function getResult(res: unknown, resKey?: string | false) {
+function getResult(res: unknown, resKey?: ApiResponseConfig['resKey']) {
   if (!res || !resKey || typeof res !== 'object') return res;
-  return getObjectValue(res, resKey);
+  return getResponseValue(res, resKey);
 }
