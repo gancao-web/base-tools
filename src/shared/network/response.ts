@@ -40,3 +40,9 @@ export function getResponseValue(response: unknown, key: ResponseKey | undefined
 
   return key === undefined ? undefined : getObjectValue(response, key);
 }
+
+/** 按 resKey 提取业务结果；未配置、配置为 false 或响应不是对象时返回完整响应。 */
+export function getResponseResult(response: unknown, resKey: ResponseKey | false | undefined) {
+  if (!response || !resKey || typeof response !== 'object') return response;
+  return getResponseValue(response, resKey);
+}

@@ -11,11 +11,7 @@ import path from 'node:path';
  * - 让 AI 先命中 `base-tools` 总入口, 再按项目类型和导出清单定位现有函数, 避免重复造轮子
  *
  * 什么时候跑:
- * - 新增导出函数 / hook / HOC / 指令之后
- * - 删除导出之后
- *
- * 一般不用跑:
- * - 只改函数内部实现, 但导出名和导出结构没变
+ * - npm run build的时候自动跑
  *
  * 注意:
  * - 该脚本只生成 `skills/base-tools/references/**`

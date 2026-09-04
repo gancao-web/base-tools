@@ -1,15 +1,25 @@
 import { cloneDeep, isPlainObject } from 'es-toolkit';
 import { toDayjs } from '../../ts/day';
-import { appendUrlParam } from '../../ts/url';
 import { getBaseToolsConfig } from '../config';
 import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
 import {
+  createFetchRequest,
+  filterRequestData,
+  filterRequestHeader,
+  handleFetchStreamResponse,
+  parseFetchResponse,
+  type SseTask,
+} from '../../shared/network/fetch';
+import {
+  getResponseResult,
   getResponseValue,
   type ApiResponseConfig,
   type ResponseTransformer,
 } from '../../shared/network/response';
 import type { ApiTaskConfig } from '../../shared/network/action';
 import type { AppLogInfo } from '../config';
+
+export { filterRequestData, filterRequestHeader } from '../../shared/network/fetch';
 
 /** 请求方法类型 */
 export type RequestMethod =
@@ -134,13 +144,6 @@ export type RequestTask = {
   /** 取消请求 */
   abort: () => void;
 };
-
-/**
- * 流式解析对象
- * - undefined: 未初始化
- * - null: 已取消
- */
-type SseTask = { parser: SSEParser | undefined | null };
 
 /** 日志请求 */
 type RequestLogConfig = {
@@ -286,8 +289,6 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
   // 2. 创建 Promise
   return new Promise<T>((resolve, reject) => {
     const execute = async () => {
-      const isGet = method === 'GET';
-
       // 2.1 参数处理
       // 参数过滤 undefined
       let fillData = isPlainObject(data) ? filterRequestData(data) : data;
@@ -317,41 +318,16 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         }
       }
 
-      // 获取 Content-Type (忽略大小写)
-      const contentTypeKey = Object.keys(fillHeader).find(
-        (k) => k.toLowerCase() === 'content-type',
-      );
-      const contentType = contentTypeKey ? String(fillHeader[contentTypeKey]).toLowerCase() : '';
-      const isObjectData = isPlainObject(fillData);
-      const isArrayData = !isObjectData && Array.isArray(fillData);
-
-      if (!isGet && fillData && (isObjectData || isArrayData) && !contentType) {
-        fillHeader['Content-Type'] = 'application/json';
-      }
-
       // 2.2 处理 URL 和 Body
-      fillUrl =
-        isGet && isPlainObject(fillData)
-          ? appendUrlParam(fillUrl, fillData as Record<string, unknown>)
-          : fillUrl;
-
-      let fillBody: BodyInit | null | undefined;
-
-      if (!isGet && fillData) {
-        if (isObjectData && contentType.includes('application/x-www-form-urlencoded')) {
-          // application/x-www-form-urlencoded: 转换为 URLSearchParams
-          fillBody = toSearchParams(fillData as Record<string, unknown>);
-        } else if (isObjectData && contentType.includes('multipart/form-data')) {
-          // multipart/form-data: 转换为 FormData
-          fillBody = toFormData(fillData as Record<string, unknown>);
-          // 删除 Content-Type, 让 fetch 自动生成 boundary
-          if (contentTypeKey) delete fillHeader[contentTypeKey];
-        } else if (isObjectData || isArrayData) {
-          fillBody = JSON.stringify(fillData);
-        } else {
-          fillBody = fillData as BodyInit;
-        }
-      }
+      const fetchRequest = createFetchRequest({
+        url: fillUrl,
+        method,
+        data: fillData,
+        header: fillHeader,
+      });
+      fillUrl = fetchRequest.url;
+      fillHeader = fetchRequest.headers;
+      const fillBody = fetchRequest.body;
 
       // 2.3 日志与缓存配置
       const logConfig = { ...config, data: fillData, header: fillHeader, url: fillUrl };
@@ -380,7 +356,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
             startTime,
             res,
           });
-          resolve(getResult(res, resKey) as T);
+          resolve(getResponseResult(res, resKey) as T);
           return;
         }
       }
@@ -433,7 +409,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         if (enableChunked && response.ok) {
           if (showLoading) appConfig.hideLoading?.();
 
-          const res = await handleStreamResponse(response, sseTask);
+          const res = await handleFetchStreamResponse(response, sseTask);
 
           logRequestInfo({ status: 'success', config: logConfig, startTime, res });
 
@@ -442,7 +418,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         }
 
         // 2.9 处理普通响应
-        const resData = await parseResponse(response, responseType);
+        const resData = await parseFetchResponse(response, responseType);
 
         // 隐藏 Loading
         if (showLoading) appConfig.hideLoading?.();
@@ -464,7 +440,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         if (isSuccess) {
           // 业务正常
           if (isCache) requestCache.set(cacheKey, { res, expire: Date.now() + cacheTime });
-          resolve(getResult(res, resKey) as T);
+          resolve(getResponseResult(res, resKey) as T);
         } else if (isRelogin) {
           // 登录失效
           reject(res);
@@ -502,30 +478,6 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 
     execute();
   });
-}
-
-/**
- * 参数过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 、 0 这些有效值)
- */
-export function filterRequestData(data: Record<string, any>) {
-  const res: Record<string, any> = {};
-  Object.entries(data).forEach(([k, v]) => {
-    if (v !== undefined) res[k] = v;
-  });
-  return res;
-}
-
-/**
- * 请求头过滤空值 (undefined, null, ""), 不过滤0和false
- */
-export function filterRequestHeader(header: RequestConfigBase['header']) {
-  const newHeader: Record<string, string> = {};
-  if (header) {
-    Object.entries(header).forEach(([k, v]) => {
-      if (v !== undefined && v !== null && v !== '') newHeader[k] = String(v);
-    });
-  }
-  return newHeader;
 }
 
 /**
@@ -573,14 +525,6 @@ function logRequestInfo(options: {
 }
 
 /**
- * 获取 resKey 对应的数据
- */
-function getResult(res: unknown, resKey?: RequestConfigBase['resKey']) {
-  if (!res || !resKey || typeof res !== 'object') return res;
-  return getResponseValue(res, resKey);
-}
-
-/**
  * 检查缓存
  */
 function checkCache(cacheKey: string) {
@@ -591,111 +535,4 @@ function checkCache(cacheKey: string) {
     return null;
   }
   return cached.res;
-}
-
-/**
- * 处理流式响应
- */
-async function handleStreamResponse(response: Response, sseTask: SseTask) {
-  if (!response.body) throw new Error('Response body is null');
-  if (sseTask.parser === undefined) {
-    throw new Error(
-      'Stream parser missing: Please set config.onMessage when enableChunked is true',
-    );
-  }
-
-  const reader = response.body.getReader();
-  while (true) {
-    const { done, value } = await reader.read();
-
-    if (sseTask.parser === null) {
-      await reader.cancel();
-      throw new DOMException('BodyStreamBuffer was aborted', 'AbortError');
-    }
-
-    if (done) break;
-    if (sseTask.parser && value) sseTask.parser.receive(value.buffer);
-  }
-
-  if (sseTask.parser) sseTask.parser.flush();
-
-  return 'Stream Finished';
-}
-
-/**
- * 解析响应数据
- */
-async function parseResponse(response: Response, responseType: string) {
-  if (!response.ok) {
-    // HTTP 非 2xx && responseType是'arraybuffer'或'text' (如服务端设置401+JSON体,确保toLogin能正常触发)
-    const text = await response.text();
-
-    try {
-      return JSON.parse(text);
-    } catch {
-      throw new Error(`HTTP Error ${response.status}: ${text || response.statusText}`);
-    }
-  }
-
-  // HTTP 为 2xx 的响应数据
-  let resData: ResponseData;
-  if (responseType === 'arraybuffer') {
-    resData = await response.arrayBuffer();
-  } else if (responseType === 'text') {
-    resData = await response.text();
-  } else {
-    const text = await response.text();
-    try {
-      resData = JSON.parse(text);
-    } catch {
-      resData = text;
-    }
-  }
-  return resData;
-}
-
-/**
- * 转换为 URLSearchParams
- */
-function toSearchParams(data: Record<string, unknown>) {
-  const params = new URLSearchParams();
-  for (const key in data) {
-    const val = data[key];
-    // undefined 已在 fillData 阶段过滤，此处仅需判断 null
-    // null 在 Form 中会被转为字符串 "null"，通常不符合预期，故过滤
-    if (val === null) continue;
-    if (Array.isArray(val)) {
-      val.forEach((v) => params.append(key, typeof v === 'object' ? JSON.stringify(v) : String(v)));
-    } else {
-      params.append(key, typeof val === 'object' ? JSON.stringify(val) : String(val));
-    }
-  }
-  return params;
-}
-
-/**
- * 转换为 FormData
- */
-function toFormData(data: Record<string, unknown>) {
-  const formData = new FormData();
-  for (const key in data) {
-    const val = data[key];
-    // undefined 已在 fillData 阶段过滤，此处仅需判断 null
-    // null 在 Form 中会被转为字符串 "null"，通常不符合预期，故过滤
-    if (val === null) continue;
-    if (Array.isArray(val)) {
-      val.forEach((v) =>
-        formData.append(
-          key,
-          v instanceof Blob ? v : typeof v === 'object' ? JSON.stringify(v) : String(v),
-        ),
-      );
-    } else {
-      formData.append(
-        key,
-        val instanceof Blob ? val : typeof val === 'object' ? JSON.stringify(val) : String(val),
-      );
-    }
-  }
-  return formData;
 }

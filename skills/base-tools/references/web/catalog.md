@@ -16,9 +16,13 @@
 - 来源: `src/shared/network/action.ts`
 - 导出: `ApiActionConfig`、`ApiTaskConfig`
 
+###### fetch
+- 来源: `src/shared/network/fetch.ts`
+- 导出: `createFetchRequest`、`FetchRequestHeader`、`filterRequestData`、`filterRequestHeader`、`handleFetchStreamResponse`、`parseFetchResponse`、`SseTask`
+
 ###### response
 - 来源: `src/shared/network/response.ts`
-- 导出: `ApiResponseConfig`、`ApiResponseConfigOptions`、`getResponseValue`、`ResponseKey`、`ResponseTransformer`
+- 导出: `ApiResponseConfig`、`ApiResponseConfigOptions`、`getResponseResult`、`getResponseValue`、`ResponseKey`、`ResponseTransformer`
 
 ### clipboard
 - 来源: `src/web/clipboard/index.ts`
@@ -48,7 +52,7 @@
 
 #### request
 - 来源: `src/web/network/request.ts`
-- 导出: `filterRequestData`、`filterRequestHeader`、`request`、`RequestConfig`、`RequestConfigBase`、`RequestData`、`RequestMethod`、`RequestTask`、`ResponseData`、`TransformRequestContext`、`TransformRequestResult`
+- 导出: `request`、`RequestConfig`、`RequestConfigBase`、`RequestData`、`RequestMethod`、`RequestTask`、`ResponseData`、`TransformRequestContext`、`TransformRequestResult`
 
 #### uploadFile
 - 来源: `src/web/network/uploadFile.ts`
