@@ -1,15 +1,22 @@
-import { cloneDeep, isPlainObject, pickBy } from 'es-toolkit';
+import { cloneDeep, isPlainObject } from 'es-toolkit';
 import { toDayjs } from '../../ts/day';
 import { getBaseToolsConfig } from '../config';
 import { toLogin } from '../router';
-import { getPlatformOs } from '../system';
+import { getPlatformOs, getPlatformUni } from '../system';
 import { toast } from '../ui';
 import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
 import {
+  getResponseResult,
   getResponseValue,
   type ApiResponseConfig,
   type ResponseTransformer,
 } from '../../shared/network/response';
+import {
+  createFetchRequest,
+  filterRequestData,
+  filterRequestHeader,
+  handleFetchStreamResponse,
+} from '../../shared/network/fetch';
 import type { ApiTaskConfig } from '../../shared/network/action';
 import type { AppLogInfo } from '../config';
 
@@ -184,12 +191,10 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     } = config;
 
     // 参数: 过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 这些有效值)
-    let fillData = isPlainObject(data) ? pickBy(data, (val) => val !== undefined) : data;
+    let fillData = isPlainObject(data) ? filterRequestData(data as Record<string, any>) : data;
 
     // 请求头: 过滤空值 (undefined, null, ""), 不过滤0和false
-    let fillHeader = header
-      ? pickBy(header, (val) => val !== undefined && val !== null && val !== '')
-      : {};
+    let fillHeader = filterRequestHeader(header);
 
     const execute = async () => {
       let fillUrl = url;
@@ -205,15 +210,12 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 
         if (transformed.url !== undefined) fillUrl = transformed.url;
         if (transformed.header !== undefined) {
-          fillHeader = pickBy(
-            transformed.header,
-            (val) => val !== undefined && val !== null && val !== '',
-          );
+          fillHeader = filterRequestHeader(transformed.header);
         }
         if (transformed.data !== undefined) {
           const transformedData = transformed.data;
           fillData = isPlainObject(transformedData)
-            ? pickBy(transformedData, (val) => val !== undefined)
+            ? filterRequestData(transformedData as Record<string, any>)
             : transformedData;
         }
       }
@@ -225,7 +227,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       const startTime = Date.now();
 
       // 缓存处理
-      const isCache = cacheTime && cacheTime > 0;
+      const isCache = !enableChunked && cacheTime && cacheTime > 0;
       const cacheKey = isCache ? JSON.stringify({ url: fillUrl, data: fillData }) : '';
       if (isCache) {
         const cached = requestCache.get(cacheKey);
@@ -239,7 +241,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
               startTime,
               res,
             });
-            resolve(getResult(res, resKey) as T); // 返回缓存数据
+            resolve(getResponseResult(res, resKey) as T); // 返回缓存数据
             return;
           }
           requestCache.delete(cacheKey); // 删除过期缓存
@@ -249,6 +251,88 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       // 显示进度条
       if (showLoading)
         uni.showLoading(typeof showLoading === 'string' ? { title: showLoading } : {});
+
+      // uni.request 在 H5 端基于 XHR，无法读取响应流；仅 H5 流式请求改用 Fetch。
+      if (enableChunked && getPlatformUni() === 'web') {
+        const controller = new AbortController();
+        const sseTask: { parser: SSEParser | undefined | null } = {
+          parser: onMessage ? new SSEParser(onMessage) : undefined,
+        };
+        const headerListeners = new Set<(result: any) => void>();
+        const task: UniApp.RequestTask = {
+          abort() {
+            sseTask.parser = null;
+            controller.abort();
+          },
+          onHeadersReceived(callback) {
+            headerListeners.add(callback);
+          },
+          offHeadersReceived(callback) {
+            headerListeners.delete(callback);
+          },
+        };
+
+        onTaskReady?.(task);
+
+        let isTimeout = false;
+        const timeoutId = setTimeout(() => {
+          isTimeout = true;
+          task.abort();
+        }, config.timeout ?? 60000);
+
+        try {
+          const {
+            url: streamUrl,
+            body,
+            headers,
+          } = createFetchRequest({
+            url: fillUrl,
+            method: config.method,
+            data: fillData,
+            header: fillHeader,
+          });
+          const response = await fetch(streamUrl, {
+            method: config.method || 'GET',
+            headers,
+            body,
+            signal: controller.signal,
+            credentials: config.withCredentials ? 'include' : 'same-origin',
+          });
+
+          const responseHeader: Record<string, string> = {};
+          response.headers.forEach((value, key) => {
+            responseHeader[key] = value;
+          });
+          headerListeners.forEach((callback) =>
+            callback({ header: responseHeader, statusCode: response.status }),
+          );
+
+          if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+          const res = await handleFetchStreamResponse(response, sseTask);
+
+          if (showLoading) uni.hideLoading();
+          logRequestInfo({ status: 'success', config: logConfig, startTime, res });
+          resolve(res as T);
+        } catch (e) {
+          if (showLoading) uni.hideLoading();
+
+          const isAbortError = e instanceof DOMException && e.name === 'AbortError';
+          const error = isAbortError && isTimeout ? new Error('Request Timeout') : e;
+
+          if (toastError && (!isAbortError || isTimeout)) {
+            toast(
+              isTimeout
+                ? '请求超时'
+                : `请求失败:${e instanceof Error ? e.message : JSON.stringify(e)}`,
+            );
+          }
+          logRequestInfo({ status: 'fail', config: logConfig, startTime, e: error });
+          reject(error);
+        } finally {
+          clearTimeout(timeoutId);
+        }
+        return;
+      }
 
       // 发送请求
       const task = uni.request({
@@ -281,7 +365,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 
           if (isSuccess) {
             // 业务正常
-            resolve(getResult(res, resKey) as T);
+            resolve(getResponseResult(res, resKey) as T);
           } else if (isRelogin) {
             // 重新登录
             toLogin();
@@ -378,7 +462,7 @@ function logRequestInfo(options: {
 
     // 微信开发工具输出JSON字符串,快捷复制定义ts (使用对象的形式,避免控制台展开根对象时占用太多屏幕)
     if (getPlatformOs() === 'devtools' && res && typeof res === 'object') {
-      const result = getResult(res, config.resKey);
+      const result = getResponseResult(res, config.resKey);
 
       if (result && typeof result === 'object') {
         info._res = { text: JSON.stringify(result) };
@@ -390,11 +474,4 @@ function logRequestInfo(options: {
     info.e = e instanceof Error ? { name: e.name, message: e.message, stack: e.stack } : e; // Error需转为普通对象,否则发送网络日志会序列化成空对象
     log('error', info);
   }
-}
-
-// 获取 resKey 对应的数据
-function getResult(res: unknown, resKey?: RequestConfigBase['resKey']) {
-  if (!res || !resKey || typeof res !== 'object') return res;
-
-  return getResponseValue(res, resKey);
 }
