@@ -76,10 +76,18 @@ function main() {
     }
 
     // 4. Mirror the release commit and tag to every configured remote
+    const pushErrors = [];
     for (const remote of remotes) {
-      run(`git push ${remote} master`);
-      run(`git push ${remote} ${tagName}`);
-      console.log(`\x1b[32mMaster and tag ${tagName} pushed to ${remote}.\x1b[0m`);
+      try {
+        run(`git push ${remote} master refs/tags/${tagName}`);
+        console.log(`\x1b[32mMaster and tag ${tagName} pushed to ${remote}.\x1b[0m`);
+      } catch (error) {
+        pushErrors.push(`${remote}: ${error.message}`);
+        console.error(`\x1b[31mFailed to push master/tag to ${remote}; continuing with other remotes.\x1b[0m`);
+      }
+    }
+    if (pushErrors.length) {
+      throw new Error(`Failed to push to remote(s):\n${pushErrors.join('\n')}`);
     }
 
     // 5. Merge master into docs and push to every configured remote
