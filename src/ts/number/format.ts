@@ -164,7 +164,7 @@ export function toChineseNum(num: number | string) {
         zeroFlag = true;
         continue;
       }
-      if (zeroFlag) str = digit[0] + str;
+      if (zeroFlag && str) str = digit[0] + str;
       str = digit[d] + unit[i] + str;
       zeroFlag = false;
     }
