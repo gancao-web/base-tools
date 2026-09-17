@@ -50,6 +50,10 @@
 - 来源: `src/web/network/download.ts`
 - 导出: `download`、`getDispositionFileName`、`hasCss`、`hasJs`、`loadCss`、`loadJs`、`preloadImage`
 
+#### loadFontFace
+- 来源: `src/web/network/loadFontFace.ts`
+- 导出: `loadFontFace`、`LoadFontFaceOptions`
+
 #### request
 - 来源: `src/web/network/request.ts`
 - 导出: `request`、`RequestConfig`、`RequestConfigBase`、`RequestData`、`RequestMethod`、`RequestTask`、`ResponseData`、`TransformRequestContext`、`TransformRequestResult`
