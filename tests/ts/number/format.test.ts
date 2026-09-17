@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatFileSize, toChineseCurrency } from '../../../src/ts';
+import { formatFileSize, toChineseCurrency, toChineseNum } from '../../../src/ts';
 
 describe('ts/number format - file size', () => {
   it('formats bytes with binary units', () => {
@@ -21,6 +21,18 @@ describe('ts/number format - file size', () => {
     expect(formatFileSize(Number.NaN)).toBe('-');
     expect(formatFileSize(Number.POSITIVE_INFINITY)).toBe('-');
     expect(formatFileSize(-1, { fallback: '' })).toBe('');
+  });
+});
+
+describe('ts/number format - Chinese number', () => {
+  it('does not append zero for trailing zero digits', () => {
+    expect(toChineseNum(10)).toBe('十');
+    expect(toChineseNum(20)).toBe('二十');
+    expect(toChineseNum(1000)).toBe('一千');
+  });
+
+  it('keeps zero between non-zero digits', () => {
+    expect(toChineseNum(101)).toBe('一百零一');
   });
 });
 
