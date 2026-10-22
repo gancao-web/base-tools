@@ -203,21 +203,26 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     let httpStatus: number | undefined;
     let responseHeader: Record<string, unknown> | undefined;
     let businessCode: unknown;
-    let logged = false;
+    let finalized = false;
     let sseStartMs = Date.now();
     const captureLog = config.showLog !== false && !!getBaseToolsConfig().log && !enableChunked;
-    const finish = (info: Omit<RequestLogOptions, 'config'>) => {
-      if (logged) return;
-      logged = true;
-      logRequestInfo({
-        config: logConfig,
-        httpTimer,
-        httpStatus,
-        responseHeader,
-        businessCode,
-        sseStartMs,
-        ...info,
-      });
+    // 统一结束请求；状态与是否输出日志无关，日志异常不得阻止 Promise 完成。
+    const finish = (info: Omit<RequestLogOptions, 'config'>, result?: T) => {
+      if (finalized) return;
+      finalized = true;
+      if (info.success) resolve(result as T);
+      else reject('e' in info ? info.e : info.res);
+      runRequestEffect(() =>
+        logRequestInfo({
+          config: logConfig,
+          httpTimer,
+          httpStatus,
+          responseHeader,
+          businessCode,
+          sseStartMs,
+          ...info,
+        }),
+      );
     };
     const execute = async () => {
       let fillData = isPlainObject(data) ? filterRequestData(data as Record<string, any>) : data;
@@ -255,8 +260,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
           try {
             const result = getResponseResult(res, resKey) as T;
             businessCode = getResponseValue(res, codeKey);
-            finish({ status: 'success', success: true, fromCache: true, res });
-            resolve(result);
+            finish({ status: 'success', success: true, fromCache: true, res }, result);
           } catch (e) {
             finish({
               status: 'fail',
@@ -266,7 +270,6 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
               failureStage: 'response',
               failureCode: 'response_result_failed',
             });
-            reject(e);
           }
           return;
         }
@@ -336,8 +339,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
           const res = await handleFetchStreamResponse(response, sseTask);
 
           if (showLoading) runRequestEffect(() => uni.hideLoading());
-          finish({ status: 'success', success: true, res });
-          resolve(res as T);
+          finish({ status: 'success', success: true, res }, res as T);
         } catch (e) {
           if (showLoading) runRequestEffect(() => uni.hideLoading());
 
@@ -349,12 +351,11 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
               toast(
                 isTimeout
                   ? '请求超时'
-                  : `请求失败:${e instanceof Error ? e.message : JSON.stringify(e)}`,
+                  : `请求失败: ${e instanceof Error ? e.message : JSON.stringify(e)}`,
               ),
             );
           }
           finish({ status: 'fail', success: false, e: error });
-          reject(error);
         } finally {
           clearTimeout(timeoutId);
         }
@@ -369,12 +370,12 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         data: fillData,
         header: fillHeader,
         success: (xhr) => {
-          if (logged) return;
+          if (finalized) return;
           httpTimer?.end();
           httpStatus = xhr.statusCode;
           if (captureLog) responseHeader = { ...xhr.header };
-          let res: UniApp.RequestSuccessCallbackResult['data'] | undefined;
-          let hasResponseBody = false;
+          // 转换失败时保留宿主返回的正文；成功后再替换为转换结果。
+          let res = xhr.data;
           let result: unknown;
           let msg: string;
           let isSuccess: boolean;
@@ -382,7 +383,6 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
           let failureCode: RequestFailureCode = 'response_transform_failed';
           try {
             res = transformResponse ? transformResponse(xhr.data) : xhr.data;
-            hasResponseBody = true;
             failureCode = 'response_result_failed';
             businessCode = enableChunked ? '' : getResponseValue(res, codeKey);
             const scode = enableChunked
@@ -406,31 +406,35 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
               e,
               failureStage: 'response',
               failureCode,
-              ...(hasResponseBody ? { res } : {}),
+              res,
             });
-            reject(e);
             if (showLoading) runRequestEffect(() => uni.hideLoading());
+            if (toastError)
+              runRequestEffect(() =>
+                toast(`请求失败: ${e instanceof Error ? e.message : JSON.stringify(e)}`, 2000),
+              );
             return;
           }
-          finish({
-            status: 'success',
-            success: isSuccess,
-            res,
-            ...(!isSuccess && {
-              failureStage: 'business' as const,
-              failureCode: isRelogin ? ('login_required' as const) : ('business_failed' as const),
-            }),
-          });
+          finish(
+            {
+              status: 'success',
+              success: isSuccess,
+              res,
+              ...(!isSuccess && {
+                failureStage: 'business' as const,
+                failureCode: isRelogin ? ('login_required' as const) : ('business_failed' as const),
+              }),
+            },
+            result as T,
+          );
           if (showLoading) runRequestEffect(() => uni.hideLoading());
-          if (isSuccess) resolve(result as T);
-          else {
-            reject(res);
+          if (!isSuccess) {
             if (isRelogin) runRequestEffect(() => toLogin());
             else if (toastError) runRequestEffect(() => toast(msg, 2000));
           }
         },
         fail(e) {
-          if (logged) return;
+          if (finalized) return;
           httpTimer?.end();
           // 只识别宿主约定的明确通知，不用模糊关键词推测。
           const failureCode: RequestFailureCode =
@@ -440,10 +444,9 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
                 ? 'aborted'
                 : 'network_failed';
           finish({ status: 'fail', success: false, e, failureStage: 'network', failureCode });
-          reject(e);
           if (showLoading) runRequestEffect(() => uni.hideLoading());
           if (toastError)
-            runRequestEffect(() => toast(`请求失败:${e.errMsg || JSON.stringify(e)}`));
+            runRequestEffect(() => toast(`请求失败: ${e.errMsg || JSON.stringify(e)}`));
         },
       });
       if (onMessage) {
@@ -462,7 +465,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       runRequestEffect(() => onTaskReady?.(task));
     };
     execute().catch((e) => {
-      if (logged) return;
+      if (finalized) return;
       // 同步发送失败没有网络传输，不补造 duration。
       finish({
         status: 'fail',
@@ -472,8 +475,11 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         failureCode: 'request_prepare_failed',
         httpTimer: undefined,
       });
-      reject(e);
       if (showLoading) runRequestEffect(() => uni.hideLoading());
+      if (toastError)
+        runRequestEffect(() =>
+          toast(`请求失败: ${e instanceof Error ? e.message : JSON.stringify(e)}`, 2000),
+        );
     });
   });
 }

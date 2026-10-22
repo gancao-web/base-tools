@@ -109,7 +109,9 @@ chatTask?.abort();
 
 ### 字段含义
 
-保留 name、status、url、method、data、header、res、e、fromCache 和 logExtra。`res` 是执行 transformResponse 后、按 resKey 提取业务结果前的完整正文；`e` 中的 Error 转换为包含 name/message/stack 的普通对象。
+保留 name、status、url、method、data、header、res、e、fromCache 和 logExtra。`res` 通常是执行 transformResponse 后、按 resKey 提取业务结果前的完整正文；若 transformResponse 抛错，则保留宿主传入转换函数的正文。`e` 中的 Error 转换为包含 name/message/stack 的普通对象，并递归记录标准 Error.cause；循环的 Error.cause 用 `[Circular error cause]` 截断，非 Error 值保持原值。reject 仍传递原始异常，不使用日志序列化结果。
+
+开启 toastError 时，普通响应处理异常使用 Error.message 生成“请求失败: 错误信息”提示，不将 cause 或响应正文展示给用户。封装库可抛出 `new Error('响应处理失败', { cause: originalError })`，分别提供用户提示和日志中的原始原因；工具库不根据提示文字或异常类型推断业务专有分类。
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |

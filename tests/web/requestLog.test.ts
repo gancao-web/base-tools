@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { request, setBaseToolsConfig } from '../../src/web';
 import { request as requestUni, setBaseToolsConfig as setUniConfig } from '../../src/uni';
 import { createUniConfig } from '../helpers/uniConfig';
+import { writeRequestLog } from '../../src/shared/network/requestLog';
 
 const config = {
   url: '/request-log',
@@ -16,7 +17,7 @@ const config = {
 
 describe('普通请求统一日志', () => {
   afterEach(() => {
-    setBaseToolsConfig({ log: undefined });
+    setBaseToolsConfig({ log: undefined, toast: undefined });
     setUniConfig(createUniConfig({ log: undefined }));
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
@@ -131,8 +132,57 @@ describe('普通请求统一日志', () => {
     expect(info.businessCode).toBeUndefined();
   });
 
-  it('uni 原生响应回调抛错仍 reject，并保留 HTTP 信息', async () => {
-    const error = new Error('transform');
+  it('Web 转换失败保留原始正文和异常链，提示只使用外层 message', async () => {
+    const cause = new SyntaxError('invalid JSON');
+    const error = new Error('响应处理失败', { cause });
+    const log = vi.fn();
+    const toast = vi.fn();
+    setBaseToolsConfig({ log, toast });
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('raw response')));
+    await expect(
+      request({
+        ...config,
+        responseType: 'text',
+        toastError: true,
+        data: { id: 1 },
+        transformResponse: () => {
+          throw error;
+        },
+      }),
+    ).rejects.toBe(error);
+    expect(log).toHaveBeenCalledTimes(1);
+    const info = log.mock.calls[0][1];
+    expect(info).toMatchObject({
+      url: '/request-log?id=1',
+      data: { id: 1 },
+      res: 'raw response',
+      failureStage: 'response',
+      failureCode: 'response_transform_failed',
+      e: {
+        name: 'Error',
+        message: '响应处理失败',
+        cause: { name: 'SyntaxError', message: 'invalid JSON', stack: cause.stack },
+      },
+    });
+    expect(JSON.parse(JSON.stringify(info)).e.cause.message).toBe('invalid JSON');
+    expect(toast).toHaveBeenCalledWith({ status: 'fail', msg: '请求失败: 响应处理失败' });
+  });
+
+  it('循环 Error.cause 不阻止失败日志输出', () => {
+    const error = new Error('cycle');
+    error.cause = error;
+    const log = vi.fn();
+    writeRequestLog(log, { config: {}, status: 'fail', e: error });
+    expect(log).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(JSON.stringify(log.mock.calls[0][1])).e).toMatchObject({
+      message: 'cycle',
+      cause: '[Circular error cause]',
+    });
+  });
+
+  it('uni 原生响应回调抛错仍 reject，并保留原始正文、异常链和 HTTP 信息', async () => {
+    const cause = new SyntaxError('invalid JSON');
+    const error = new Error('transform', { cause });
     const log = vi.fn();
     setUniConfig(createUniConfig({ log }));
     vi.stubGlobal('uni', {
@@ -141,7 +191,7 @@ describe('普通请求统一日志', () => {
       request: (options: UniApp.RequestOptions) => {
         queueMicrotask(() =>
           options.success?.({
-            data: {},
+            data: 'raw response',
             statusCode: 200,
             header: { test: 'yes' },
             cookies: [],
@@ -164,6 +214,8 @@ describe('普通请求统一日志', () => {
       success: false,
       httpStatus: 200,
       responseHeader: { test: 'yes' },
+      res: 'raw response',
+      e: { message: 'transform', cause: { name: 'SyntaxError', message: 'invalid JSON' } },
       failureCode: 'response_transform_failed',
       duration: expect.any(Number),
     });

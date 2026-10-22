@@ -419,11 +419,13 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
             failureCode = 'http_failed';
           }
         });
+        // 转换失败时仍保留已读取的正文；成功后再替换为转换结果。
+        responseBody = resData;
+        hasResponseBody = true;
         failureStage = 'response';
         failureCode = 'response_transform_failed';
         const res = transformResponse ? transformResponse(resData) : resData;
         responseBody = res;
-        hasResponseBody = true;
         failureCode = 'response_result_failed';
         businessCode = getResponseValue(res, codeKey);
         const scode = successKey ? getResponseValue(res, successKey) : businessCode;

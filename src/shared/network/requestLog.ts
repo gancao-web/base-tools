@@ -124,13 +124,22 @@ export function writeRequestLog(
     // 放在正文复制及日志回调之前，调用方计时不会包含日志自身的开销。
     Object.assign(info, extra);
     if ('res' in options) info.res = cloneDeep(res);
-    if (error !== undefined)
-      info.e =
-        error instanceof Error
-          ? { name: error.name, message: error.message, stack: error.stack }
-          : error;
+    if (error !== undefined) info.e = serializeRequestError(error);
     runRequestEffect(() => decorate?.(info));
     // 保持既有 level/status 对应关系，新增失败事实由 success/失败字段表达。
     return log(status === 'fail' ? 'error' : 'info', info);
   });
+}
+
+/** 保留标准异常链；普通抛出值沿用原值，循环的 Error.cause 用标记截断。 */
+function serializeRequestError(error: unknown, seen = new Set<Error>()): unknown {
+  if (!(error instanceof Error)) return error;
+  if (seen.has(error)) return '[Circular error cause]';
+  seen.add(error);
+  return {
+    name: error.name,
+    message: error.message,
+    stack: error.stack,
+    ...('cause' in error ? { cause: serializeRequestError(error.cause, seen) } : {}),
+  };
 }
