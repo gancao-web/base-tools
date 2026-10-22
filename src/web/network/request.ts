@@ -1,5 +1,5 @@
-import { cloneDeep, isPlainObject } from 'es-toolkit';
-import { toDayjs } from '../../ts/day';
+import { isPlainObject } from 'es-toolkit';
+import { startTimer, type Timer } from '../../ts/time';
 import { getBaseToolsConfig } from '../config';
 import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
 import {
@@ -16,8 +16,14 @@ import {
   type ApiResponseConfig,
   type ResponseTransformer,
 } from '../../shared/network/response';
+import {
+  runRequestEffect,
+  writeRequestLog,
+  type RequestFailureStage,
+  type RequestFailureCode,
+  type RequestLogOptions,
+} from '../../shared/network/requestLog';
 import type { ApiTaskConfig } from '../../shared/network/action';
-import type { AppLogInfo } from '../config';
 
 export { filterRequestData, filterRequestHeader } from '../../shared/network/fetch';
 
@@ -153,6 +159,7 @@ type RequestLogConfig = {
   method?: RequestMethod;
   logExtra?: Record<string, unknown>;
   showLog?: boolean;
+  enableChunked?: boolean;
   resKey?: RequestConfigBase['resKey'];
 };
 
@@ -267,15 +274,8 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     onTaskReady,
     onMessage,
   } = config;
-
-  // 1. 初始化控制对象
   const controller = new AbortController();
-  const signal = controller.signal;
-
-  // 流式解析对象
   const sseTask: SseTask = { parser: onMessage ? new SSEParser(onMessage) : undefined };
-
-  // 构造 Task 对象
   const task: RequestTask = {
     abort: () => {
       sseTask.parser = null;
@@ -283,245 +283,214 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     },
   };
 
-  // Task 准备就绪的回调
-  onTaskReady?.(task);
-
-  // 2. 创建 Promise
   return new Promise<T>((resolve, reject) => {
-    const execute = async () => {
-      // 2.1 参数处理
-      // 参数过滤 undefined
-      let fillData = isPlainObject(data) ? filterRequestData(data) : data;
-
-      // 请求头过滤空值 (undefined, null, "")
-      let fillHeader = filterRequestHeader(header);
-
-      // 请求前转换
-      let fillUrl = url;
-      const requestTransformer = transformRequest;
-      if (requestTransformer) {
-        const transformed =
-          (await requestTransformer({
-            url: fillUrl,
-            method,
-            header: { ...fillHeader },
-            data: fillData as D,
-          })) || {};
-
-        if (transformed.url !== undefined) fillUrl = transformed.url;
-        if (transformed.header !== undefined) fillHeader = filterRequestHeader(transformed.header);
-        if (transformed.data !== undefined) {
-          const transformedData = transformed.data;
-          fillData = isPlainObject(transformedData)
-            ? filterRequestData(transformedData as Record<string, any>)
-            : transformedData;
-        }
-      }
-
-      // 2.2 处理 URL 和 Body
-      const fetchRequest = createFetchRequest({
-        url: fillUrl,
-        method,
-        data: fillData,
-        header: fillHeader,
+    const appConfig = getBaseToolsConfig();
+    const captureLog = config.showLog !== false && !!appConfig.log && !enableChunked;
+    let logConfig: RequestLogConfig = config;
+    let httpTimer: Timer | undefined;
+    let httpStatus: number | undefined;
+    let responseHeader: Record<string, unknown> | undefined;
+    let failureStage: RequestFailureStage = 'prepare';
+    let failureCode: RequestFailureCode = 'request_prepare_failed';
+    let businessCode: unknown;
+    let responseBody: unknown;
+    let hasResponseBody = false;
+    let fromCache = false;
+    let logged = false;
+    let isTimeout = false;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let sseStartMs = Date.now();
+    const finish = (info: Omit<RequestLogOptions, 'config'>) => {
+      if (logged) return;
+      logged = true;
+      logRequestInfo({
+        config: logConfig,
+        httpTimer,
+        httpStatus,
+        responseHeader,
+        businessCode,
+        sseStartMs,
+        fromCache,
+        ...info,
       });
-      fillUrl = fetchRequest.url;
-      fillHeader = fetchRequest.headers;
-      const fillBody = fetchRequest.body;
+    };
 
-      // 2.3 日志与缓存配置
-      const logConfig = { ...config, data: fillData, header: fillHeader, url: fillUrl };
-      const startTime = Date.now();
-
-      // 2.4 检查缓存
-      const isCache = cacheTime && cacheTime > 0;
-      const cacheKey = isCache
-        ? JSON.stringify({
-            url: fillUrl,
-            method,
-            header: fillHeader,
-            data: fillData,
-            fetchOptions,
-            responseType,
-          })
-        : '';
-
-      if (isCache) {
-        const res = checkCache(cacheKey);
-        if (res) {
-          logRequestInfo({
-            status: 'success',
-            config: logConfig,
-            fromCache: true,
-            startTime,
-            res,
-          });
-          resolve(getResponseResult(res, resKey) as T);
-          return;
-        }
-      }
-
-      // 2.5 UI 反馈
-      const appConfig = getBaseToolsConfig();
-      if (showLoading)
-        appConfig.showLoading?.(typeof showLoading === 'string' ? { title: showLoading } : {});
-
-      // 2.6 设置超时
-      let isTimeout = false;
-      const timeoutId = setTimeout(() => {
-        isTimeout = true;
-        controller.abort();
-      }, timeout);
-
+    const execute = async () => {
       try {
-        // 2.7 发起请求
+        onTaskReady?.(task);
+        let fillData = isPlainObject(data) ? filterRequestData(data) : data;
+        let fillHeader = filterRequestHeader(header);
+        let fillUrl = url;
+        if (transformRequest) {
+          const transformed =
+            (await transformRequest({
+              url: fillUrl,
+              method,
+              header: { ...fillHeader },
+              data: fillData as D,
+            })) || {};
+          if (transformed.url !== undefined) fillUrl = transformed.url;
+          if (transformed.header !== undefined)
+            fillHeader = filterRequestHeader(transformed.header);
+          if (transformed.data !== undefined)
+            fillData = isPlainObject(transformed.data)
+              ? filterRequestData(transformed.data as Record<string, any>)
+              : transformed.data;
+        }
+        const fetchRequest = createFetchRequest({
+          url: fillUrl,
+          method,
+          data: fillData,
+          header: fillHeader,
+        });
+        fillUrl = fetchRequest.url;
+        fillHeader = fetchRequest.headers;
+        logConfig = { ...config, data: fillData, header: fillHeader, url: fillUrl, method };
+        sseStartMs = Date.now();
+
+        const isCache = !enableChunked && cacheTime && cacheTime > 0;
+        const cacheKey = isCache
+          ? JSON.stringify({
+              url: fillUrl,
+              method,
+              header: fillHeader,
+              data: fillData,
+              fetchOptions,
+              responseType,
+            })
+          : '';
+        if (isCache) {
+          const res = checkCache(cacheKey);
+          if (res) {
+            fromCache = true;
+            responseBody = res;
+            hasResponseBody = true;
+            failureStage = 'response';
+            failureCode = 'response_result_failed';
+            const result = getResponseResult(res, resKey) as T;
+            businessCode = getResponseValue(res, codeKey);
+            finish({ status: 'success', success: true, fromCache: true, res });
+            resolve(result);
+            return;
+          }
+        }
+
+        if (showLoading)
+          runRequestEffect(() =>
+            appConfig.showLoading?.(typeof showLoading === 'string' ? { title: showLoading } : {}),
+          );
+        timeoutId = setTimeout(() => {
+          isTimeout = true;
+          controller.abort();
+        }, timeout);
         const requestInit: RequestInit = {
           ...fetchOptions,
           method,
           headers: fillHeader,
-          body: fillBody,
-          signal,
+          body: fetchRequest.body,
+          signal: controller.signal,
         };
-        let response = await fetch(fillUrl, requestInit);
-
-        // HTTP异常处理
-        if (!response.ok) {
-          if (showLoading) appConfig.hideLoading?.();
-
-          // 尝试解析响应体，让业务状态码逻辑有机会生效 (兼容服务端设置401+JSON体的情况,确保toLogin能正常触发)
-          let errorText: string;
-          try {
-            errorText = await response.text();
-            JSON.parse(errorText);
-          } catch {
-            throw new Error(`HTTP Error ${response.status}`); // 非JSON体,直接抛出HTTP异常: 502, 503, 504等
-          }
-
-          // 用已读取的 text 构造一个新的 Response，让后续 parseResponse 能正常消费 (因为response.text只能读取一次)
-          response = new Response(errorText, {
-            status: response.status,
-            statusText: response.statusText,
-            headers: response.headers,
+        failureStage = 'network';
+        failureCode = 'network_failed';
+        if (captureLog) httpTimer = startTimer();
+        const response = await fetch(fillUrl, requestInit);
+        httpStatus = response.status;
+        if (captureLog) {
+          responseHeader = {};
+          response.headers.forEach((value, key) => {
+            responseHeader![key] = value;
           });
         }
 
-        // 2.8 处理流式响应
         if (enableChunked && response.ok) {
-          if (showLoading) appConfig.hideLoading?.();
-
+          if (showLoading) runRequestEffect(() => appConfig.hideLoading?.());
           const res = await handleFetchStreamResponse(response, sseTask);
-
-          logRequestInfo({ status: 'success', config: logConfig, startTime, res });
-
+          finish({ status: 'success', success: true, res });
           resolve(res as T);
           return;
         }
 
-        // 2.9 处理普通响应
-        const resData = await parseFetchResponse(response, responseType);
-
-        // 隐藏 Loading
-        if (showLoading) appConfig.hideLoading?.();
-
-        // 响应数据转换
+        // 正文只读一次；读完立即停表，JSON 解析、解密和业务判断不计入传输。
+        const resData = await parseFetchResponse(response, responseType, () => {
+          httpTimer?.end();
+          // 正文读取完成前仍属于传输阶段，取消、超时和断流按网络失败记录。
+          if (!response.ok) {
+            failureStage = 'http';
+            failureCode = 'http_failed';
+          }
+        });
+        failureStage = 'response';
+        failureCode = 'response_transform_failed';
         const res = transformResponse ? transformResponse(resData) : resData;
-
-        // 2.10 业务状态码解析
-        const code = getResponseValue(res, codeKey);
-        const scode = successKey ? getResponseValue(res, successKey) : code;
+        responseBody = res;
+        hasResponseBody = true;
+        failureCode = 'response_result_failed';
+        businessCode = getResponseValue(res, codeKey);
+        const scode = successKey ? getResponseValue(res, successKey) : businessCode;
         const msgValue = getResponseValue(res, msgKey);
-        const msg = msgValue === undefined || msgValue === null ? '' : String(msgValue);
+        const msg = String(msgValue ?? '');
         const isSuccess = successCode.includes(scode as string | number);
-        const isRelogin = reloginCode.includes(code as string | number);
-
-        logRequestInfo({ status: 'success', config: logConfig, startTime, res });
-
-        // 2.11 结果处理
-        if (isSuccess) {
-          // 业务正常
-          if (isCache) requestCache.set(cacheKey, { res, expire: Date.now() + cacheTime });
-          resolve(getResponseResult(res, resKey) as T);
-        } else if (isRelogin) {
-          // 登录失效
+        const isRelogin = reloginCode.includes(businessCode as string | number);
+        // 结果提取可能抛错，必须在记成功日志前完成。
+        const result = isSuccess ? (getResponseResult(res, resKey) as T) : undefined;
+        if (isSuccess && isCache)
+          requestCache.set(cacheKey, { res, expire: Date.now() + cacheTime });
+        finish({
+          status: 'success',
+          success: isSuccess,
+          res,
+          ...(!isSuccess && {
+            failureStage: 'business' as const,
+            failureCode: isRelogin ? ('login_required' as const) : ('business_failed' as const),
+          }),
+        });
+        if (showLoading) runRequestEffect(() => appConfig.hideLoading?.());
+        if (isSuccess) resolve(result as T);
+        else {
           reject(res);
-          appConfig.toLogin?.(); // 放在后面,确保reject执行后再跳转登录
-        } else {
-          // 业务错误
-          if (toastError && msg) appConfig.toast?.({ status: 'fail', msg });
-          reject(res);
+          if (isRelogin) runRequestEffect(() => appConfig.toLogin?.());
+          else if (toastError && msg)
+            runRequestEffect(() => appConfig.toast?.({ status: 'fail', msg }));
         }
       } catch (e) {
-        if (showLoading) appConfig.hideLoading?.();
-
-        const status = 'fail';
-        const isAbortError = e instanceof DOMException && e.name === 'AbortError'; // 取消请求不视为错误
-
-        if (isAbortError && isTimeout) {
-          if (toastError) appConfig.toast?.({ status, msg: '请求超时' });
-          const timeoutError = new Error('Request Timeout');
-          logRequestInfo({ status, config: logConfig, startTime, e: timeoutError });
-          reject(timeoutError);
-          return;
-        }
-
-        if (!isAbortError && toastError)
-          appConfig.toast?.({
-            status,
-            msg: `请求失败: ${e instanceof Error ? e.message : JSON.stringify(e)}`,
-          });
-        logRequestInfo({ status, config: logConfig, startTime, e });
-        reject(e);
+        httpTimer?.end();
+        const isAbortError = e instanceof Error && e.name === 'AbortError';
+        const error = isAbortError && isTimeout ? new Error('Request Timeout') : e;
+        finish({
+          status: 'fail',
+          success: false,
+          e: error,
+          failureStage,
+          ...(hasResponseBody ? { res: responseBody } : {}),
+          failureCode:
+            failureStage === 'network' && isAbortError
+              ? isTimeout
+                ? 'timeout'
+                : 'aborted'
+              : failureCode,
+        });
+        reject(error);
+        if (showLoading) runRequestEffect(() => appConfig.hideLoading?.());
+        if (toastError && (!isAbortError || isTimeout))
+          runRequestEffect(() =>
+            appConfig.toast?.({
+              status: 'fail',
+              msg: isTimeout
+                ? '请求超时'
+                : `请求失败: ${e instanceof Error ? e.message : JSON.stringify(e)}`,
+            }),
+          );
       } finally {
         if (timeoutId) clearTimeout(timeoutId);
       }
     };
-
+    // 包含请求准备阶段，不能只捕获 fetch 后的异常。
     execute();
   });
 }
 
-/**
- * 日志输出
- */
-function logRequestInfo(options: {
-  config: RequestLogConfig;
-  fromCache?: boolean;
-  startTime: number;
-  status: 'success' | 'fail';
-  res?: unknown;
-  e?: unknown;
-}) {
-  const { log } = getBaseToolsConfig();
-  const { showLog = true } = options.config;
-
-  if (!log || !showLog) return;
-
-  const { config, res, fromCache = false, startTime, status, e } = options;
-  const { url, data, header, method, logExtra } = config;
-  const endTime = Date.now();
-  const fmt = 'YYYY-MM-DD HH:mm:ss.SSS';
-
-  const info: AppLogInfo = {
-    name: 'request',
-    status,
-    url,
-    data,
-    method,
-    header,
-    fromCache,
-    startTime: toDayjs(startTime).format(fmt),
-    endTime: toDayjs(endTime).format(fmt),
-    duration: endTime - startTime,
-    ...logExtra,
-  };
-
-  if (status === 'success') {
-    info.res = cloneDeep(res); // 深拷贝,避免外部修改对象,造成输出不一致
-    log('info', info);
-  } else {
-    info.e = e instanceof Error ? { name: e.name, message: e.message, stack: e.stack } : e; // Error需转为普通对象,否则发送网络日志会序列化成空对象
-    log('error', info);
-  }
+function logRequestInfo(options: RequestLogOptions) {
+  writeRequestLog(getBaseToolsConfig().log, options);
 }
 
 /**

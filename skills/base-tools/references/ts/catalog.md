@@ -70,6 +70,10 @@
 - 来源: `src/ts/string/random.ts`
 - 导出: `createTimeRandId`、`createUUID`、`createViewRandId`
 
+### time
+- 来源: `src/ts/time/index.ts`
+- 导出: `startTimer`、`Timer`、`TimerResult`
+
 ### tree
 - 来源: `src/ts/tree/index.ts`
 - 导出: `findTreeNode`、`findTreePath`、`flattenTree`、`TreeChildrenGetter`

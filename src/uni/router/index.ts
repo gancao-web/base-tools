@@ -33,8 +33,7 @@ export function href(
 
   // http开头的路径以webview的方式打开
   if (url.startsWith('http')) {
-    uni.navigateTo({ url: pathWebview });
-    return;
+    return uni.navigateTo({ url: pathWebview });
   }
 
   // 登录校验 (未登录, 则自动跳登)
@@ -52,16 +51,16 @@ export function href(
 
   if (isTabBar(url)) {
     // 首页tab
-    uni.switchTab({ url });
+    return uni.switchTab({ url });
   } else if (mode === 'redirectTo') {
     // 关闭当前页面, 打开新界面
-    uni.redirectTo({ url });
+    return uni.redirectTo({ url });
   } else if (mode === 'reLaunch') {
     // 关闭之前的所有页, 打开新界面
-    uni.reLaunch({ url });
+    return uni.reLaunch({ url });
   } else {
     // 保留当前页面, 打开新界面
-    uni.navigateTo({ url });
+    return uni.navigateTo({ url });
   }
 }
 
@@ -92,7 +91,7 @@ export function toHome() {
  */
 export function toLogin() {
   const { pathLogin } = getBaseToolsConfig();
-  href(pathLogin);
+  return href(pathLogin);
 }
 
 /**

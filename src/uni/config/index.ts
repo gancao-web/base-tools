@@ -1,4 +1,5 @@
 import { registerUniAppConfigBridge } from '../../shared/config/uniAppBridge';
+import type { RequestLogInfo } from '../../shared/network/requestLog';
 
 export type AppConfig = {
   /**
@@ -84,7 +85,7 @@ export type AppConfig = {
   log?: (level: 'info' | 'error' | 'warn' | 'debug', data: AppLogInfo) => void;
 };
 
-export type AppLogInfo = {
+export type AppLogInfo = RequestLogInfo & {
   /** 调用函数的名称 */
   name: string;
 

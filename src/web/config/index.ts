@@ -1,7 +1,11 @@
 import { getUniAppConfigBridge } from '../../shared/config/uniAppBridge';
+import type { RequestLogInfo } from '../../shared/network/requestLog';
 
 export type AppConfig = {
-  /** 全局 Toast 提示 */
+  /**
+   * 全局 Toast 提示。
+   * status 提示类型：success 为成功提示，fail 为失败提示 (后续可能会拓展"warning"|"info",所以采用string,而非boolean)。
+   */
   toast?: (option: { msg: string; status: 'success' | 'fail' }) => void;
   /** 显示全局 Loading */
   showLoading?: (option?: { title?: string }) => void;
@@ -31,11 +35,11 @@ export type AppConfig = {
   log?: (level: 'info' | 'error' | 'warn' | 'debug', data: AppLogInfo) => void;
 };
 
-export type AppLogInfo = {
+export type AppLogInfo = RequestLogInfo & {
   /** 调用函数的名称 */
   name: string;
 
-  /** 函数的调用状态 */
+  /** 函数的调用状态 (后续可能会拓展"start","loading","end"等状态,所以采用string,而非boolean)*/
   status?: 'success' | 'fail';
 
   /** 函数的调用参数 */
