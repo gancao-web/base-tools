@@ -1,4 +1,5 @@
 import { registerUniAppConfigBridge } from '../../shared/config/uniAppBridge';
+import type { RequestLogInfo } from '../../shared/network/requestLog';
 
 export type AppConfig = {
   /**
@@ -63,14 +64,28 @@ export type AppConfig = {
   onBeforeHref?: (path: string) => boolean | void;
 
   /**
-   * 日志记录函数
+   * 日志回调函数
    * @param level 日志级别 'info' | 'error' | 'warn' | 'debug'
    * @param data 日志数据
+   * @example
+   * setBaseToolsConfig({
+   *   //...
+   *   // 优先处理错误日志，避免请求及其他工具函数的错误被归为普通日志。
+   *   log(level, data) {
+   *     if (level === 'error') {
+   *       sendLog('error', data);
+   *     } else if (data.name === 'request') {
+   *       sendLog('request', data);
+   *     } else {
+   *       sendLog('action', data);
+   *     }
+   *   },
+   * });
    */
   log?: (level: 'info' | 'error' | 'warn' | 'debug', data: AppLogInfo) => void;
 };
 
-export type AppLogInfo = {
+export type AppLogInfo = RequestLogInfo & {
   /** 调用函数的名称 */
   name: string;
 

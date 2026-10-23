@@ -1,5 +1,5 @@
-import { cloneDeep, isPlainObject } from 'es-toolkit';
-import { toDayjs } from '../../ts/day';
+import { isPlainObject } from 'es-toolkit';
+import { startTimer, type Timer } from '../../ts/time';
 import { getBaseToolsConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformOs, getPlatformUni } from '../system';
@@ -17,8 +17,13 @@ import {
   filterRequestHeader,
   handleFetchStreamResponse,
 } from '../../shared/network/fetch';
+import {
+  runRequestEffect,
+  writeRequestLog,
+  type RequestFailureCode,
+  type RequestLogOptions,
+} from '../../shared/network/requestLog';
 import type { ApiTaskConfig } from '../../shared/network/action';
-import type { AppLogInfo } from '../config';
 
 /** 请求参数 */
 export type RequestData = UniApp.RequestOptions['data'];
@@ -96,6 +101,7 @@ type RequestLogConfig = {
   method?: string;
   logExtra?: Record<string, unknown>;
   showLog?: boolean;
+  enableChunked?: boolean;
   resKey?: RequestConfigBase['resKey'];
 };
 
@@ -188,17 +194,40 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       transformResponse,
       onTaskReady,
       onMessage,
+      logExtra: _logExtra,
+      showLog: _showLog,
+      ...nativeConfig
     } = config;
-
-    // 参数: 过滤undefined, 避免接口处理异常 (不可过滤 null 、 "" 、 false 这些有效值)
-    let fillData = isPlainObject(data) ? filterRequestData(data as Record<string, any>) : data;
-
-    // 请求头: 过滤空值 (undefined, null, ""), 不过滤0和false
-    let fillHeader = filterRequestHeader(header);
-
+    let logConfig: RequestLogConfig = config;
+    let httpTimer: Timer | undefined;
+    let httpStatus: number | undefined;
+    let responseHeader: Record<string, unknown> | undefined;
+    let businessCode: unknown;
+    let finalized = false;
+    let sseStartMs = Date.now();
+    const captureLog = config.showLog !== false && !!getBaseToolsConfig().log && !enableChunked;
+    // 统一结束请求；状态与是否输出日志无关，日志异常不得阻止 Promise 完成。
+    const finish = (info: Omit<RequestLogOptions, 'config'>, result?: T) => {
+      if (finalized) return;
+      finalized = true;
+      if (info.success) resolve(result as T);
+      else reject('e' in info ? info.e : info.res);
+      runRequestEffect(() =>
+        logRequestInfo({
+          config: logConfig,
+          httpTimer,
+          httpStatus,
+          responseHeader,
+          businessCode,
+          sseStartMs,
+          ...info,
+        }),
+      );
+    };
     const execute = async () => {
+      let fillData = isPlainObject(data) ? filterRequestData(data as Record<string, any>) : data;
+      let fillHeader = filterRequestHeader(header);
       let fillUrl = url;
-
       if (transformRequest) {
         const transformed =
           (await transformRequest({
@@ -207,50 +236,49 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
             header: { ...fillHeader },
             data: fillData as D,
           })) || {};
-
         if (transformed.url !== undefined) fillUrl = transformed.url;
-        if (transformed.header !== undefined) {
-          fillHeader = filterRequestHeader(transformed.header);
-        }
-        if (transformed.data !== undefined) {
-          const transformedData = transformed.data;
-          fillData = isPlainObject(transformedData)
-            ? filterRequestData(transformedData as Record<string, any>)
-            : transformedData;
-        }
+        if (transformed.header !== undefined) fillHeader = filterRequestHeader(transformed.header);
+        if (transformed.data !== undefined)
+          fillData = isPlainObject(transformed.data)
+            ? filterRequestData(transformed.data as Record<string, any>)
+            : transformed.data;
       }
-
-      // 日志输出的config
-      const logConfig = { ...config, url: fillUrl, data: fillData, header: fillHeader };
-
-      // 记录请求开始时间
-      const startTime = Date.now();
-
-      // 缓存处理
+      logConfig = {
+        ...config,
+        url: fillUrl,
+        data: fillData,
+        header: fillHeader,
+        method: config.method || 'GET',
+      };
+      sseStartMs = Date.now();
       const isCache = !enableChunked && cacheTime && cacheTime > 0;
       const cacheKey = isCache ? JSON.stringify({ url: fillUrl, data: fillData }) : '';
       if (isCache) {
         const cached = requestCache.get(cacheKey);
-        if (cached) {
-          if (cached.expire > startTime) {
-            const { res } = cached;
-            logRequestInfo({
-              status: 'success',
-              config: logConfig,
+        if (cached && cached.expire > Date.now()) {
+          const { res } = cached;
+          try {
+            const result = getResponseResult(res, resKey) as T;
+            businessCode = getResponseValue(res, codeKey);
+            finish({ status: 'success', success: true, fromCache: true, res }, result);
+          } catch (e) {
+            finish({
+              status: 'fail',
+              success: false,
               fromCache: true,
-              startTime,
-              res,
+              e,
+              failureStage: 'response',
+              failureCode: 'response_result_failed',
             });
-            resolve(getResponseResult(res, resKey) as T); // 返回缓存数据
-            return;
           }
-          requestCache.delete(cacheKey); // 删除过期缓存
+          return;
         }
+        requestCache.delete(cacheKey);
       }
-
-      // 显示进度条
       if (showLoading)
-        uni.showLoading(typeof showLoading === 'string' ? { title: showLoading } : {});
+        runRequestEffect(() =>
+          uni.showLoading(typeof showLoading === 'string' ? { title: showLoading } : {}),
+        );
 
       // uni.request 在 H5 端基于 XHR，无法读取响应流；仅 H5 流式请求改用 Fetch。
       if (enableChunked && getPlatformUni() === 'web') {
@@ -310,168 +338,157 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
           if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
           const res = await handleFetchStreamResponse(response, sseTask);
 
-          if (showLoading) uni.hideLoading();
-          logRequestInfo({ status: 'success', config: logConfig, startTime, res });
-          resolve(res as T);
+          if (showLoading) runRequestEffect(() => uni.hideLoading());
+          finish({ status: 'success', success: true, res }, res as T);
         } catch (e) {
-          if (showLoading) uni.hideLoading();
+          if (showLoading) runRequestEffect(() => uni.hideLoading());
 
           const isAbortError = e instanceof DOMException && e.name === 'AbortError';
           const error = isAbortError && isTimeout ? new Error('Request Timeout') : e;
 
           if (toastError && (!isAbortError || isTimeout)) {
-            toast(
-              isTimeout
-                ? '请求超时'
-                : `请求失败:${e instanceof Error ? e.message : JSON.stringify(e)}`,
+            runRequestEffect(() =>
+              toast(
+                isTimeout
+                  ? '请求超时'
+                  : `请求失败: ${e instanceof Error ? e.message : JSON.stringify(e)}`,
+              ),
             );
           }
-          logRequestInfo({ status: 'fail', config: logConfig, startTime, e: error });
-          reject(error);
+          finish({ status: 'fail', success: false, e: error });
         } finally {
           clearTimeout(timeoutId);
         }
         return;
       }
 
-      // 发送请求
+      if (captureLog) httpTimer = startTimer();
       const task = uni.request({
-        ...config,
+        ...nativeConfig,
+        enableChunked,
         url: fillUrl,
         data: fillData,
         header: fillHeader,
         success: (xhr) => {
-          // 隐藏进度条 (不能写在complete回调,否则toast会被hideLoading隐藏)
-          if (showLoading) uni.hideLoading();
-
-          // 响应数据转换
-          const res = transformResponse ? transformResponse(xhr.data) : xhr.data;
-
-          // 解析数据 (分块传输会先不断执行task.onChunkReceived回调,流式传输完毕才执行success回调)
-          const code = enableChunked ? '' : getResponseValue(res, codeKey);
-          const scode = enableChunked ? '' : successKey ? getResponseValue(res, successKey) : code;
-          const msgValue = enableChunked ? undefined : getResponseValue(res, msgKey);
-          const msg = String(msgValue ?? '');
-          const isSuccess = enableChunked ? true : successCode.includes(scode as string | number);
-          const isRelogin = enableChunked ? false : reloginCode.includes(code as string | number);
-
-          // 缓存数据
-          if (isSuccess && isCache) {
-            requestCache.set(cacheKey, { res, expire: Date.now() + cacheTime });
+          if (finalized) return;
+          httpTimer?.end();
+          httpStatus = xhr.statusCode;
+          if (captureLog) responseHeader = { ...xhr.header };
+          // 转换失败时保留宿主返回的正文；成功后再替换为转换结果。
+          let res = xhr.data;
+          let result: unknown;
+          let msg: string;
+          let isSuccess: boolean;
+          let isRelogin: boolean;
+          let failureCode: RequestFailureCode = 'response_transform_failed';
+          try {
+            res = transformResponse ? transformResponse(xhr.data) : xhr.data;
+            failureCode = 'response_result_failed';
+            businessCode = enableChunked ? '' : getResponseValue(res, codeKey);
+            const scode = enableChunked
+              ? ''
+              : successKey
+                ? getResponseValue(res, successKey)
+                : businessCode;
+            msg = String((enableChunked ? undefined : getResponseValue(res, msgKey)) ?? '');
+            isSuccess = enableChunked ? true : successCode.includes(scode as string | number);
+            isRelogin = enableChunked
+              ? false
+              : reloginCode.includes(businessCode as string | number);
+            result = isSuccess ? getResponseResult(res, resKey) : undefined;
+            if (isSuccess && isCache)
+              requestCache.set(cacheKey, { res, expire: Date.now() + cacheTime });
+          } catch (e) {
+            // 原生回调里的异常无法由 execute().catch 捕获。
+            finish({
+              status: 'fail',
+              success: false,
+              e,
+              failureStage: 'response',
+              failureCode,
+              res,
+            });
+            if (showLoading) runRequestEffect(() => uni.hideLoading());
+            if (toastError)
+              runRequestEffect(() =>
+                toast(`请求失败: ${e instanceof Error ? e.message : JSON.stringify(e)}`, 2000),
+              );
+            return;
           }
-
-          // 日志
-          logRequestInfo({ status: 'success', config: logConfig, startTime, res });
-
-          if (isSuccess) {
-            // 业务正常
-            resolve(getResponseResult(res, resKey) as T);
-          } else if (isRelogin) {
-            // 重新登录
-            toLogin();
-            reject(res);
-          } else {
-            // 业务异常
-            if (toastError) toast(msg, 2000);
-            reject(res);
+          finish(
+            {
+              status: 'success',
+              success: isSuccess,
+              res,
+              ...(!isSuccess && {
+                failureStage: 'business' as const,
+                failureCode: isRelogin ? ('login_required' as const) : ('business_failed' as const),
+              }),
+            },
+            result as T,
+          );
+          if (showLoading) runRequestEffect(() => uni.hideLoading());
+          if (!isSuccess) {
+            if (isRelogin) runRequestEffect(() => toLogin());
+            else if (toastError) runRequestEffect(() => toast(msg, 2000));
           }
         },
-
         fail(e) {
-          // 隐藏进度条 (不能写在complete回调,否则toast会被hideLoading隐藏)
-          if (showLoading) uni.hideLoading();
-          // 请求异常
-          if (toastError) toast(`请求失败:${e.errMsg || JSON.stringify(e)}`);
-          // 上报日志
-          logRequestInfo({ status: 'fail', config: logConfig, startTime, e });
-          // 失败回调
-          reject(e);
+          if (finalized) return;
+          httpTimer?.end();
+          // 只识别宿主约定的明确通知，不用模糊关键词推测。
+          const failureCode: RequestFailureCode =
+            e.errMsg === 'request:fail timeout'
+              ? 'timeout'
+              : e.errMsg === 'request:fail abort'
+                ? 'aborted'
+                : 'network_failed';
+          finish({ status: 'fail', success: false, e, failureStage: 'network', failureCode });
+          if (showLoading) runRequestEffect(() => uni.hideLoading());
+          if (toastError)
+            runRequestEffect(() => toast(`请求失败: ${e.errMsg || JSON.stringify(e)}`));
         },
       });
-
       if (onMessage) {
-        // 流式解析对象
         const sseTask: { parser: SSEParser | null } = { parser: new SSEParser(onMessage) };
-
-        // 监听流式响应
         // @ts-ignore
-        task.onChunkReceived((res: { data: ArrayBuffer }) => {
-          sseTask.parser?.receive(res.data);
-        });
-
-        // 覆盖abort方法, 取消流式接收
+        task.onChunkReceived((res: { data: ArrayBuffer }) => sseTask.parser?.receive(res.data));
         const oldAbort = task.abort.bind(task);
-
         task.abort = () => {
-          sseTask.parser = null; // 清空解析对象
+          sseTask.parser = null;
           // @ts-ignore
-          task.offChunkReceived(); // 小程序必须取消监听,才能中断流式接收 (而h5直接abort即可)
-          oldAbort(); // 取消请求 (小程序流式请求响应后,就无法中断,只能offChunkReceived)
+          task.offChunkReceived();
+          oldAbort();
         };
       }
-
-      // task对象初始化完毕
-      onTaskReady?.(task);
+      // 任务已发送；通知回调失败不能把请求改记为准备失败。
+      runRequestEffect(() => onTaskReady?.(task));
     };
-
     execute().catch((e) => {
-      if (showLoading) uni.hideLoading();
-      reject(e);
+      if (finalized) return;
+      // 同步发送失败没有网络传输，不补造 duration。
+      finish({
+        status: 'fail',
+        success: false,
+        e,
+        failureStage: 'prepare',
+        failureCode: 'request_prepare_failed',
+        httpTimer: undefined,
+      });
+      if (showLoading) runRequestEffect(() => uni.hideLoading());
+      if (toastError)
+        runRequestEffect(() =>
+          toast(`请求失败: ${e instanceof Error ? e.message : JSON.stringify(e)}`, 2000),
+        );
     });
   });
 }
 
-/**
- * 日志输出
- */
-function logRequestInfo(options: {
-  config: RequestLogConfig;
-  fromCache?: boolean;
-  startTime: number;
-  status: 'success' | 'fail';
-  res?: unknown;
-  e?: unknown;
-}) {
-  const { log } = getBaseToolsConfig();
-  const { showLog = true } = options.config;
-
-  if (!log || !showLog) return;
-
-  const { config, res, fromCache = false, startTime, status, e } = options;
-  const { url, data, header, method, logExtra } = config;
-  const endTime = Date.now();
-  const fmt = 'YYYY-MM-DD HH:mm:ss.SSS';
-
-  const info: AppLogInfo = {
-    name: 'request',
-    status,
-    url,
-    data,
-    method,
-    header,
-    fromCache,
-    startTime: toDayjs(startTime).format(fmt),
-    endTime: toDayjs(endTime).format(fmt),
-    duration: endTime - startTime,
-    ...logExtra,
-  };
-
-  if (status === 'success') {
-    // 深拷贝,避免外部修改对象,造成输出不一致
-    info.res = cloneDeep(res);
-
-    // 微信开发工具输出JSON字符串,快捷复制定义ts (使用对象的形式,避免控制台展开根对象时占用太多屏幕)
-    if (getPlatformOs() === 'devtools' && res && typeof res === 'object') {
-      const result = getResponseResult(res, config.resKey);
-
-      if (result && typeof result === 'object') {
-        info._res = { text: JSON.stringify(result) };
-      }
-    }
-    log('info', info);
-  } else {
-    // 失败日志
-    info.e = e instanceof Error ? { name: e.name, message: e.message, stack: e.stack } : e; // Error需转为普通对象,否则发送网络日志会序列化成空对象
-    log('error', info);
-  }
+function logRequestInfo(options: RequestLogOptions) {
+  writeRequestLog(getBaseToolsConfig().log, options, (info) => {
+    // 保留微信开发工具中复制响应类型的既有便利字段。
+    if (options.status !== 'success' || getPlatformOs() !== 'devtools') return;
+    const result = getResponseResult(options.res, (options.config as RequestLogConfig).resKey);
+    if (result && typeof result === 'object') info._res = { text: JSON.stringify(result) };
+  });
 }

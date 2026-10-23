@@ -1,7 +1,11 @@
 import { getUniAppConfigBridge } from '../../shared/config/uniAppBridge';
+import type { RequestLogInfo } from '../../shared/network/requestLog';
 
 export type AppConfig = {
-  /** 全局 Toast 提示 */
+  /**
+   * 全局 Toast 提示。
+   * status 提示类型：success 为成功提示，fail 为失败提示 (后续可能会拓展"warning"|"info",所以采用string,而非boolean)。
+   */
   toast?: (option: { msg: string; status: 'success' | 'fail' }) => void;
   /** 显示全局 Loading */
   showLoading?: (option?: { title?: string }) => void;
@@ -9,15 +13,33 @@ export type AppConfig = {
   hideLoading?: () => void;
   /** 跳转登录页的方法 */
   toLogin?: () => void;
-  /** 日志记录函数 */
+  /**
+   * 日志回调函数
+   * @param level 日志级别 'info' | 'error' | 'warn' | 'debug'
+   * @param data 日志数据
+   * @example
+   * setBaseToolsConfig({
+   *   //...
+   *   // 优先处理错误日志，避免请求及其他工具函数的错误被归为普通日志。
+   *   log(level, data) {
+   *     if (level === 'error') {
+   *       sendLog('error', data);
+   *     } else if (data.name === 'request') {
+   *       sendLog('request', data);
+   *     } else {
+   *       sendLog('action', data);
+   *     }
+   *   },
+   * });
+   */
   log?: (level: 'info' | 'error' | 'warn' | 'debug', data: AppLogInfo) => void;
 };
 
-export type AppLogInfo = {
+export type AppLogInfo = RequestLogInfo & {
   /** 调用函数的名称 */
   name: string;
 
-  /** 函数的调用状态 */
+  /** 函数的调用状态 (后续可能会拓展"start","loading","end"等状态,所以采用string,而非boolean)*/
   status?: 'success' | 'fail';
 
   /** 函数的调用参数 */

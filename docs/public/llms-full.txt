@@ -1,7 +1,7 @@
 # Base Tools Full Documentation
 
 Project: @base-web-kits/base-tools
-Date: 2026-09-17
+Date: 2026-10-23
 
 
 
@@ -9581,6 +9581,90 @@ words('fred, barney, & pebbles');
 
 
 ==================================================
+File: ts/time/startTimer.md
+==================================================
+
+# startTimer
+
+创建并启动一次性计时器，返回开始时间、结束时间和耗时。适用于请求、任务及其他异步操作的耗时测量。
+
+## 示例
+
+```ts
+import { startTimer } from '@base-web-kits/base-tools-ts';
+
+const timer = startTimer();
+
+try {
+  await doSomething();
+} finally {
+  const { startMs, endMs, durationMs } = timer.end();
+  console.log({ startMs, endMs, durationMs });
+}
+```
+
+## API
+
+```ts
+type TimerResult = {
+  startMs: number;
+  endMs: number;
+  durationMs: number;
+};
+
+type Timer = {
+  startMs: number;
+  end(): TimerResult;
+};
+
+function startTimer(): Timer;
+```
+
+无参数。`Timer`、`TimerResult` 可以从同一包入口作为类型导入。
+
+| 字段／方法 | 说明 |
+| --- | --- |
+| `timer.startMs` | 创建计时器时的 Unix 毫秒时间戳 |
+| `timer.end()` | 停止计时，返回 `TimerResult`；重复调用返回首次结束时的同一个结果对象 |
+| `result.startMs` | 开始时的 Unix 毫秒时间戳 |
+| `result.endMs` | 首次调用 `end()` 时的 Unix 毫秒时间戳 |
+| `result.durationMs` | 耗时，单位毫秒，可含小数，最小为 `0` |
+
+## 时钟与边界
+
+- 时间戳使用 `Date.now()`；耗时优先使用全局 `performance.now()`，开始时不可用、抛错或返回非有限值时，回退到系统时间。
+- 结束时单调时钟抛错或返回非有限值，也会回退到系统时间戳之差，并将负耗时截为 `0`。
+- 系统时间可能被校准，因此 `durationMs` 不保证等于 `endMs - startMs`，`endMs` 也不保证大于等于 `startMs`。使用 `durationMs` 统计耗时，使用时间戳展示日期。
+- 只读取 `timer.startMs` 不会停止计时；第一次调用 `end()` 后，结束时间和耗时固定。不要修改复用的结果对象。
+- 该函数不格式化日期、不输出日志、不管理超时或取消。测量范围由调用位置决定，也包含范围内的等待和调度时间。
+
+## 延迟读取示例
+
+将计时结果作为其他操作的附加字段时，可以在字段被读取时才结束计时：
+
+```ts
+const timer = startTimer();
+const extra = {
+  get elapsedMs() {
+    return timer.end().durationMs;
+  },
+  get completedAtMs() {
+    return timer.end().endMs;
+  },
+};
+
+await doSomething();
+console.log({ ...extra }); // 此时触发 getter，两次 end() 复用同一份结果
+```
+
+展开对象、`Object.assign` 或 JSON 序列化都会读取可枚举 getter；需要延迟计算时，避免提前读取这些属性。
+
+## 版本
+
+- 1.7.0 新增
+
+
+==================================================
 File: ts/tree/findTreeNode.md
 ==================================================
 
@@ -11633,8 +11717,85 @@ chatTask?.abort();
 
 `Promise<T>`
 
+## 请求日志（2.0.0）
+
+继续通过 `setBaseToolsConfig({ log })` 接收请求结束日志，单次调用使用 `showLog` 控制。普通 HTTP 调用在业务结果判断及结果提取完成后输出一次结束日志；日志和 UI 回调的同步异常、异步拒绝不覆盖已确定的请求结果。
+
+### 字段含义
+
+保留 name、status、url、method、data、header、res、e、fromCache 和 logExtra。`res` 通常是执行 transformResponse 后、按 resKey 提取业务结果前的完整正文；若 transformResponse 抛错，则保留宿主传入转换函数的正文。`e` 中的 Error 转换为包含 name/message/stack 的普通对象，并递归记录标准 Error.cause；循环的 Error.cause 用 `[Circular error cause]` 截断，非 Error 值保持原值。reject 仍传递原始异常，不使用日志序列化结果。
+
+开启 toastError 时，普通响应处理异常使用 Error.message 生成“请求失败: 错误信息”提示，不将 cause 或响应正文展示给用户。封装库可抛出 `new Error('响应处理失败', { cause: originalError })`，分别提供用户提示和日志中的原始原因；工具库不根据提示文字或异常类型推断业务专有分类。
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| success | `boolean` | 按现有 successCode/successKey 等规则处理成功，且完成结果提取；业务失败、掉登或处理异常为 false |
+| businessCode | `string \| number`，可选 | 从转换后的响应按 codeKey 读取，不等同于 successKey，也不保证是未经转换的服务端原码 |
+| httpStatus | `number`，可选 | 实际收到的 HTTP 状态，独立于业务结果 |
+| responseHeader | `Record<string, unknown>`，可选 | 实际取得的响应头；Web 受浏览器权限限制，uni 以宿主提供的值为准 |
+| failureStage | `RequestFailureStage`，可选 | prepare、network、http、response、business |
+| failureCode | `RequestFailureCode` 或扩展字符串，可选 | 明确取得的失败原因，见下表 |
+| networkStartTimeMs / networkEndTimeMs | `number`，可选 | 实际发送前、正文接收完成或传输失败通知时的 Unix 毫秒时间戳 |
+| networkStartTime / networkEndTime | `string`，可选 | 网络开始、结束时间，格式 YYYY-MM-DD HH:mm:ss.SSS，使用运行环境时区 |
+| networkDurationMs | `number`，可选 | 网络耗时，毫秒，优先使用单调时钟，可含小数，不保证等于时间戳差 |
+
+工具库只提供网络计时，不采集请求总耗时或调用方上下文。调用方自定义字段通过 `logExtra` 传入，工具库不规定其名称或结构。缓存命中、发送前失败时不生成网络计时字段。
+
+Error 及其 cause 序列化时保留实际存在的字符串或数字 `code`；请求 `failureCode` 与异常 `code` 相互独立。
+
+`status` 仍表示调用状态，不等同于 `success`。例如 HTTP 已返回但业务码表示掉登时，仍可能输出 `level: 'info'`、`status: 'success'`，同时 `success: false`、`failureStage: 'business'`、`failureCode: 'login_required'`。HTTP 200 不代表业务成功；HTTP 非 2xx 返回可解析业务正文时，仍沿用已有业务判断规则。
+
+### 失败分类
+
+| failureStage | failureCode                      | 含义                                   |
+| ------------ | -------------------------------- | -------------------------------------- |
+| prepare      | request_prepare_failed           | 参数过滤、请求转换或编码等准备步骤失败 |
+| network      | network_failed                   | 网络调用或正文接收失败                 |
+| network      | timeout / aborted                | 明确确认的超时或取消                   |
+| http         | http_failed                      | HTTP 错误响应无法按原有流程处理        |
+| response     | response_transform_failed        | transformResponse 同步抛错             |
+| response     | response_result_failed           | 业务字段读取或结果提取失败             |
+| business     | business_failed / login_required | 按既有规则判定业务拒绝或登录失效       |
+
+RequestFailureCode 还包含 response_parse_failed，供能够明确识别解析错误的封装使用；工具库不会根据某个码值推断解析失败。普通成功日志不主动添加失败字段。已取得的 HTTP 状态、响应头和传输时间，在后续响应处理失败时仍保留。
+
+### 附加字段与 getter
+
+logExtra 保留覆盖默认日志字段的行为。工具库在结果确定后、复制响应正文及调用 log 之前合并一次；调用方可使用可枚举 getter 延迟生成自己的字段。需要测量封装耗时时，可结合 [startTimer](../../ts/time/startTimer.md) 使用：
+
+```ts
+const logExtra = {
+  get completedAtMs() {
+    return Date.now();
+  },
+  tag: 'example',
+};
+
+await requestApi({ url: '/items', logExtra });
+// completedAtMs 在结束日志组装时读取，而不是在创建对象时读取。
+```
+
+避免在请求完成前提前展开或序列化 logExtra；showLog: false 或未配置 log 时，工具库不读取这些 getter。调用方覆盖 success、失败分类等默认字段时，需要自行保证含义一致。
+
 ## 版本
 
+### 2.0.0 升级说明
+
+网络计时字段统一增加 `network` 前缀，耗时字段明确使用毫秒单位；以下旧字段不再由工具库生成，日志接收方需同步调整：
+
+| 旧字段 | 2.0.0 字段 |
+| --- | --- |
+| startTime | networkStartTime |
+| endTime | networkEndTime |
+| startTimeMs | networkStartTimeMs |
+| endTimeMs | networkEndTimeMs |
+| duration | networkDurationMs |
+
+同时，日志中的 Error 及其 cause 新增保留字符串或数字 `code`。请求调用方式及 `logExtra` 扩展方式保持不变。
+
+### 历史版本
+
+- 1.7.0 增强普通 HTTP 结束日志，新增业务结果、HTTP 信息和失败分类；时间字段改为传输口径，详见升级说明。
 - 1.0.2 新增
 
 
@@ -21421,8 +21582,85 @@ npm i whatwg-fetch
 import 'whatwg-fetch';
 ```
 
+## 请求日志（2.0.0）
+
+继续通过 `setBaseToolsConfig({ log })` 接收请求结束日志，单次调用使用 `showLog` 控制。普通 HTTP 调用在业务结果判断及结果提取完成后输出一次结束日志；日志和 UI 回调的同步异常、异步拒绝不覆盖已确定的请求结果。
+
+### 字段含义
+
+保留 name、status、url、method、data、header、res、e、fromCache 和 logExtra。`res` 通常是执行 transformResponse 后、按 resKey 提取业务结果前的完整正文；若 transformResponse 抛错，则保留传入转换函数的正文（Web 为正文读取与解析后的值，不是 HTTP 原始字节）。`e` 中的 Error 转换为包含 name/message/stack 的普通对象，并递归记录标准 Error.cause；循环的 Error.cause 用 `[Circular error cause]` 截断，非 Error 值保持原值。reject 仍传递原始异常，不使用日志序列化结果。
+
+开启 toastError 且配置 toast 时，普通响应处理异常使用 Error.message 生成“请求失败: 错误信息”提示，不将 cause 或响应正文展示给用户。封装库可抛出 `new Error('响应处理失败', { cause: originalError })`，分别提供用户提示和日志中的原始原因；工具库不根据提示文字或异常类型推断业务专有分类。
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| success | `boolean` | 按现有 successCode/successKey 等规则处理成功，且完成结果提取；业务失败、掉登或处理异常为 false |
+| businessCode | `string \| number`，可选 | 从转换后的响应按 codeKey 读取，不等同于 successKey，也不保证是未经转换的服务端原码 |
+| httpStatus | `number`，可选 | 实际收到的 HTTP 状态，独立于业务结果 |
+| responseHeader | `Record<string, unknown>`，可选 | 实际取得的响应头；Web 受浏览器权限限制，uni 以宿主提供的值为准 |
+| failureStage | `RequestFailureStage`，可选 | prepare、network、http、response、business |
+| failureCode | `RequestFailureCode` 或扩展字符串，可选 | 明确取得的失败原因，见下表 |
+| networkStartTimeMs / networkEndTimeMs | `number`，可选 | 实际发送前、正文接收完成或传输失败通知时的 Unix 毫秒时间戳 |
+| networkStartTime / networkEndTime | `string`，可选 | 网络开始、结束时间，格式 YYYY-MM-DD HH:mm:ss.SSS，使用运行环境时区 |
+| networkDurationMs | `number`，可选 | 网络耗时，毫秒，优先使用单调时钟，可含小数，不保证等于时间戳差 |
+
+工具库只提供网络计时，不采集请求总耗时或调用方上下文。调用方自定义字段通过 `logExtra` 传入，工具库不规定其名称或结构。缓存命中、发送前失败时不生成网络计时字段。
+
+Error 及其 cause 序列化时保留实际存在的字符串或数字 `code`；请求 `failureCode` 与异常 `code` 相互独立。
+
+`status` 仍表示调用状态，不等同于 `success`。例如 HTTP 已返回但业务码表示掉登时，仍可能输出 `level: 'info'`、`status: 'success'`，同时 `success: false`、`failureStage: 'business'`、`failureCode: 'login_required'`。HTTP 200 不代表业务成功；HTTP 非 2xx 返回可解析业务正文时，仍沿用已有业务判断规则。
+
+### 失败分类
+
+| failureStage | failureCode                      | 含义                                   |
+| ------------ | -------------------------------- | -------------------------------------- |
+| prepare      | request_prepare_failed           | 参数过滤、请求转换或编码等准备步骤失败 |
+| network      | network_failed                   | 网络调用或正文接收失败                 |
+| network      | timeout / aborted                | 明确确认的超时或取消                   |
+| http         | http_failed                      | HTTP 错误响应无法按原有流程处理        |
+| response     | response_transform_failed        | transformResponse 同步抛错             |
+| response     | response_result_failed           | 业务字段读取或结果提取失败             |
+| business     | business_failed / login_required | 按既有规则判定业务拒绝或登录失效       |
+
+RequestFailureCode 还包含 response_parse_failed，供能够明确识别解析错误的封装使用；工具库不会根据某个码值推断解析失败。普通成功日志不主动添加失败字段。已取得的 HTTP 状态、响应头和传输时间，在后续响应处理失败时仍保留。
+
+### 附加字段与 getter
+
+logExtra 保留覆盖默认日志字段的行为。工具库在结果确定后、复制响应正文及调用 log 之前合并一次；调用方可使用可枚举 getter 延迟生成自己的字段。需要测量封装耗时时，可结合 [startTimer](../../ts/time/startTimer.md) 使用：
+
+```ts
+const logExtra = {
+  get completedAtMs() {
+    return Date.now();
+  },
+  tag: 'example',
+};
+
+await requestApi({ url: '/items', logExtra });
+// completedAtMs 在结束日志组装时读取，而不是在创建对象时读取。
+```
+
+避免在请求完成前提前展开或序列化 logExtra；showLog: false 或未配置 log 时，工具库不读取这些 getter。调用方覆盖 success、失败分类等默认字段时，需要自行保证含义一致。
+
 ## 版本
 
+### 2.0.0 升级说明
+
+网络计时字段统一增加 `network` 前缀，耗时字段明确使用毫秒单位；以下旧字段不再由工具库生成，日志接收方需同步调整：
+
+| 旧字段 | 2.0.0 字段 |
+| --- | --- |
+| startTime | networkStartTime |
+| endTime | networkEndTime |
+| startTimeMs | networkStartTimeMs |
+| endTimeMs | networkEndTimeMs |
+| duration | networkDurationMs |
+
+同时，日志中的 Error 及其 cause 新增保留字符串或数字 `code`。请求调用方式及 `logExtra` 扩展方式保持不变。
+
+### 历史版本
+
+- 1.7.0 增强普通 HTTP 结束日志，新增业务结果、HTTP 信息和失败分类；时间字段改为传输口径，详见升级说明。
 - 1.1.2 新增
 
 

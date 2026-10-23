@@ -55,6 +55,7 @@ describe('uni/enhanceUniApi', () => {
       icon: 'none',
       title: '上传失败',
       duration: 1000,
+      fail: expect.any(Function),
     });
   });
 });

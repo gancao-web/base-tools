@@ -1,4 +1,4 @@
-import { isPlainObject } from 'es-toolkit';
+import { isPlainObject, pickBy } from 'es-toolkit';
 import { appendUrlParam } from '../../ts/url';
 import type { SSEParser } from '../../ts/buffer/SSEParser';
 
@@ -13,11 +13,7 @@ export type SseTask = { parser: SSEParser | undefined | null };
 
 /** 过滤 undefined，保留 null、空字符串、false 和 0 等有效参数。 */
 export function filterRequestData(data: Record<string, any>) {
-  const result: Record<string, any> = {};
-  Object.entries(data).forEach(([key, value]) => {
-    if (value !== undefined) result[key] = value;
-  });
-  return result;
+  return pickBy(data, (value) => value !== undefined);
 }
 
 /** 过滤空请求头，并将 Fetch 不支持的数字、布尔值转换为字符串。 */
@@ -101,9 +97,14 @@ export async function handleFetchStreamResponse(
 }
 
 /** 按指定响应类型读取 Fetch 响应，并兼容 HTTP 异常中的 JSON 业务响应。 */
-export async function parseFetchResponse(response: Response, responseType: string) {
+export async function parseFetchResponse(
+  response: Response,
+  responseType: string,
+  onBodyRead?: () => void,
+) {
   if (!response.ok) {
     const text = await response.text();
+    onBodyRead?.();
 
     try {
       return JSON.parse(text);
@@ -112,10 +113,15 @@ export async function parseFetchResponse(response: Response, responseType: strin
     }
   }
 
-  if (responseType === 'arraybuffer') return response.arrayBuffer();
-  if (responseType === 'text') return response.text();
+  if (responseType === 'arraybuffer') {
+    const body = await response.arrayBuffer();
+    onBodyRead?.();
+    return body;
+  }
 
   const text = await response.text();
+  onBodyRead?.();
+  if (responseType === 'text') return text;
   try {
     return JSON.parse(text);
   } catch {

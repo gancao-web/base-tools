@@ -11,10 +11,10 @@ import type { ComponentInternalInstance } from 'vue';
  * back(); // 小程序的toast是页面级的,而非全局;若toast不await,直接back,则toast会看不见
  */
 export function toast(msg: string, duration = 1000) {
-  return new Promise<void>((resolve) => {
+  return new Promise<void>((resolve, reject) => {
     if (!msg) return resolve();
 
-    uni.showToast({ icon: 'none', title: msg, duration });
+    uni.showToast({ icon: 'none', title: msg, duration, fail: reject });
 
     setTimeout(() => resolve(), duration);
   });
