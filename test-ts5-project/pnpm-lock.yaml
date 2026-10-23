@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@base-web-kits/base-tools-ts':
         specifier: file:../packages/base-tools-ts
-        version: file:../packages/base-tools-ts(dayjs@1.11.19)
+        version: file:../packages/base-tools-ts
       '@base-web-kits/base-tools-web':
         specifier: file:../packages/base-tools-web
         version: file:../packages/base-tools-web
@@ -29,8 +29,6 @@ packages:
 
   '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts':
     resolution: {directory: ../packages/base-tools-ts, type: directory}
-    peerDependencies:
-      dayjs: ^1.0.0
 
   '@base-web-kits/base-tools-web@file:../packages/base-tools-web':
     resolution: {directory: ../packages/base-tools-web, type: directory}
@@ -303,6 +301,10 @@ packages:
   bignumber.js@9.3.1:
     resolution: {integrity: sha512-Ko0uX15oIUS7wJ3Rb30Fs6SkVbLmPBAKdlm7q9+ak9bbIeFf0MwuBsQV6z7+X768/cHsfg+WlysDWJcmthjsjQ==}
 
+  clsx@2.1.1:
+    resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
+    engines: {node: '>=6'}
+
   dayjs@1.11.19:
     resolution: {integrity: sha512-t5EcLVS6QPBNqM2z8fakk/NKel+Xzshgt8FFKAn+qwlD1pzZWxh0nVCrvFK7ZDb6XucZeF9z8C7CBWTRIVApAw==}
 
@@ -384,14 +386,18 @@ packages:
 
 snapshots:
 
-  '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts(dayjs@1.11.19)':
+  '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts':
     dependencies:
       bignumber.js: 9.3.1
+      clsx: 2.1.1
       dayjs: 1.11.19
       es-toolkit: 1.44.0
       mitt: 3.0.1
 
-  '@base-web-kits/base-tools-web@file:../packages/base-tools-web': {}
+  '@base-web-kits/base-tools-web@file:../packages/base-tools-web':
+    dependencies:
+      dayjs: 1.11.19
+      es-toolkit: 1.44.0
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
@@ -535,6 +541,8 @@ snapshots:
       undici-types: 6.21.0
 
   bignumber.js@9.3.1: {}
+
+  clsx@2.1.1: {}
 
   dayjs@1.11.19: {}
 

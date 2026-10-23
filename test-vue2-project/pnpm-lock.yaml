@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@base-web-kits/base-tools-ts':
         specifier: file:../packages/base-tools-ts
-        version: file:../packages/base-tools-ts(dayjs@1.11.19)
+        version: file:../packages/base-tools-ts
       '@base-web-kits/base-tools-web':
         specifier: file:../packages/base-tools-web
         version: file:../packages/base-tools-web
@@ -56,8 +56,6 @@ packages:
 
   '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts':
     resolution: {directory: ../packages/base-tools-ts, type: directory}
-    peerDependencies:
-      dayjs: ^1.0.0
 
   '@base-web-kits/base-tools-web@file:../packages/base-tools-web':
     resolution: {directory: ../packages/base-tools-web, type: directory}
@@ -117,6 +115,10 @@ packages:
 
   buffer-from@1.1.2:
     resolution: {integrity: sha1-KxRqb9cugLT1XSVfNe1Zo6mkG9U=}
+
+  clsx@2.1.1:
+    resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
+    engines: {node: '>=6'}
 
   commander@2.20.3:
     resolution: {integrity: sha1-/UhehMA+tIgcIHIrpIA16FMa6zM=}
@@ -386,14 +388,18 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts(dayjs@1.11.19)':
+  '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts':
     dependencies:
       bignumber.js: 9.3.1
+      clsx: 2.1.1
       dayjs: 1.11.19
       es-toolkit: 1.44.0
       mitt: 3.0.1
 
-  '@base-web-kits/base-tools-web@file:../packages/base-tools-web': {}
+  '@base-web-kits/base-tools-web@file:../packages/base-tools-web':
+    dependencies:
+      dayjs: 1.11.19
+      es-toolkit: 1.44.0
 
   '@esbuild/android-arm@0.15.18':
     optional: true
@@ -448,6 +454,8 @@ snapshots:
   bignumber.js@9.3.1: {}
 
   buffer-from@1.1.2: {}
+
+  clsx@2.1.1: {}
 
   commander@2.20.3: {}
 

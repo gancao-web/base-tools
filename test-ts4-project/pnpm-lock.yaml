@@ -13,7 +13,7 @@ importers:
         version: file:../packages/base-tools-react(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@base-web-kits/base-tools-ts':
         specifier: file:../packages/base-tools-ts
-        version: file:../packages/base-tools-ts(dayjs@1.11.19)
+        version: file:../packages/base-tools-ts
       '@base-web-kits/base-tools-web':
         specifier: file:../packages/base-tools-web
         version: file:../packages/base-tools-web
@@ -160,11 +160,13 @@ packages:
     resolution: {directory: ../packages/base-tools-react, type: directory}
     peerDependencies:
       react: '>=18'
+      react-dom: '>=18'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
 
   '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts':
     resolution: {directory: ../packages/base-tools-ts, type: directory}
-    peerDependencies:
-      dayjs: ^1.0.0
 
   '@base-web-kits/base-tools-web@file:../packages/base-tools-web':
     resolution: {directory: ../packages/base-tools-web, type: directory}
@@ -343,9 +345,6 @@ packages:
   '@types/babel__traverse@7.28.0':
     resolution: {integrity: sha512-8PvcXf70gTDZBgt9ptxJ8elBeBjcLOAcOtoO/mPJjtji1+CdGbHgm77om1GrsPxsiE+uXIpNSK64UYaIwQXd4Q==}
 
-  '@types/js-cookie@3.0.6':
-    resolution: {integrity: sha512-wkw9yd1kEXOPnvEeEV1Go1MmxtBJL0RR79aOTAApecWFVu7w0NNXNqhcWgvw2YgZDYadliXkl14pa3WXw5jlCQ==}
-
   '@types/prop-types@15.7.15':
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
 
@@ -363,8 +362,8 @@ packages:
     peerDependencies:
       vite: ^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
 
-  ahooks@3.9.6:
-    resolution: {integrity: sha512-Mr7f05swd5SmKlR9SZo5U6M0LsL4ErweLzpdgXjA1JPmnZ78Vr6wzx0jUtvoxrcqGKYnX0Yjc02iEASVxHFPjQ==}
+  ahooks@3.10.0:
+    resolution: {integrity: sha512-gwlBIjvG6x9UDOxZJeJ9l4x/nlrfrHBEqmau0b2mqchwWKOwAGAMXVE7rJXy883y9hzUTn+xlHgJHcJrf98Haw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
@@ -408,6 +407,10 @@ packages:
 
   classnames@2.5.1:
     resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
+
+  clsx@2.1.1:
+    resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
+    engines: {node: '>=6'}
 
   combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
@@ -534,9 +537,6 @@ packages:
   hasown@2.0.2:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
-
-  intersection-observer@0.12.2:
-    resolution: {integrity: sha512-7m1vEcPCxXYI8HqnL8CKI6siDyD+eIWSwgB3DZA+ZTogxk9I4CDnj4wilt9x/+/QbHI4YG5YZNmC6458/e9Ktg==}
 
   js-cookie@3.0.5:
     resolution: {integrity: sha512-cEiJEAEoIbWfCZYKWhVwFuvPX1gETRYPw6LlaTKoxD3s2AkXzkCjnp6h0V77ozyqj0jakteJ4YqDJT830+lVGw==}
@@ -1082,19 +1082,23 @@ snapshots:
 
   '@base-web-kits/base-tools-react@file:../packages/base-tools-react(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      ahooks: 3.9.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      ahooks: 3.10.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react: 18.2.0
-    transitivePeerDependencies:
-      - react-dom
+    optionalDependencies:
+      react-dom: 18.2.0(react@18.2.0)
 
-  '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts(dayjs@1.11.19)':
+  '@base-web-kits/base-tools-ts@file:../packages/base-tools-ts':
     dependencies:
       bignumber.js: 9.3.1
+      clsx: 2.1.1
       dayjs: 1.11.19
       es-toolkit: 1.44.0
       mitt: 3.0.1
 
-  '@base-web-kits/base-tools-web@file:../packages/base-tools-web': {}
+  '@base-web-kits/base-tools-web@file:../packages/base-tools-web':
+    dependencies:
+      dayjs: 1.11.19
+      es-toolkit: 1.44.0
 
   '@ctrl/tinycolor@3.6.1': {}
 
@@ -1214,8 +1218,6 @@ snapshots:
     dependencies:
       '@babel/types': 7.28.5
 
-  '@types/js-cookie@3.0.6': {}
-
   '@types/prop-types@15.7.15': {}
 
   '@types/react-dom@18.3.7(@types/react@18.3.27)':
@@ -1239,12 +1241,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  ahooks@3.9.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  ahooks@3.10.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.28.4
-      '@types/js-cookie': 3.0.6
       dayjs: 1.11.19
-      intersection-observer: 0.12.2
       js-cookie: 3.0.5
       lodash: 4.17.21
       react: 18.2.0
@@ -1336,6 +1336,8 @@ snapshots:
   caniuse-lite@1.0.30001757: {}
 
   classnames@2.5.1: {}
+
+  clsx@2.1.1: {}
 
   combined-stream@1.0.8:
     dependencies:
@@ -1465,8 +1467,6 @@ snapshots:
   hasown@2.0.2:
     dependencies:
       function-bind: 1.1.2
-
-  intersection-observer@0.12.2: {}
 
   js-cookie@3.0.5: {}
 

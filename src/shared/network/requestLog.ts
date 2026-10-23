@@ -23,12 +23,12 @@ export type RequestLogInfo = {
   httpStatus?: number;
   responseHeader?: Record<string, unknown>;
   failureStage?: RequestFailureStage;
-  failureCode?: RequestFailureCode;
-  startTime?: string;
-  endTime?: string;
-  startTimeMs?: number;
-  endTimeMs?: number;
-  duration?: number;
+  failureCode?: RequestFailureCode | (string & {});
+  networkStartTime?: string;
+  networkEndTime?: string;
+  networkStartTimeMs?: number;
+  networkEndTimeMs?: number;
+  networkDurationMs?: number;
   [key: string]: unknown;
 };
 
@@ -97,18 +97,20 @@ export function writeRequestLog(
       // SSE 仍沿用旧口径，本轮不扩展流式采集。
       const endTime = Date.now();
       Object.assign(info, {
-        startTime: dateFormat(options.sseStartMs, fmt),
-        endTime: dateFormat(endTime, fmt),
-        duration: endTime - options.sseStartMs,
+        networkStartTime: dateFormat(options.sseStartMs, fmt),
+        networkEndTime: dateFormat(endTime, fmt),
+        networkStartTimeMs: options.sseStartMs,
+        networkEndTimeMs: endTime,
+        networkDurationMs: endTime - options.sseStartMs,
       });
     } else {
       if (httpTiming)
         Object.assign(info, {
-          startTimeMs: httpTiming.startMs,
-          endTimeMs: httpTiming.endMs,
-          duration: httpTiming.durationMs,
-          startTime: dateFormat(httpTiming.startMs, fmt),
-          endTime: dateFormat(httpTiming.endMs, fmt),
+          networkStartTimeMs: httpTiming.startMs,
+          networkEndTimeMs: httpTiming.endMs,
+          networkDurationMs: httpTiming.durationMs,
+          networkStartTime: dateFormat(httpTiming.startMs, fmt),
+          networkEndTime: dateFormat(httpTiming.endMs, fmt),
         });
       info.success = options.success === true;
       if (typeof options.businessCode === 'string' || typeof options.businessCode === 'number')
@@ -140,6 +142,9 @@ function serializeRequestError(error: unknown, seen = new Set<Error>()): unknown
     name: error.name,
     message: error.message,
     stack: error.stack,
+    ...('code' in error && (typeof error.code === 'string' || typeof error.code === 'number')
+      ? { code: error.code }
+      : {}),
     ...('cause' in error ? { cause: serializeRequestError(error.cause, seen) } : {}),
   };
 }

@@ -22,10 +22,13 @@ packages.forEach((packageName) => {
   const packagePath = join(packagesDir, packageName);
   console.log(`Publishing ${packageName}...`);
   try {
-    execSync('npm publish --access public --tag alpha --registry https://registry.npmjs.org', {
-      cwd: packagePath,
-      stdio: 'inherit',
-    });
+    execSync(
+      'node ../../scripts/prepare-package.mjs && npm publish --access public --tag alpha --registry https://registry.npmjs.org',
+      {
+        cwd: packagePath,
+        stdio: 'inherit',
+      },
+    );
     console.log(`✅ ${packageName} published successfully!\n`);
   } catch (error) {
     console.error(`❌ Failed to publish ${packageName}: ${error.message}\n`);

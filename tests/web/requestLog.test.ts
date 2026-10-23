@@ -68,10 +68,10 @@ describe('普通请求统一日志', () => {
       businessCode: 1,
       httpStatus: 200,
       responseHeader: { 'x-test': 'yes' },
-      duration: 30,
+      networkDurationMs: 30,
       callerElapsed: 120,
-      startTimeMs: expect.any(Number),
-      endTimeMs: expect.any(Number),
+      networkStartTimeMs: expect.any(Number),
+      networkEndTimeMs: expect.any(Number),
     });
     expect(Object.getOwnPropertySymbols(log.mock.calls[0][1])).toHaveLength(0);
     expect(reads).toBe(1);
@@ -101,7 +101,7 @@ describe('普通请求统一日志', () => {
       failureStage: 'prepare',
       failureCode: 'request_prepare_failed',
     });
-    expect(log.mock.calls[0][1]).not.toHaveProperty('duration');
+    expect(log.mock.calls[0][1]).not.toHaveProperty('networkDurationMs');
   });
 
   it('沿用 logExtra 覆盖语义，不解释调用方的附加信息', async () => {
@@ -133,8 +133,8 @@ describe('普通请求统一日志', () => {
   });
 
   it('Web 转换失败保留原始正文和异常链，提示只使用外层 message', async () => {
-    const cause = new SyntaxError('invalid JSON');
-    const error = new Error('响应处理失败', { cause });
+    const cause = Object.assign(new SyntaxError('invalid JSON'), { code: 1001 });
+    const error = Object.assign(new Error('响应处理失败', { cause }), { code: 'TRANSFORM' });
     const log = vi.fn();
     const toast = vi.fn();
     setBaseToolsConfig({ log, toast });
@@ -161,7 +161,8 @@ describe('普通请求统一日志', () => {
       e: {
         name: 'Error',
         message: '响应处理失败',
-        cause: { name: 'SyntaxError', message: 'invalid JSON', stack: cause.stack },
+        code: 'TRANSFORM',
+        cause: { name: 'SyntaxError', message: 'invalid JSON', stack: cause.stack, code: 1001 },
       },
     });
     expect(JSON.parse(JSON.stringify(info)).e.cause.message).toBe('invalid JSON');
@@ -217,7 +218,7 @@ describe('普通请求统一日志', () => {
       res: 'raw response',
       e: { message: 'transform', cause: { name: 'SyntaxError', message: 'invalid JSON' } },
       failureCode: 'response_transform_failed',
-      duration: expect.any(Number),
+      networkDurationMs: expect.any(Number),
     });
   });
 
@@ -231,7 +232,7 @@ describe('普通请求统一日志', () => {
     await expect(request(cached)).resolves.toBe('ok');
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(log.mock.calls[1][1]).toMatchObject({ fromCache: true, success: true });
-    for (const key of ['httpStatus', 'responseHeader', 'duration', 'startTimeMs', 'endTimeMs'])
+    for (const key of ['httpStatus', 'responseHeader', 'networkDurationMs', 'networkStartTimeMs', 'networkEndTimeMs'])
       expect(log.mock.calls[1][1]).not.toHaveProperty(key);
     log.mockClear();
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{"status":1,"data":"ok"}')));

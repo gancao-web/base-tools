@@ -161,7 +161,7 @@ npm i whatwg-fetch
 import 'whatwg-fetch';
 ```
 
-## 请求日志（1.7.0）
+## 请求日志（2.0.0）
 
 继续通过 `setBaseToolsConfig({ log })` 接收请求结束日志，单次调用使用 `showLog` 控制。普通 HTTP 调用在业务结果判断及结果提取完成后输出一次结束日志；日志和 UI 回调的同步异常、异步拒绝不覆盖已确定的请求结果。
 
@@ -178,10 +178,14 @@ import 'whatwg-fetch';
 | httpStatus | `number`，可选 | 实际收到的 HTTP 状态，独立于业务结果 |
 | responseHeader | `Record<string, unknown>`，可选 | 实际取得的响应头；Web 受浏览器权限限制，uni 以宿主提供的值为准 |
 | failureStage | `RequestFailureStage`，可选 | prepare、network、http、response、business |
-| failureCode | `RequestFailureCode`，可选 | 明确取得的失败原因，见下表 |
-| startTimeMs / endTimeMs | `number`，可选 | 实际发送前、正文接收完成或传输失败通知时的 Unix 毫秒时间戳 |
-| startTime / endTime | `string`，可选 | 对应数字时间戳的可读时间，格式 YYYY-MM-DD HH:mm:ss.SSS，使用 dateFormat 的运行环境时区 |
-| duration | `number`，可选 | 传输耗时，单位毫秒，优先使用单调时钟，可含小数，不保证等于 endTimeMs - startTimeMs |
+| failureCode | `RequestFailureCode` 或扩展字符串，可选 | 明确取得的失败原因，见下表 |
+| networkStartTimeMs / networkEndTimeMs | `number`，可选 | 实际发送前、正文接收完成或传输失败通知时的 Unix 毫秒时间戳 |
+| networkStartTime / networkEndTime | `string`，可选 | 网络开始、结束时间，格式 YYYY-MM-DD HH:mm:ss.SSS，使用运行环境时区 |
+| networkDurationMs | `number`，可选 | 网络耗时，毫秒，优先使用单调时钟，可含小数，不保证等于时间戳差 |
+
+工具库只提供网络计时，不采集请求总耗时或调用方上下文。调用方自定义字段通过 `logExtra` 传入，工具库不规定其名称或结构。缓存命中、发送前失败时不生成网络计时字段。
+
+Error 及其 cause 序列化时保留实际存在的字符串或数字 `code`；请求 `failureCode` 与异常 `code` 相互独立。
 
 `status` 仍表示调用状态，不等同于 `success`。例如 HTTP 已返回但业务码表示掉登时，仍可能输出 `level: 'info'`、`status: 'success'`，同时 `success: false`、`failureStage: 'business'`、`failureCode: 'login_required'`。HTTP 200 不代表业务成功；HTTP 非 2xx 返回可解析业务正文时，仍沿用已有业务判断规则。
 
@@ -218,6 +222,22 @@ await requestApi({ url: '/items', logExtra });
 避免在请求完成前提前展开或序列化 logExtra；showLog: false 或未配置 log 时，工具库不读取这些 getter。调用方覆盖 success、失败分类等默认字段时，需要自行保证含义一致。
 
 ## 版本
+
+### 2.0.0 升级说明
+
+网络计时字段统一增加 `network` 前缀，耗时字段明确使用毫秒单位；以下旧字段不再由工具库生成，日志接收方需同步调整：
+
+| 旧字段 | 2.0.0 字段 |
+| --- | --- |
+| startTime | networkStartTime |
+| endTime | networkEndTime |
+| startTimeMs | networkStartTimeMs |
+| endTimeMs | networkEndTimeMs |
+| duration | networkDurationMs |
+
+同时，日志中的 Error 及其 cause 新增保留字符串或数字 `code`。请求调用方式及 `logExtra` 扩展方式保持不变。
+
+### 历史版本
 
 - 1.7.0 增强普通 HTTP 结束日志，新增业务结果、HTTP 信息和失败分类；时间字段改为传输口径，详见升级说明。
 - 1.1.2 新增
