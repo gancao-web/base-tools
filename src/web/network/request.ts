@@ -118,9 +118,6 @@ export type RequestConfigBase<D extends RequestData = RequestData> = RequestResp
     /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
     showLoading?: boolean | string;
 
-    /** 是否输出日志 (默认true) */
-    showLog?: boolean;
-
     /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
     logExtra?: Record<string, unknown>;
 
@@ -158,7 +155,6 @@ type RequestLogConfig = {
   header?: unknown;
   method?: RequestMethod;
   logExtra?: Record<string, unknown>;
-  showLog?: boolean;
   enableChunked?: boolean;
   resKey?: RequestConfigBase['resKey'];
 };
@@ -285,7 +281,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 
   return new Promise<T>((resolve, reject) => {
     const appConfig = getBaseToolsConfig();
-    const captureLog = config.showLog !== false && !!appConfig.log && !enableChunked;
+    const captureLog = !!appConfig.log && !enableChunked;
     let logConfig: RequestLogConfig = config;
     let httpTimer: Timer | undefined;
     let httpStatus: number | undefined;

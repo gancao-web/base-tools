@@ -41,9 +41,11 @@ const res = await uploadFile(
 // 直接返回json对象
 type UploadResult = { status: number; message: string; data: { path: string } | null };
 
-const json = await uploadFile<UploadResult>(
-  { url: 'https://xx', file: file, responseType: 'json' },
-);
+const json = await uploadFile<UploadResult>({
+  url: 'https://xx',
+  file: file,
+  responseType: 'json',
+});
 
 // 按业务状态码解析并直接提取 data.path
 const path = await uploadFile<string>(
@@ -83,7 +85,6 @@ console.log('uploadFile ok', JSON.parse(res));
 | showLoading | `boolean \| string` | 否 | `false` | 是否显示加载提示 (支持字符串作为自定义文本) |
 | toastSuccess | `boolean \| string \| ((res) => boolean \| string)` | 否 | `false` | 操作成功的 toast 提示 |
 | toastError | `boolean \| string \| ((err) => boolean \| string)` | 否 | `true` | 是否显示操作失败的详细错误信息 |
-| showLog | `boolean` | 否 | `true` | 是否在控制台打印日志 |
 | logExtra | `Record<string, unknown>` | 否 | - | 成功和失败日志中附加的数据 |
 | transformResponse | `(response: unknown) => unknown` | 否 | - | 转换原始响应；配置业务响应解析时，转换结果会继续按状态码配置解析 |
 | resKey | `string \| false` | 条件必填 | - | 业务成功时提取结果的字段；`false` 返回完整响应 |

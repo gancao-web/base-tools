@@ -1,5 +1,5 @@
-import { cloneDeep } from 'es-toolkit';
 import { dateFormat } from '../../ts/day';
+import { createLogSnapshot } from './logSnapshot';
 import type { Timer } from '../../ts/time';
 
 export type RequestFailureStage = 'prepare' | 'network' | 'http' | 'response' | 'business';
@@ -38,7 +38,6 @@ export type RequestLogOptions = {
     data?: unknown;
     header?: unknown;
     method?: string;
-    showLog?: boolean;
     enableChunked?: boolean;
     logExtra?: Record<string, unknown>;
   };
@@ -76,7 +75,7 @@ export function writeRequestLog(
   options: RequestLogOptions,
   decorate?: (info: RequestLogInfo) => void,
 ) {
-  if (!log || options.config.showLog === false) return;
+  if (!log) return;
   runRequestEffect(() => {
     const fmt = 'YYYY-MM-DD HH:mm:ss.SSS';
     const { config, status, res, fromCache = false } = options;
@@ -125,11 +124,12 @@ export function writeRequestLog(
     // 保持 logExtra 的覆盖语义；此时结果已确定，展开时才读取延迟属性。
     // 放在正文复制及日志回调之前，调用方计时不会包含日志自身的开销。
     Object.assign(info, extra);
-    if ('res' in options) info.res = cloneDeep(res);
+    // transformRequest 抛错,参数处理异常,断网,请求超时或被主动取消此时没有res,不必给日志加上undefined的res
+    if ('res' in options) info.res = res;
     if (error !== undefined) info.e = serializeRequestError(error);
     runRequestEffect(() => decorate?.(info));
     // 保持既有 level/status 对应关系，新增失败事实由 success/失败字段表达。
-    return log(status === 'fail' ? 'error' : 'info', info);
+    return log(status === 'fail' ? 'error' : 'info', createLogSnapshot(info));
   });
 }
 

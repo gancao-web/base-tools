@@ -14,9 +14,6 @@ export type ApiActionConfig<Res = unknown, Err = unknown> = {
   /** 是否显示加载提示，默认 false。 */
   showLoading?: boolean | string;
 
-  /** 是否输出日志，默认 true。 */
-  showLog?: boolean;
-
   /** 成功和失败时额外输出的日志数据。 */
   logExtra?: Record<string, unknown>;
 };

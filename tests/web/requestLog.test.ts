@@ -76,8 +76,9 @@ describe('普通请求统一日志', () => {
     expect(Object.getOwnPropertySymbols(log.mock.calls[0][1])).toHaveLength(0);
     expect(reads).toBe(1);
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{"status":1,"data":"ok"}')));
-    await request({ ...config, showLog: false, logExtra: extra });
-    expect(reads).toBe(1);
+    await request({ ...config, ...{ showLog: false }, logExtra: extra });
+    expect(reads).toBe(2);
+    expect(log).toHaveBeenCalledTimes(2);
   });
 
   it('准备失败以原异常 reject，无传输时间，失败日志仅一次', async () => {
@@ -190,6 +191,7 @@ describe('普通请求统一日志', () => {
       canIUse: () => false,
       getSystemInfoSync: () => ({ platform: 'ios', uniPlatform: 'mp-weixin' }),
       request: (options: UniApp.RequestOptions) => {
+        expect(options).not.toHaveProperty('showLog');
         queueMicrotask(() =>
           options.success?.({
             data: 'raw response',
@@ -205,6 +207,7 @@ describe('普通请求统一日志', () => {
     await expect(
       requestUni({
         ...config,
+        ...{ showLog: false },
         transformResponse: () => {
           throw error;
         },
@@ -236,7 +239,7 @@ describe('普通请求统一日志', () => {
       expect(log.mock.calls[1][1]).not.toHaveProperty(key);
     log.mockClear();
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{"status":1,"data":"ok"}')));
-    await request({ ...config, showLog: false });
-    expect(log).not.toHaveBeenCalled();
+    await request({ ...config, ...{ showLog: false } });
+    expect(log).toHaveBeenCalledTimes(1);
   });
 });

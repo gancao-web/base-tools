@@ -28,7 +28,6 @@ describe('web/request', () => {
         reloginCode: [-1],
         fetchOptions: { cache: 'no-store', credentials: 'include' },
         showLoading: false,
-        showLog: false,
         toastError: false,
       }),
     ).resolves.toBe('ok');
@@ -67,7 +66,6 @@ describe('web/request', () => {
       reloginCode: [-1],
       cacheTime: 60_000,
       showLoading: false,
-      showLog: false,
       toastError: false,
     };
 

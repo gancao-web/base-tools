@@ -1,4 +1,5 @@
-import { cloneDeep } from 'es-toolkit';
+import { createLogSnapshot } from '../../shared/network/logSnapshot';
+import { runRequestEffect } from '../../shared/network/requestLog';
 import { getBaseToolsConfig } from '../index';
 import type { AppLogInfo } from '../index';
 import type { ApiActionConfig } from '../../shared/network/action';
@@ -28,13 +29,10 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
 ) {
   return (option: Option, config?: WebApiConfig<Res, Err> & Config) => {
     const finalConfig = config || ({} as WebApiConfig<Res, Err> & Config);
-    const {
-      showLoading = false,
-      toastSuccess = false,
-      toastError = true,
-      showLog = true,
-      logExtra,
-    } = finalConfig;
+    const { showLoading = false, toastSuccess = false, toastError = true, logExtra } = finalConfig;
+    const { showLog: _legacyShowLog, ...apiConfig } = finalConfig as typeof finalConfig & {
+      showLog?: unknown;
+    };
 
     const {
       log,
@@ -58,16 +56,17 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
     };
 
     return new Promise<Res>((resolve, reject) => {
-      webApi(option, finalConfig)
+      webApi(option, apiConfig as Config)
         .then((res) => {
           hideLoading();
 
-          if (showLog) {
-            const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
-            logData.res = cloneDeep(res); // 深拷贝响应数据,避免外部修改对象,造成输出不一致
+          if (log)
+            runRequestEffect(() => {
+              const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
+              logData.res = res;
 
-            log?.('info', logData);
-          }
+              return log('info', createLogSnapshot(logData));
+            });
 
           resolve(res);
 
@@ -76,7 +75,13 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
         })
         .catch((e) => {
           hideLoading();
-          if (showLog) log?.('error', { name: fname, status: 'fail', option, e, ...logExtra });
+          if (log)
+            runRequestEffect(() =>
+              log(
+                'error',
+                createLogSnapshot({ name: fname, status: 'fail', option, e, ...logExtra }),
+              ),
+            );
 
           const msg = typeof toastError === 'function' ? toastError(e) : toastError;
           if (msg) {

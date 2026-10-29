@@ -66,9 +66,6 @@ export type RequestConfigBase<D extends RequestData = RequestData> = RequestResp
     /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
     showLoading?: boolean | string;
 
-    /** 是否输出日志 (默认true) */
-    showLog?: boolean;
-
     /** 额外输出的日志数据 */
     logExtra?: Record<string, unknown>;
 
@@ -100,7 +97,6 @@ type RequestLogConfig = {
   header?: unknown;
   method?: string;
   logExtra?: Record<string, unknown>;
-  showLog?: boolean;
   enableChunked?: boolean;
   resKey?: RequestConfigBase['resKey'];
 };
@@ -197,7 +193,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       logExtra: _logExtra,
       showLog: _showLog,
       ...nativeConfig
-    } = config;
+    } = config as typeof config & { showLog?: unknown };
     let logConfig: RequestLogConfig = config;
     let httpTimer: Timer | undefined;
     let httpStatus: number | undefined;
@@ -205,7 +201,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     let businessCode: unknown;
     let finalized = false;
     let sseStartMs = Date.now();
-    const captureLog = config.showLog !== false && !!getBaseToolsConfig().log && !enableChunked;
+    const captureLog = !!getBaseToolsConfig().log && !enableChunked;
     // 统一结束请求；状态与是否输出日志无关，日志异常不得阻止 Promise 完成。
     const finish = (info: Omit<RequestLogOptions, 'config'>, result?: T) => {
       if (finalized) return;

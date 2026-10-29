@@ -34,7 +34,6 @@ describe('web/request response key', () => {
         successCode: [0] as const,
         reloginCode: [-1] as const,
         showLoading: false,
-        showLog: false,
         toastError: false,
       }),
     ).resolves.toBe('ok');

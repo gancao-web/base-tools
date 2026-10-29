@@ -95,7 +95,6 @@ chatTask?.abort();
 - `transformResponse?: (data: any) => any` - 响应数据的转换, 如解密操作
 - `showLoading?: boolean | string` - 是否显示进度条，默认 `true`，支持字符串自定义文案
 - `toastError?: boolean` - 是否提示接口异常，默认 `true`
-- `showLog?: boolean` - 是否输出日志，默认 `true`
 - `cacheTime?: number` - 缓存时间，默认 `0` 不缓存 (单位毫秒)
 - `logExtra?: Record<string, unknown>` - 额外输出的日志数据
 
@@ -105,7 +104,7 @@ chatTask?.abort();
 
 ## 请求日志（2.0.0）
 
-继续通过 `setBaseToolsConfig({ log })` 接收请求结束日志，单次调用使用 `showLog` 控制。普通 HTTP 调用在业务结果判断及结果提取完成后输出一次结束日志；日志和 UI 回调的同步异常、异步拒绝不覆盖已确定的请求结果。
+继续通过 `setBaseToolsConfig({ log })` 接收请求结束日志，成功和失败均记录，不再提供单次调用关闭日志的开关。普通 HTTP 调用在业务结果判断及结果提取完成后输出一次结束日志；日志和 UI 回调的同步异常、异步拒绝不覆盖已确定的请求结果。
 
 ### 字段含义
 
@@ -161,7 +160,7 @@ await requestApi({ url: '/items', logExtra });
 // completedAtMs 在结束日志组装时读取，而不是在创建对象时读取。
 ```
 
-避免在请求完成前提前展开或序列化 logExtra；showLog: false 或未配置 log 时，工具库不读取这些 getter。调用方覆盖 success、失败分类等默认字段时，需要自行保证含义一致。
+避免在请求完成前提前展开或序列化 logExtra；未配置 log 时，工具库不读取这些 getter。调用方覆盖 success、失败分类等默认字段时，需要自行保证含义一致。
 
 ## 版本
 
@@ -169,13 +168,13 @@ await requestApi({ url: '/items', logExtra });
 
 网络计时字段统一增加 `network` 前缀，耗时字段明确使用毫秒单位；以下旧字段不再由工具库生成，日志接收方需同步调整：
 
-| 旧字段 | 2.0.0 字段 |
-| --- | --- |
-| startTime | networkStartTime |
-| endTime | networkEndTime |
+| 旧字段      | 2.0.0 字段         |
+| ----------- | ------------------ |
+| startTime   | networkStartTime   |
+| endTime     | networkEndTime     |
 | startTimeMs | networkStartTimeMs |
-| endTimeMs | networkEndTimeMs |
-| duration | networkDurationMs |
+| endTimeMs   | networkEndTimeMs   |
+| duration    | networkDurationMs  |
 
 同时，日志中的 Error 及其 cause 新增保留字符串或数字 `code`。请求调用方式及 `logExtra` 扩展方式保持不变。
 
