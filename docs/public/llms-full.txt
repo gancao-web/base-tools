@@ -1,7 +1,7 @@
 # Base Tools Full Documentation
 
 Project: @base-web-kits/base-tools
-Date: 2026-10-23
+Date: 2026-10-29
 
 
 
@@ -11147,7 +11147,6 @@ await saveImagePromise(
     showLoading: '保存中',
     toastSuccess: (res) => '图片已保存到相册',
     toastError: '保存失败，请检查权限',
-    showLog: true,
   },
 );
 
@@ -11175,7 +11174,6 @@ await enhanceUniApi(uni.downloadFile, 'downloadFile')(
     - `showLoading` - 是否显示加载提示，默认 `false`（支持字符串自定义文本）
     - `toastSuccess` - 操作成功的toast提示，默认 `false`（支持函数返回自定义文本）
     - `toastError` - 是否显示操作失败的详细错误信息，默认 `true`（支持函数判断是否显示）
-    - `showLog` - 是否显示日志，默认 `true`
     - `logExtra` - 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name')
     - `onTaskReady` - 初始化task对象时的回调函数，默认 `undefined`（支持自定义task事件监听）
 
@@ -11709,7 +11707,6 @@ chatTask?.abort();
 - `transformResponse?: (data: any) => any` - 响应数据的转换, 如解密操作
 - `showLoading?: boolean | string` - 是否显示进度条，默认 `true`，支持字符串自定义文案
 - `toastError?: boolean` - 是否提示接口异常，默认 `true`
-- `showLog?: boolean` - 是否输出日志，默认 `true`
 - `cacheTime?: number` - 缓存时间，默认 `0` 不缓存 (单位毫秒)
 - `logExtra?: Record<string, unknown>` - 额外输出的日志数据
 
@@ -11719,7 +11716,7 @@ chatTask?.abort();
 
 ## 请求日志（2.0.0）
 
-继续通过 `setBaseToolsConfig({ log })` 接收请求结束日志，单次调用使用 `showLog` 控制。普通 HTTP 调用在业务结果判断及结果提取完成后输出一次结束日志；日志和 UI 回调的同步异常、异步拒绝不覆盖已确定的请求结果。
+继续通过 `setBaseToolsConfig({ log })` 接收请求结束日志，成功和失败均记录，不再提供单次调用关闭日志的开关。普通 HTTP 调用在业务结果判断及结果提取完成后输出一次结束日志；日志和 UI 回调的同步异常、异步拒绝不覆盖已确定的请求结果。
 
 ### 字段含义
 
@@ -11775,7 +11772,7 @@ await requestApi({ url: '/items', logExtra });
 // completedAtMs 在结束日志组装时读取，而不是在创建对象时读取。
 ```
 
-避免在请求完成前提前展开或序列化 logExtra；showLog: false 或未配置 log 时，工具库不读取这些 getter。调用方覆盖 success、失败分类等默认字段时，需要自行保证含义一致。
+避免在请求完成前提前展开或序列化 logExtra；未配置 log 时，工具库不读取这些 getter。调用方覆盖 success、失败分类等默认字段时，需要自行保证含义一致。
 
 ## 版本
 
@@ -11783,13 +11780,13 @@ await requestApi({ url: '/items', logExtra });
 
 网络计时字段统一增加 `network` 前缀，耗时字段明确使用毫秒单位；以下旧字段不再由工具库生成，日志接收方需同步调整：
 
-| 旧字段 | 2.0.0 字段 |
-| --- | --- |
-| startTime | networkStartTime |
-| endTime | networkEndTime |
+| 旧字段      | 2.0.0 字段         |
+| ----------- | ------------------ |
+| startTime   | networkStartTime   |
+| endTime     | networkEndTime     |
 | startTimeMs | networkStartTimeMs |
-| endTimeMs | networkEndTimeMs |
-| duration | networkDurationMs |
+| endTimeMs   | networkEndTimeMs   |
+| duration    | networkDurationMs  |
 
 同时，日志中的 Error 及其 cause 新增保留字符串或数字 `code`。请求调用方式及 `logExtra` 扩展方式保持不变。
 
@@ -11856,7 +11853,6 @@ console.log('uploadFile ok', JSON.parse(res));
 | showLoading | `boolean \| string` | 否 | `false` | 是否显示加载提示 |
 | toastSuccess | `boolean \| string \| ((res) => false \| string)` | 否 | `false` | 操作成功提示 |
 | toastError | `boolean \| string \| ((err) => boolean \| string)` | 否 | `true` | 操作失败提示 |
-| showLog | `boolean` | 否 | `true` | 是否输出日志 |
 | logExtra | `Record<string, unknown>` | 否 | - | 成功和失败日志中附加的数据 |
 | transformResponse | `(response: unknown) => unknown` | 否 | - | 转换原始 `data`；配置业务响应解析时，转换结果会继续按状态码配置解析 |
 | resKey | `string \| false` | 条件必填 | - | 业务成功时提取结果的字段；`false` 返回完整响应 |
@@ -21538,7 +21534,6 @@ chatTask?.abort();
 | reloginCode | `(number \| string)[]` | 是 | - | 登录过期状态码列表 |
 | showLoading | `boolean \| string` | 否 | `true` | 是否显示进度条，支持字符串自定义文案 |
 | toastError | `boolean` | 否 | `true` | 是否提示接口异常 |
-| showLog | `boolean` | 否 | `true` | 是否输出日志 |
 | logExtra | `Record<string, unknown>` | 否 | - | 额外输出的日志数据 |
 | cacheTime | `number` | 否 | `0` | 响应数据的缓存时间 (毫秒)，仅成功时缓存，内存缓存 |
 | enableChunked | `boolean` | 否 | `false` | 是否开启流式传输 (如 SSE) |
@@ -21584,7 +21579,7 @@ import 'whatwg-fetch';
 
 ## 请求日志（2.0.0）
 
-继续通过 `setBaseToolsConfig({ log })` 接收请求结束日志，单次调用使用 `showLog` 控制。普通 HTTP 调用在业务结果判断及结果提取完成后输出一次结束日志；日志和 UI 回调的同步异常、异步拒绝不覆盖已确定的请求结果。
+继续通过 `setBaseToolsConfig({ log })` 接收请求结束日志，成功和失败均记录，不再提供单次调用关闭日志的开关。普通 HTTP 调用在业务结果判断及结果提取完成后输出一次结束日志；日志和 UI 回调的同步异常、异步拒绝不覆盖已确定的请求结果。
 
 ### 字段含义
 
@@ -21640,7 +21635,7 @@ await requestApi({ url: '/items', logExtra });
 // completedAtMs 在结束日志组装时读取，而不是在创建对象时读取。
 ```
 
-避免在请求完成前提前展开或序列化 logExtra；showLog: false 或未配置 log 时，工具库不读取这些 getter。调用方覆盖 success、失败分类等默认字段时，需要自行保证含义一致。
+避免在请求完成前提前展开或序列化 logExtra；未配置 log 时，工具库不读取这些 getter。调用方覆盖 success、失败分类等默认字段时，需要自行保证含义一致。
 
 ## 版本
 
@@ -21648,13 +21643,13 @@ await requestApi({ url: '/items', logExtra });
 
 网络计时字段统一增加 `network` 前缀，耗时字段明确使用毫秒单位；以下旧字段不再由工具库生成，日志接收方需同步调整：
 
-| 旧字段 | 2.0.0 字段 |
-| --- | --- |
-| startTime | networkStartTime |
-| endTime | networkEndTime |
+| 旧字段      | 2.0.0 字段         |
+| ----------- | ------------------ |
+| startTime   | networkStartTime   |
+| endTime     | networkEndTime     |
 | startTimeMs | networkStartTimeMs |
-| endTimeMs | networkEndTimeMs |
-| duration | networkDurationMs |
+| endTimeMs   | networkEndTimeMs   |
+| duration    | networkDurationMs  |
 
 同时，日志中的 Error 及其 cause 新增保留字符串或数字 `code`。请求调用方式及 `logExtra` 扩展方式保持不变。
 
@@ -21711,9 +21706,11 @@ const res = await uploadFile(
 // 直接返回json对象
 type UploadResult = { status: number; message: string; data: { path: string } | null };
 
-const json = await uploadFile<UploadResult>(
-  { url: 'https://xx', file: file, responseType: 'json' },
-);
+const json = await uploadFile<UploadResult>({
+  url: 'https://xx',
+  file: file,
+  responseType: 'json',
+});
 
 // 按业务状态码解析并直接提取 data.path
 const path = await uploadFile<string>(
@@ -21753,7 +21750,6 @@ console.log('uploadFile ok', JSON.parse(res));
 | showLoading | `boolean \| string` | 否 | `false` | 是否显示加载提示 (支持字符串作为自定义文本) |
 | toastSuccess | `boolean \| string \| ((res) => boolean \| string)` | 否 | `false` | 操作成功的 toast 提示 |
 | toastError | `boolean \| string \| ((err) => boolean \| string)` | 否 | `true` | 是否显示操作失败的详细错误信息 |
-| showLog | `boolean` | 否 | `true` | 是否在控制台打印日志 |
 | logExtra | `Record<string, unknown>` | 否 | - | 成功和失败日志中附加的数据 |
 | transformResponse | `(response: unknown) => unknown` | 否 | - | 转换原始响应；配置业务响应解析时，转换结果会继续按状态码配置解析 |
 | resKey | `string \| false` | 条件必填 | - | 业务成功时提取结果的字段；`false` 返回完整响应 |
