@@ -30,9 +30,6 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
   return (option: Option, config?: WebApiConfig<Res, Err> & Config) => {
     const finalConfig = config || ({} as WebApiConfig<Res, Err> & Config);
     const { showLoading = false, toastSuccess = false, toastError = true, logExtra } = finalConfig;
-    const { showLog: _legacyShowLog, ...apiConfig } = finalConfig as typeof finalConfig & {
-      showLog?: unknown;
-    };
 
     const {
       log,
@@ -56,7 +53,7 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
     };
 
     return new Promise<Res>((resolve, reject) => {
-      webApi(option, apiConfig as Config)
+      webApi(option, finalConfig)
         .then((res) => {
           hideLoading();
 

@@ -35,9 +35,6 @@ export function enhanceUniApi<Option, Res, Err, Task>(
 ) {
   return (option?: OmitOption<Option>, config: UniApiConfig<Res, Err, Task> = {}) => {
     const { showLoading = false, toastSuccess = false, toastError = true, logExtra } = config;
-    const { showLog: _legacyShowLog, ...nativeOption } = (option || {}) as OmitOption<Option> & {
-      showLog?: unknown;
-    };
 
     const { log } = getBaseToolsConfig();
     const fname = apiName || 'enhanceUniApi'; // uniApi.name得到的值都是'promiseApi'，不如默认'enhanceUniApi'
@@ -76,7 +73,7 @@ export function enhanceUniApi<Option, Res, Err, Task>(
       };
 
       const task = uniApi({
-        ...(nativeOption as Option),
+        ...(option as Option),
         success(res) {
           hideLoading();
 

@@ -119,13 +119,12 @@ describe('文件载荷日志快照', () => {
     expect(input.value).toBe(pdf());
   });
 
-  it('先读取延迟现场，再快照请求、响应、错误与附加数据，旧开关不抑制日志', () => {
+  it('先读取延迟现场，再快照请求、响应、错误与附加数据', () => {
     const log = vi.fn();
     let captured = 0;
     const data = { file: pdf() };
     writeRequestLog(log, {
       config: {
-        ...{ showLog: false },
         data,
         logExtra: {
           get endContext() {

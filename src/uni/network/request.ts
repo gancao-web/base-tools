@@ -191,9 +191,8 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       onTaskReady,
       onMessage,
       logExtra: _logExtra,
-      showLog: _showLog,
       ...nativeConfig
-    } = config as typeof config & { showLog?: unknown };
+    } = config;
     let logConfig: RequestLogConfig = config;
     let httpTimer: Timer | undefined;
     let httpStatus: number | undefined;

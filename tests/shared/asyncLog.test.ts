@@ -15,14 +15,13 @@ describe('异步操作统一日志', () => {
     vi.unstubAllGlobals();
   });
 
-  it('Web 的旧开关不透传、不抑制成功和失败日志，日志异常不影响结果', async () => {
+  it('Web 成功和失败均使用快照且日志异常不影响结果', async () => {
     const log = vi.fn();
     setBaseToolsConfig({ log });
     const api = vi.fn(async (_option: unknown, _config?: Record<string, unknown>) => ({ file }));
     const enhanced = enhanceWebApi(api, 'upload');
     const input = { file };
-    await expect(enhanced(input, { ...{ showLog: false } })).resolves.toEqual({ file });
-    expect(api.mock.calls[0][1]).not.toHaveProperty('showLog');
+    await expect(enhanced(input)).resolves.toEqual({ file });
     expect(log).toHaveBeenCalledOnce();
     expect(log.mock.calls[0][1]).toMatchObject({
       option: { file: fileSummary },
@@ -37,31 +36,26 @@ describe('异步操作统一日志', () => {
     const failing = enhanceWebApi(async () => {
       throw error;
     });
-    await expect(failing({}, { ...{ showLog: false }, toastError: false })).rejects.toBe(error);
+    await expect(failing({}, { toastError: false })).rejects.toBe(error);
     expect(log.mock.calls.at(-1)?.[0]).toBe('error');
     expect(log.mock.calls.at(-1)?.[1].e.cause.file).toBe(fileSummary);
   });
 
-  it('Uni 过滤旧平台参数，成功和失败均使用快照且日志拒绝不影响结果', async () => {
+  it('Uni 成功和失败均使用快照且日志拒绝不影响结果', async () => {
     const log = vi.fn().mockRejectedValue(new Error('logger'));
     setUniConfig(createUniConfig({ log }));
     const api = vi.fn((option: { success?: (res: { file: string }) => void }) => {
       option.success?.({ file });
     });
     const enhanced = enhanceUniApi(api, 'download');
-    await expect(
-      enhanced({ ...{ showLog: false } }, { ...{ showLog: false }, toastError: false }),
-    ).resolves.toEqual({ file });
-    expect(api.mock.calls[0][0]).not.toHaveProperty('showLog');
+    await expect(enhanced({}, { toastError: false })).resolves.toEqual({ file });
     expect(log).toHaveBeenCalledOnce();
     expect(log.mock.calls[0][1].res.file).toBe(fileSummary);
     const error = { file };
     const failing = enhanceUniApi((option: { fail?: (err: unknown) => void }) =>
       option.fail?.(error),
     );
-    await expect(failing(undefined, { ...{ showLog: false }, toastError: false })).rejects.toBe(
-      error,
-    );
+    await expect(failing(undefined, { toastError: false })).rejects.toBe(error);
     expect(log.mock.calls[1][0]).toBe('error');
     expect(log.mock.calls[1][1].e.file).toBe(fileSummary);
   });
