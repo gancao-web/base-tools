@@ -2,7 +2,10 @@ import { isPlainObject } from 'es-toolkit';
 import { startTimer, type Timer } from '../../ts/time';
 import { getBaseToolsConfig } from '../config';
 import { type MessageCallback } from '../../ts/buffer/SSEParser';
-import { createSseParser } from '../../shared/network/sse';
+import {
+  createSseParser, getSseResponseFailure, isSseResponseHeader,
+  type SseTaskControl,
+} from '../../shared/network/sse';
 import {
   createFetchRequest,
   filterRequestData,
@@ -119,7 +122,7 @@ export type RequestConfigBase<D extends RequestData = RequestData> = RequestResp
     /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
     showLoading?: boolean | string;
 
-    /** 附带日志数据，可补充逻辑 data/res；确定的公共结果字段不可覆盖。 */
+    /** 日志附带信息：url 整值覆盖；header/data/res 局部合并；method 和公共结果字段不可覆盖。 */
     logExtra?: Record<string, unknown>;
 
     /**
@@ -143,11 +146,14 @@ export type RequestConfigBase<D extends RequestData = RequestData> = RequestResp
     onMessage?: MessageCallback;
   };
 
-/** 请求任务对象 (用于取消请求) */
+/** 流式控制能力。 */
+export type SseRequestTask = SseTaskControl;
+
+/** 请求任务对象，支持取消请求和流式控制。 */
 export type RequestTask = {
   /** 取消请求 */
   abort: () => void;
-};
+} & SseRequestTask;
 
 /** 日志请求 */
 type RequestLogConfig = {
@@ -165,6 +171,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
 
 /**
  * 基础请求 (返回 Promise 和 Task 对象)
+ * 统一返回 Promise<T>，默认 T = unknown。流式消息通过 onMessage 交付，正常结束值为 undefined，不读取 Promise 结果。
  * 基于 fetch API 封装，支持流式请求
  * @param config 请求配置
  * @example
@@ -197,6 +204,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  *      successCode: [1],
  *      reloginCode: [-10],
  *      ...config,
+ *      url: `${HOST}${config.url}`,
  *    });
  * }
  *
@@ -221,7 +229,6 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  *     url: '/sse/chatStream',
  *     resKey: false,
  *     showLoading: false,
- *     responseType: 'arraybuffer', // 流式响应类型
  *     enableChunked: true, // 开启分块传输
  *   });
  * }
@@ -247,16 +254,9 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * // 流式取消 (在组件销毁或页面关闭时调用)
  * chatTask?.abort();
  */
-export function request<_T = unknown, D extends RequestData = RequestData>(
-  config: RequestConfigBase<D> & { enableChunked: true },
-): Promise<void>;
-export function request<T, D extends RequestData = RequestData>(
-  config: RequestConfigBase<D> & { enableChunked?: false },
-): Promise<T>;
-export function request<T, D extends RequestData = RequestData>(
+export function request<T = unknown, D extends RequestData = RequestData>(
   config: RequestConfigBase<D>,
-): Promise<T | void>;
-export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
+): Promise<T> {
   const {
     url,
     data,
@@ -283,13 +283,15 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
   const controller = new AbortController();
   const sseTask: SseTask = { parser: undefined };
   const task: RequestTask = {
+    complete: () => {},
+    fail: () => {},
     abort: () => {
       sseTask.parser = null;
       controller.abort();
     },
   };
 
-  return new Promise<T | void>((resolve, reject) => {
+  return new Promise<T>((resolve, reject) => {
     const appConfig = getBaseToolsConfig();
     const captureLog = !!appConfig.log;
     let logConfig: RequestLogConfig = config;
@@ -303,18 +305,13 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     let hasResponseBody = false;
     let fromCache = false;
     let logged = false;
+    let streamReady = false;
     let isTimeout = false;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    if (enableChunked || onMessage)
-      sseTask.parser = createSseParser(
-        enableChunked ? appConfig.log : undefined,
-        config.logExtra,
-        onMessage,
-        () => !logged && !controller.signal.aborted,
-      );
     const finish = (info: Omit<RequestLogOptions, 'config'>) => {
       if (logged) return;
       logged = true;
+      if (timeoutId) clearTimeout(timeoutId);
       logRequestInfo({
         config: logConfig,
         httpTimer,
@@ -325,6 +322,39 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         ...info,
       });
     };
+    const stopStream = (info: Omit<RequestLogOptions, 'config'>) => {
+      if (!enableChunked || !streamReady || logged || controller.signal.aborted) return;
+      httpTimer?.end();
+      // 先确定终态，再关闭传输；底层 AbortError 不得推翻已确认的业务结果。
+      finish(info);
+      // 流式请求只等待完成，不提供业务结果；T 由调用方声明。
+      if (info.success) resolve(undefined as T);
+      else reject('e' in info ? info.e : info.res);
+      sseTask.parser = null;
+      controller.abort();
+      if (showLoading) runRequestEffect(() => appConfig.hideLoading?.());
+    };
+    task.complete = () => stopStream({ status: 'success', success: true, closeReason: 'caller_completed' });
+    task.fail = (e, code) => stopStream({
+      status: 'fail', success: false, closeReason: 'business_error',
+      failureStage: 'business', failureCode: 'business_failed', businessCode: code,
+      ...(e !== undefined ? { e } : {}),
+    });
+    if (enableChunked || onMessage)
+      sseTask.parser = createSseParser(
+        enableChunked ? appConfig.log : undefined,
+        config.logExtra,
+        onMessage,
+        () => !logged && !controller.signal.aborted,
+        enableChunked ? (e) => stopStream({
+          status: 'fail', success: false, e, closeReason: 'message_handler_error',
+          failureStage: 'response', failureCode: 'sse_message_handler_failed',
+        }) : undefined,
+      );
+    sseTask.onResponseError = (e) => stopStream({
+      status: 'fail', success: false, e, closeReason: 'response_handler_error',
+      failureStage: 'response', failureCode: 'response_parse_failed',
+    });
 
     const execute = async () => {
       try {
@@ -348,6 +378,8 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
               ? filterRequestData(transformed.data as Record<string, any>)
               : transformed.data;
         }
+        if (enableChunked && !Object.keys(fillHeader).some((key) => key.toLowerCase() === 'accept'))
+          fillHeader.Accept = 'text/event-stream';
         const fetchRequest = createFetchRequest({
           url: fillUrl,
           method,
@@ -405,19 +437,31 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         if (captureLog) httpTimer = startTimer();
         const response = await fetch(fillUrl, requestInit);
         httpStatus = response.status;
-        if (captureLog) {
+        if (captureLog || enableChunked) {
           responseHeader = {};
           response.headers.forEach((value, key) => {
             responseHeader![key] = value;
           });
         }
 
-        if (enableChunked && response.ok) {
+        if (enableChunked) {
+          if (!response.ok || !isSseResponseHeader(responseHeader)) {
+            const body = await response.text();
+            httpTimer?.end();
+            const { info, relogin, msg } = getSseResponseFailure(body, httpStatus, config);
+            finish(info);
+            reject('e' in info ? info.e : info.res);
+            if (showLoading) runRequestEffect(() => appConfig.hideLoading?.());
+            if (relogin) runRequestEffect(() => appConfig.toLogin?.());
+            else if (toastError && msg) runRequestEffect(() => appConfig.toast?.({ status: 'fail', msg }));
+            return;
+          }
+          streamReady = true;
           if (showLoading) runRequestEffect(() => appConfig.hideLoading?.());
-          await handleFetchStreamResponse(response, sseTask, () => httpTimer?.end());
+          await handleFetchStreamResponse(response, sseTask, () => httpTimer?.end(), controller.signal);
           httpTimer?.end();
           finish({ status: 'success', success: true });
-          resolve();
+          resolve(undefined as T);
           return;
         }
 
@@ -460,7 +504,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
           }),
         });
         if (showLoading) runRequestEffect(() => appConfig.hideLoading?.());
-        if (isSuccess) resolve(enableChunked ? undefined : (result as T));
+        if (isSuccess) resolve(result as T);
         else {
           reject(res);
           if (isRelogin) runRequestEffect(() => appConfig.toLogin?.());
@@ -468,9 +512,10 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
             runRequestEffect(() => appConfig.toast?.({ status: 'fail', msg }));
         }
       } catch (e) {
+        if (logged) return;
         httpTimer?.end();
         const isAbortError = e instanceof Error && e.name === 'AbortError';
-        const error = isAbortError && isTimeout ? new Error('Request Timeout') : e;
+        const error = isAbortError && isTimeout ? new Error('Request Timeout', { cause: e }) : e;
         finish({
           status: 'fail',
           success: false,

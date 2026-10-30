@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
-import { request, uploadFile, setBaseToolsConfig } from '../../../src/web';
-import { request as requestUni, uploadFile as uploadUni, setBaseToolsConfig as setUniConfig } from '../../../src/uni';
+import { request, uploadFile, setBaseToolsConfig, type RequestConfig } from '../../../src/web';
+import {
+  request as requestUni, uploadFile as uploadUni, setBaseToolsConfig as setUniConfig,
+  type RequestConfig as UniRequestConfig,
+} from '../../../src/uni';
 import { createUniConfig } from '../../helpers/uniConfig';
 import { SSEParser } from '../../../src/ts/buffer/SSEParser';
 
@@ -31,7 +34,7 @@ describe('上传与 SSE 日志采集', () => {
     vi.unstubAllGlobals();
   });
 
-  it('流式请求返回 void，普通请求保留结果类型，动态开关返回联合类型', async () => {
+  it('普通、流式和动态开关统一保留声明的结果类型，流式完成值仍为 undefined', async () => {
     mockUni();
     Object.assign(uni, { request: (options: UniApp.RequestOptions) => {
       queueMicrotask(() => options.success?.({
@@ -41,19 +44,33 @@ describe('上传与 SSE 日志采集', () => {
     } });
     vi.stubGlobal('fetch', vi.fn((url: string) => Promise.resolve(new Response(
       url === '/http' ? '{"code":0,"data":"ok"}' : 'data: hello\n\n',
+      { headers: { 'content-type': url === '/http' ? 'application/json' : 'text/event-stream' } },
     ))));
-    const webStream = request<string>({ ...base, enableChunked: true });
-    const uniStream = requestUni<string>({ ...base, enableChunked: true });
-    const http = request<string>({ ...base, url: '/http' });
-    const uniHttp = requestUni<string>({ ...base, url: '/http', enableChunked: false });
-    const dynamic = request<string>({ ...base, enableChunked: Boolean(1) });
-    expectTypeOf(webStream).toEqualTypeOf<Promise<void>>();
-    expectTypeOf(uniStream).toEqualTypeOf<Promise<void>>();
+    // 项目只需一个泛型封装，不再重复普通、流式和动态开关的重载。
+    function requestApi<T = unknown>(config: RequestConfig): Promise<T> {
+      return request<T>({ ...base, ...config, url: `${config.url}` });
+    }
+    function requestUniApi<T = unknown>(config: UniRequestConfig): Promise<T> {
+      return requestUni<T>({ ...base, ...config, url: `${config.url}` });
+    }
+    const webStream = requestApi<string>({ url: '/stream', enableChunked: true });
+    const uniStream = requestUniApi<string>({ url: '/stream', enableChunked: true });
+    const http = requestApi<string>({ url: '/http' });
+    const uniHttp = requestUniApi<string>({ url: '/http', enableChunked: false });
+    const dynamic = requestApi<string>({ url: '/stream', enableChunked: Boolean(1) });
+    const uniDynamic = requestUniApi<string>({ url: '/stream', enableChunked: Boolean(1) });
+    const defaultStream = requestApi({ url: '/stream', enableChunked: true });
+    const uniDefaultStream = requestUniApi({ url: '/stream', enableChunked: true });
+    expectTypeOf(webStream).toEqualTypeOf<Promise<string>>();
+    expectTypeOf(uniStream).toEqualTypeOf<Promise<string>>();
     expectTypeOf(http).toEqualTypeOf<Promise<string>>();
     expectTypeOf(uniHttp).toEqualTypeOf<Promise<string>>();
-    expectTypeOf(dynamic).toEqualTypeOf<Promise<string | void>>();
-    await expect(Promise.all([webStream, uniStream, http, uniHttp, dynamic])).resolves.toEqual([
-      undefined, undefined, 'ok', 'ok', undefined,
+    expectTypeOf(dynamic).toEqualTypeOf<Promise<string>>();
+    expectTypeOf(uniDynamic).toEqualTypeOf<Promise<string>>();
+    expectTypeOf(defaultStream).toEqualTypeOf<Promise<unknown>>();
+    expectTypeOf(uniDefaultStream).toEqualTypeOf<Promise<unknown>>();
+    await expect(Promise.all([webStream, uniStream, http, uniHttp, dynamic, uniDynamic, defaultStream, uniDefaultStream])).resolves.toEqual([
+      undefined, undefined, 'ok', 'ok', undefined, undefined, undefined, undefined,
     ]);
   });
 
@@ -104,7 +121,9 @@ describe('上传与 SSE 日志采集', () => {
     const log = vi.fn();
     setBaseToolsConfig({ log });
     setUniConfig(createUniConfig({ log }));
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('data: one\n\ndata: two\n\n')));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('data: one\n\ndata: two\n\n', {
+      headers: { 'content-type': 'text/event-stream' },
+    })));
     let abort = () => {};
     const onMessage = vi.fn(() => abort());
     const run = (config: StreamConfig) => platform === 'web' ? request(config) : requestUni(config);
@@ -114,20 +133,22 @@ describe('上传与 SSE 日志采集', () => {
     expect(onMessage).toHaveBeenCalledOnce();
     expect(log).toHaveBeenCalledTimes(2);
     expect(log.mock.calls[1][1]).toMatchObject({
-      success: false, closeReason: 'aborted', failureStage: 'network', failureCode: 'aborted',
+      success: false, closeReason: 'caller_aborted', failureStage: 'network', failureCode: 'aborted',
     });
   });
 
   it('尾消息回调取消不能随后记录 EOF 成功', async () => {
     const log = vi.fn();
     setBaseToolsConfig({ log });
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('data: tail\n')));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('data: tail\n', {
+      headers: { 'content-type': 'text/event-stream' },
+    })));
     let abort = () => {};
     await expect(request({ ...base, enableChunked: true,
       onTaskReady: (task) => { abort = () => task.abort(); }, onMessage: () => abort(),
     })).rejects.toMatchObject({ name: 'AbortError' });
     expect(log.mock.calls.map((call) => call[1].name)).toEqual(['sseMessage', 'request']);
-    expect(log.mock.calls[1][1]).toMatchObject({ success: false, closeReason: 'aborted' });
+    expect(log.mock.calls[1][1]).toMatchObject({ success: false, closeReason: 'caller_aborted' });
   });
 
   it('uni H5 建流失败保留 HTTP 信息和错误正文', async () => {
@@ -177,7 +198,7 @@ describe('上传与 SSE 日志采集', () => {
     options.success?.({ data: '', statusCode: 200, header: {}, cookies: [], errMsg: 'request:ok' });
     await rejected;
     expect(log).toHaveBeenCalledTimes(2);
-    expect(log.mock.calls[1][1]).toMatchObject({ success: false, closeReason: 'aborted',
+    expect(log.mock.calls[1][1]).toMatchObject({ success: false, closeReason: 'caller_aborted',
       httpStatus: 200, responseHeader: { 'content-type': 'text/event-stream' },
     });
   });

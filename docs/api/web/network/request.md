@@ -2,13 +2,11 @@
 
 基础请求方法，基于 fetch API 封装，支持流式请求、缓存、请求前转换、响应数据转换等功能。
 
-普通请求返回 `Promise<T>`；`enableChunked:true` 的流式请求返回 `Promise<void>`，消息通过 `onMessage` 交付。正常 EOF 时 resolve，取消、超时和请求异常时 reject；EOF 不代表业务回答完整。`enableChunked` 为动态 boolean 时，返回类型为 `Promise<T | void>`。
-
 ## 示例
 
 ```typescript
 import { setBaseToolsConfig, request } from '@base-web-kits/base-tools-web';
-import type { RequestConfig } from '@base-web-kits/base-tools-web';
+import type { RequestConfig, RequestTask, SSEMessage } from '@base-web-kits/base-tools-web';
 
 // 1. 在入口文件完成配置 (确保请求失败有toast提示,登录过期能够触发重新登录,log有日志输出)
 setBaseToolsConfig({
@@ -17,17 +15,19 @@ setBaseToolsConfig({
   hideLoading: () => message.destroy(),
   toLogin: () => reLogin(),
   log(level, data) {
-    if (data.name === 'request') {
-      sendLog('request', data); // 请求日志
-    } else if (level === 'error') {
+    if (level === 'error') {
       sendLog('error', data); // 错误日志
+    } else if (data.name === 'request') {
+      sendLog('request', data); // 请求日志
     } else {
-      sendLog('action', data); // 操作日志
+      sendLog('xx', data); // 其他日志
     }
   },
 });
 
 // 2. 封装项目的基础请求
+const HOST = 'https://api.example.com';
+
 export function requestApi<T>(config: RequestConfig) {
   return request<T>({
     header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
@@ -39,19 +39,26 @@ export function requestApi<T>(config: RequestConfig) {
     successCode: [1],
     reloginCode: [-10],
     ...config,
+    url: `${HOST}${config.url}`,
   });
 }
 
 // 3. 基于上面 requestApi 普通接口请求
+
+type GoodItem = { id: number; name: string };
 
 // 方式一：直接传参
 export function apiGoodList(data: { page: number; size: number }) {
   return requestApi<GoodItem[]>({ url: '/goods/list', data, resKey: 'data.list' });
 }
 
-// 方式二：参数泛型写法 (推荐，更灵活)
+// 方式二：参数泛型写法
 export function apiGoodList(config: RequestConfig<{ page: number; size: number }>) {
-  return requestApi<GoodItem[]>({ url: '/goods/list', resKey: 'data.list', ...config });
+  return requestApi<GoodItem[]>({
+    url: '/goods/list',
+    resKey: 'data.list',
+    ...config,
+  });
 }
 
 // 调用
@@ -64,7 +71,6 @@ export function apiChatStream(config: RequestConfig<ChatData>) {
     url: '/sse/chatStream',
     resKey: false,
     showLoading: false,
-    responseType: 'arraybuffer', // 流式响应类型
     enableChunked: true, // 开启分块传输
   });
 }
@@ -72,8 +78,8 @@ export function apiChatStream(config: RequestConfig<ChatData>) {
 // 发送的消息类型
 type ChatData = { content: string; conversationId: number };
 
-// 初始化请求对象
-let chatTask: RequestTask;
+// 可选：需要取消或提前结束时保存任务；只接收消息可省略 onTaskReady。
+let chatTask: RequestTask | undefined;
 const onTaskReady = (task: RequestTask) => {
   chatTask = task;
 };
@@ -81,8 +87,10 @@ const onTaskReady = (task: RequestTask) => {
 // 流式监听
 const onMessage = (msg: SSEMessage) => {
   console.log(msg);
-  // 流式传输结束
-  // if (msg.type === 'DONE') { }
+  // 消息处理代码抛错时，工具会自动终止流并向上传递异常。
+  // 可选：当确认业务结束、希望提前关闭连接时，可调用 chatTask?.complete()。
+  // 可选：当确认业务失败时、希望提前关闭连接时，可调用 chatTask?.fail(error, businessCode)。
+  // 不调用也可以，默认等服务端关闭连接即可。
 
   // 思考中
   // if (msg.type === 'thinking') { }
@@ -122,10 +130,10 @@ chatTask?.abort();
 | logExtra | `Record<string, unknown>` | 否 | - | 额外输出的日志数据 |
 | cacheTime | `number` | 否 | `0` | 响应数据的缓存时间 (毫秒)，仅成功时缓存，内存缓存 |
 | enableChunked | `boolean` | 否 | `false` | 是否开启流式传输 (如 SSE) |
-| responseType | `'text' \| 'arraybuffer' \| 'json'` | 否 | `'json'` | 响应类型 |
+| responseType | `'text' \| 'arraybuffer' \| 'json'` | 否 | `'json'` | 普通请求的响应类型，开启流式请求时忽略 |
 | transformRequest | `(ctx: { url: string; method: RequestMethod; header: Record<string, string>; data?: D }) => Partial<{ url: string; header: Record<string, string>; data?: D }> \| Promise<...>` | 否 | - | 请求前的数据转换, 可用于加密 `header`、`data` 或重写 `url` |
 | transformResponse | `(data: unknown) => unknown` | 否 | - | 响应数据的转换, 如解密操作 |
-| onTaskReady | `(task: RequestTask) => void` | 否 | - | 获取请求任务，可用于主动取消请求 |
+| onTaskReady | `(task: RequestTask) => void` | 否 | - | 普通和流式请求使用同一任务类型，可用于取消或提前结束流式请求 |
 | onMessage | `MessageCallback` | 否 | - | 接收已完成基础解析的 SSE 消息；使用流式请求时配置 |
 
 ### 缓存说明
@@ -136,16 +144,20 @@ chatTask?.abort();
 
 **返回值**
 
-`Promise<T>`
+统一返回 `Promise<T>`，默认 `T = unknown`，不根据 `enableChunked` 区分返回类型。普通请求的 `T` 由调用方声明；接口可能返回 `null` 时，应将其包含在 `T` 中。流式内容通过 `onMessage` 交付，工具不自动累积消息，正常完成时兑现值为 `undefined`；调用方只等待结束、处理失败，不读取结果，也不需要指定 `T`。即使为流式请求指定了 `T`，工具也不会生成该类型的结果。普通和流式请求统一使用 `RequestTask`。
 
 ### RequestTask
 
-请求任务对象，用于主动取消请求。
+请求任务对象，提供 `abort()`、`complete()` 和 `fail(error, businessCode?)`，用于主动取消请求和按需控制流式请求。普通请求调用 `complete()`、`fail()` 时无效果。
 
 ```typescript
 interface RequestTask {
   /** 取消请求 */
   abort: () => void;
+  /** 确认业务完成，正常停止流 */
+  complete: () => void;
+  /** 确认业务失败，以原错误或完整消息结束流 */
+  fail: (error: unknown, businessCode?: string | number) => void;
 }
 ```
 

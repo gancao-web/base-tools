@@ -1,19 +1,20 @@
 import { dateFormat } from '../../ts/day';
 import { createLogSnapshot } from './logSnapshot';
+import { patchLogHeader, patchLogValue, requestLogSourceKey, type RequestLogSource } from './logPatch';
 import type { Timer } from '../../ts/time';
 
 export type RequestFailureStage = 'prepare' | 'network' | 'http' | 'response' | 'business';
 export type RequestType = 'http' | 'upload' | 'sse';
 export type SseCloseReason =
   | 'eof'
-  | 'completed'
-  | 'aborted'
+  | 'caller_completed'
+  | 'caller_aborted'
   | 'timeout'
   | 'network_error'
   | 'http_error'
   | 'business_error'
-  | 'response_error'
-  | 'callback_error';
+  | 'response_handler_error'
+  | 'message_handler_error';
 export type UploadLogFile = { fieldName: string; name?: string; type?: string; size?: number };
 export type RequestFailureCode =
   | 'request_prepare_failed'
@@ -24,6 +25,7 @@ export type RequestFailureCode =
   | 'response_parse_failed'
   | 'response_transform_failed'
   | 'response_result_failed'
+  | 'sse_message_handler_failed'
   | 'business_failed'
   | 'login_required';
 
@@ -92,7 +94,6 @@ export function runRequestEffect(effect: () => unknown) {
 export function writeRequestLog(
   log: ((level: 'info' | 'error', info: RequestLogInfo) => unknown) | undefined,
   options: RequestLogOptions,
-  decorate?: (info: RequestLogInfo) => void,
 ) {
   if (!log) return;
   runRequestEffect(() => {
@@ -100,6 +101,7 @@ export function writeRequestLog(
     const { config, status, fromCache = false } = options;
     const requestType = options.requestType || (config.enableChunked ? 'sse' : 'http');
     const extra = config.logExtra;
+    const source = extra ? Reflect.get(extra, requestLogSourceKey) as RequestLogSource | undefined : undefined;
     const httpTiming = fromCache ? undefined : options.httpTimer?.end();
     const error = options.e;
     const info: RequestLogInfo = {
@@ -107,7 +109,7 @@ export function writeRequestLog(
       requestType,
       status,
       url: config.url,
-      data: config.data,
+      data: source && Object.prototype.hasOwnProperty.call(source, 'data') ? source.data : config.data,
       method: config.method,
       header: config.header,
       fromCache,
@@ -134,6 +136,7 @@ export function writeRequestLog(
       'responseHeader', 'failureStage', 'failureCode', 'closeReason', 'fromCache', 'files',
       'networkStartTime', 'networkEndTime', 'networkStartTimeMs', 'networkEndTimeMs',
       'networkDurationMs', 'res', 'e',
+      'method', 'data', 'header',
     ]);
     if (extra) {
       for (const key of Object.keys(extra)) {
@@ -154,22 +157,26 @@ export function writeRequestLog(
         info.success ? 'eof' :
         info.failureStage === 'http' ? 'http_error' :
         info.failureStage === 'business' ? 'business_error' :
-        info.failureStage === 'response' ? 'response_error' :
+        info.failureStage === 'response' ? 'response_handler_error' :
         info.failureCode === 'timeout' ? 'timeout' :
-        info.failureCode === 'aborted' ? 'aborted' :
+        info.failureCode === 'aborted' ? 'caller_aborted' :
         info.failureStage === 'network' ? 'network_error' : undefined
       );
       if (reason) info.closeReason = reason;
     }
-    // transformRequest 抛错,参数处理异常,断网,请求超时或被主动取消此时没有res,不必给日志加上undefined的res
-    if (requestType !== 'sse' || 'res' in options) {
-      if (extra?.res !== undefined) info.res = extra.res;
+    // 没有实际响应时，不用脱敏补丁制造响应；正常 SSE 也不生成汇总正文。
+    if ('res' in options || (source && Object.prototype.hasOwnProperty.call(source, 'res'))) {
+      if (source && Object.prototype.hasOwnProperty.call(source, 'res')) info.res = source.res;
       else if ('res' in options) info.res = options.res;
+      const patch = source && Object.prototype.hasOwnProperty.call(source, 'resPatch') ? source.resPatch : extra?.res;
+      if (patch !== undefined) info.res = patchLogValue(info.res, patch);
     }
+    const dataPatch = source && Object.prototype.hasOwnProperty.call(source, 'dataPatch') ? source.dataPatch : extra?.data;
+    info.data = patchLogValue(info.data, dataPatch);
+    info.header = patchLogHeader(info.header, extra?.header);
     if (info.startContext === undefined) delete info.startContext;
     if (info.endContext === undefined) delete info.endContext;
     if (error !== undefined) info.e = serializeRequestError(error);
-    runRequestEffect(() => decorate?.(info));
     // 保持既有 level/status 对应关系，新增失败事实由 success/失败字段表达。
     return log(status === 'fail' ? 'error' : 'info', createLogSnapshot(info));
   });

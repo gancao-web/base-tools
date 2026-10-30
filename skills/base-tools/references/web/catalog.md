@@ -56,7 +56,7 @@
 
 #### request
 - 来源: `src/web/network/request.ts`
-- 导出: `request`、`RequestConfig`、`RequestConfigBase`、`RequestData`、`RequestMethod`、`RequestTask`、`ResponseData`、`TransformRequestContext`、`TransformRequestResult`
+- 导出: `request`、`RequestConfig`、`RequestConfigBase`、`RequestData`、`RequestMethod`、`RequestTask`、`ResponseData`、`SseRequestTask`、`TransformRequestContext`、`TransformRequestResult`
 
 #### uploadFile
 - 来源: `src/web/network/uploadFile.ts`

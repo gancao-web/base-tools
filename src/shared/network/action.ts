@@ -14,7 +14,7 @@ export type ApiActionConfig<Res = unknown, Err = unknown> = {
   /** 是否显示加载提示，默认 false。 */
   showLoading?: boolean | string;
 
-  /** 成功和失败时额外输出的日志数据。 */
+  /** 日志附带信息: 支持 url 整值覆盖, 支持 header/data/res 指定字段脱敏覆盖 */
   logExtra?: Record<string, unknown>;
 };
 
