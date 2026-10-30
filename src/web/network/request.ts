@@ -1,7 +1,8 @@
 import { isPlainObject } from 'es-toolkit';
 import { startTimer, type Timer } from '../../ts/time';
 import { getBaseToolsConfig } from '../config';
-import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
+import { type MessageCallback } from '../../ts/buffer/SSEParser';
+import { createSseParser } from '../../shared/network/sse';
 import {
   createFetchRequest,
   filterRequestData,
@@ -118,7 +119,7 @@ export type RequestConfigBase<D extends RequestData = RequestData> = RequestResp
     /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
     showLoading?: boolean | string;
 
-    /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
+    /** 附带日志数据，可补充逻辑 data/res；确定的公共结果字段不可覆盖。 */
     logExtra?: Record<string, unknown>;
 
     /**
@@ -246,6 +247,15 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * // 流式取消 (在组件销毁或页面关闭时调用)
  * chatTask?.abort();
  */
+export function request<_T = unknown, D extends RequestData = RequestData>(
+  config: RequestConfigBase<D> & { enableChunked: true },
+): Promise<void>;
+export function request<T, D extends RequestData = RequestData>(
+  config: RequestConfigBase<D> & { enableChunked?: false },
+): Promise<T>;
+export function request<T, D extends RequestData = RequestData>(
+  config: RequestConfigBase<D>,
+): Promise<T | void>;
 export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
   const {
     url,
@@ -271,7 +281,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     onMessage,
   } = config;
   const controller = new AbortController();
-  const sseTask: SseTask = { parser: onMessage ? new SSEParser(onMessage) : undefined };
+  const sseTask: SseTask = { parser: undefined };
   const task: RequestTask = {
     abort: () => {
       sseTask.parser = null;
@@ -279,9 +289,9 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     },
   };
 
-  return new Promise<T>((resolve, reject) => {
+  return new Promise<T | void>((resolve, reject) => {
     const appConfig = getBaseToolsConfig();
-    const captureLog = !!appConfig.log && !enableChunked;
+    const captureLog = !!appConfig.log;
     let logConfig: RequestLogConfig = config;
     let httpTimer: Timer | undefined;
     let httpStatus: number | undefined;
@@ -295,7 +305,13 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     let logged = false;
     let isTimeout = false;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    let sseStartMs = Date.now();
+    if (enableChunked || onMessage)
+      sseTask.parser = createSseParser(
+        enableChunked ? appConfig.log : undefined,
+        config.logExtra,
+        onMessage,
+        () => !logged && !controller.signal.aborted,
+      );
     const finish = (info: Omit<RequestLogOptions, 'config'>) => {
       if (logged) return;
       logged = true;
@@ -305,7 +321,6 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         httpStatus,
         responseHeader,
         businessCode,
-        sseStartMs,
         fromCache,
         ...info,
       });
@@ -342,7 +357,6 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         fillUrl = fetchRequest.url;
         fillHeader = fetchRequest.headers;
         logConfig = { ...config, data: fillData, header: fillHeader, url: fillUrl, method };
-        sseStartMs = Date.now();
 
         const isCache = !enableChunked && cacheTime && cacheTime > 0;
         const cacheKey = isCache
@@ -400,17 +414,20 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 
         if (enableChunked && response.ok) {
           if (showLoading) runRequestEffect(() => appConfig.hideLoading?.());
-          const res = await handleFetchStreamResponse(response, sseTask);
-          finish({ status: 'success', success: true, res });
-          resolve(res as T);
+          await handleFetchStreamResponse(response, sseTask, () => httpTimer?.end());
+          httpTimer?.end();
+          finish({ status: 'success', success: true });
+          resolve();
           return;
         }
 
         // 正文只读一次；读完立即停表，JSON 解析、解密和业务判断不计入传输。
-        const resData = await parseFetchResponse(response, responseType, () => {
+        const resData = await parseFetchResponse(response, responseType, (body) => {
           httpTimer?.end();
           // 正文读取完成前仍属于传输阶段，取消、超时和断流按网络失败记录。
           if (!response.ok) {
+            responseBody = body;
+            hasResponseBody = true;
             failureStage = 'http';
             failureCode = 'http_failed';
           }
@@ -443,7 +460,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
           }),
         });
         if (showLoading) runRequestEffect(() => appConfig.hideLoading?.());
-        if (isSuccess) resolve(result as T);
+        if (isSuccess) resolve(enableChunked ? undefined : (result as T));
         else {
           reject(res);
           if (isRelogin) runRequestEffect(() => appConfig.toLogin?.());

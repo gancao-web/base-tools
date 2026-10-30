@@ -24,6 +24,7 @@ export type UniApiConfig<Res = any, Err = any, Task = any> = ApiActionConfig<Res
  * 把 uni api 包装为 Promise 形式
  * @param uniApi uni api
  * @param apiName uni api 名称 (可选, 用于日志输出, 默认'enhanceUniApi')
+ * @param options 包装器配置，log 默认 true；false 仅关闭包装器自身的日志。
  * @returns Promise 形式的 uni api (默认提示异常和输出日志,不显示进度条和操作成功)
  * @example
  * const promise = enhanceUniApi(uni.downloadFile, 'downloadFile');
@@ -32,6 +33,7 @@ export type UniApiConfig<Res = any, Err = any, Task = any> = ApiActionConfig<Res
 export function enhanceUniApi<Option, Res, Err, Task>(
   uniApi: UniApi<Option, Res, Err>,
   apiName?: string,
+  options: { log?: boolean } = {},
 ) {
   return (option?: OmitOption<Option>, config: UniApiConfig<Res, Err, Task> = {}) => {
     const { showLoading = false, toastSuccess = false, toastError = true, logExtra } = config;
@@ -57,7 +59,7 @@ export function enhanceUniApi<Option, Res, Err, Task>(
         hideLoading();
         // 先确定 Promise 状态，避免自定义日志或 toastError 抛错后调用方一直等待。
         reject(e);
-        if (log)
+        if (log && options.log !== false)
           runRequestEffect(() =>
             log(
               'error',
@@ -79,7 +81,7 @@ export function enhanceUniApi<Option, Res, Err, Task>(
 
           // 日志异常已隔离；保留成功提示异常的既有处理方式。
           try {
-            if (log)
+            if (log && options.log !== false)
               runRequestEffect(() => {
                 const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
                 logData.res = res;

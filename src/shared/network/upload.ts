@@ -1,10 +1,95 @@
+import { startTimer, type Timer } from '../../ts/time';
 import {
   getResponseValue,
   type ApiResponseConfig,
   type ApiResponseConfigOptions,
   type ResponseTransformer,
 } from './response';
+import {
+  runRequestEffect,
+  writeRequestLog,
+  type RequestLogOptions,
+  type UploadLogFile,
+} from './requestLog';
 import type { ApiActionConfig } from './action';
+
+/** 一次上传的内部采集状态，不进入业务返回值。 */
+export type UploadLogState = Pick<
+  RequestLogOptions,
+  'res' | 'businessCode' | 'failureStage' | 'failureCode' | 'httpStatus' | 'responseHeader'
+>;
+
+export function getUploadLogFiles(option: {
+  name?: string;
+  file?: unknown;
+  files?: Array<{ name?: string; file?: unknown }>;
+}): UploadLogFile[] {
+  const items = option.files || [{ name: option.name || 'file', file: option.file }];
+  return items.map((item) => {
+    const result: UploadLogFile = { fieldName: item.name || option.name || 'file' };
+    const file = item.file;
+    if (file && typeof file === 'object') {
+      for (const key of ['name', 'type', 'size'] as const) {
+        const value = (file as Record<string, unknown>)[key];
+        if (key === 'size') {
+          if (typeof value === 'number' && Number.isFinite(value) && value >= 0)
+            result.size = value;
+        } else if (typeof value === 'string' && value) result[key] = value;
+      }
+    }
+    return result;
+  });
+}
+
+/** 只对实际发送的上传输出一次结束；日志不参与业务异常链。 */
+export function createUploadLog(
+  log: Parameters<typeof writeRequestLog>[0],
+  config: RequestLogOptions['config'],
+  option: Parameters<typeof getUploadLogFiles>[0],
+) {
+  const state: UploadLogState = {};
+  let timer: Timer | undefined;
+  let started = false;
+  let ended = false;
+  return {
+    state,
+    start() {
+      started = true;
+      if (log) timer = startTimer();
+      state.failureStage = 'network';
+      state.failureCode = 'network_failed';
+    },
+    response(res: unknown, status?: number, header?: Record<string, unknown>) {
+      timer?.end();
+      state.res = res;
+      if (status !== undefined && status > 0) state.httpStatus = status;
+      if (header) state.responseHeader = header;
+    },
+    networkError(code: 'network_failed' | 'timeout' | 'aborted' | 'http_failed') {
+      timer?.end();
+      state.failureStage = code === 'http_failed' ? 'http' : 'network';
+      state.failureCode = code;
+    },
+    finish(success: boolean, e?: unknown) {
+      if (!started || ended) return;
+      ended = true;
+      timer?.end();
+      if (!log) return;
+      runRequestEffect(() =>
+        writeRequestLog(log, {
+          config: { ...config, method: 'POST' },
+          requestType: 'upload',
+          status: success ? 'success' : 'fail',
+          success,
+          ...state,
+          ...(e !== undefined ? { e } : {}),
+          files: getUploadLogFiles(option),
+          httpTimer: timer,
+        }),
+      );
+    },
+  };
+}
 
 /** 上传响应及业务响应解析配置。 */
 export type UploadResponseConfig = ApiResponseConfigOptions & ResponseTransformer;
@@ -48,7 +133,11 @@ export function hasUploadResponseConfig(config?: ApiResponseConfigOptions) {
  * - 先将默认的字符串响应解析为 JSON；传入对象时直接复用对象。
  * - 成功时提取 resKey；业务失败时抛出带原响应和状态码的错误。
  */
-export function parseUploadResponse(response: unknown, config: ApiResponseConfigOptions) {
+export function parseUploadResponse(
+  response: unknown,
+  config: ApiResponseConfigOptions,
+  state?: UploadLogState,
+) {
   if (!hasUploadResponseConfig(config)) return response;
 
   const missing = ['resKey', 'msgKey', 'codeKey', 'successCode', 'reloginCode'].filter(
@@ -59,6 +148,10 @@ export function parseUploadResponse(response: unknown, config: ApiResponseConfig
   }
 
   let res = response;
+  if (state) {
+    state.failureStage = 'response';
+    state.failureCode = 'response_parse_failed';
+  }
   if (typeof res === 'string') {
     try {
       res = JSON.parse(res);
@@ -67,7 +160,13 @@ export function parseUploadResponse(response: unknown, config: ApiResponseConfig
     }
   }
 
+  if (state) {
+    state.res = res;
+    state.failureCode = 'response_result_failed';
+  }
+
   const code = getResponseValue(res, config.codeKey);
+  if (state) state.businessCode = code;
   const successCode = config.successKey ? getResponseValue(res, config.successKey) : code;
   const msgValue = getResponseValue(res, config.msgKey);
   const msg = msgValue === undefined || msgValue === null ? '上传失败' : String(msgValue);
@@ -77,6 +176,10 @@ export function parseUploadResponse(response: unknown, config: ApiResponseConfig
   }
 
   const relogin = config.reloginCode!.includes(code as string | number);
+  if (state) {
+    state.failureStage = 'business';
+    state.failureCode = relogin ? 'login_required' : 'business_failed';
+  }
   throw new UploadBusinessError(msg, {
     code: typeof code === 'number' || typeof code === 'string' ? code : undefined,
     response: res,
@@ -88,10 +191,19 @@ export function parseUploadResponse(response: unknown, config: ApiResponseConfig
 export function transformUploadResponse<T = unknown>(
   response: unknown,
   config?: UploadResponseConfig,
+  state?: UploadLogState,
 ): T {
+  if (state) {
+    state.res = response;
+    state.failureStage = 'response';
+    state.failureCode = 'response_transform_failed';
+  }
   const transformed = config?.transformResponse ? config.transformResponse(response) : response;
+  if (state) state.res = transformed;
   return (
-    hasUploadResponseConfig(config) ? parseUploadResponse(transformed, config || {}) : transformed
+    hasUploadResponseConfig(config)
+      ? parseUploadResponse(transformed, config || {}, state)
+      : transformed
   ) as T;
 }
 

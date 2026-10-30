@@ -5,6 +5,9 @@ export * from '../../shared/network/action';
 export type { UploadResponseConfig } from '../../shared/network/upload';
 export type {
   RequestLogInfo,
+  RequestType,
+  SseCloseReason,
+  UploadLogFile,
   RequestFailureStage,
   RequestFailureCode,
 } from '../../shared/network/requestLog';

@@ -2,6 +2,8 @@
 
 基础请求 (返回promise和task对象)。
 
+普通请求返回 `Promise<T>`；`enableChunked:true` 的流式请求在 H5 与原生分块路径统一返回 `Promise<void>`，消息通过 `onMessage` 交付。正常 EOF 时 resolve，取消、超时和请求异常时 reject；EOF 不代表业务回答完整。`enableChunked` 为动态 boolean 时，返回类型为 `Promise<T | void>`。
+
 > 需在入口文件初始化应用配置 `setBaseToolsConfig({ pathLogin, log })`
 
 ## 示例

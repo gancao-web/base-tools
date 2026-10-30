@@ -24,7 +24,7 @@
 
 #### SSEParser
 - 来源: `src/ts/buffer/SSEParser.ts`
-- 导出: `MessageCallback`、`SSEMessage`、`SSEParser`
+- 导出: `MessageCallback`、`SSEMessage`、`SSEParser`、`SSEProtocolInfo`
 
 ### clsx
 - 来源: `src/ts/clsx/index.ts`

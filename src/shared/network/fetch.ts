@@ -73,38 +73,53 @@ export function createFetchRequest(options: {
 export async function handleFetchStreamResponse(
   response: Response,
   sseTask: SseTask,
-): Promise<'Stream Finished'> {
+  onBodyRead?: () => void,
+): Promise<void> {
   if (!response.body) throw new Error('Response body is null');
 
   const reader = response.body.getReader();
-  while (true) {
-    const { done, value } = await reader.read();
 
-    if (sseTask.parser === null) {
+  const checkAborted = async () => {
+    if (sseTask.parser !== null) return;
+    try {
       await reader.cancel();
-      throw new DOMException('Body stream was aborted', 'AbortError');
+    } catch {
+      // 关闭错误不覆盖已确认的取消结果
     }
-    if (done) break;
-    // slice 避免 byteOffset/byteLength 不覆盖底层 ArrayBuffer 时把无关字节交给解析器。
-    if (value) {
-      const chunk = value.slice();
-      sseTask.parser?.receive(chunk.buffer);
-    }
-  }
+    throw new DOMException('Body stream was aborted', 'AbortError');
+  };
 
-  sseTask.parser?.flush();
-  return 'Stream Finished';
+  try {
+    while (true) {
+      await checkAborted();
+      const { done, value } = await reader.read();
+      await checkAborted();
+      if (done) break;
+      // slice 避免 byteOffset/byteLength 不覆盖底层 ArrayBuffer 时把无关字节交给解析器。
+      if (value) {
+        const chunk = value.slice();
+        sseTask.parser?.receive(chunk.buffer);
+      }
+    }
+
+    onBodyRead?.();
+    sseTask.parser?.flush();
+    // 尾消息业务回调也可能取消；不能在取消之后仍记 EOF 成功。
+    await checkAborted();
+  } finally {
+    reader.releaseLock();
+  }
 }
 
 /** 按指定响应类型读取 Fetch 响应，并兼容 HTTP 异常中的 JSON 业务响应。 */
 export async function parseFetchResponse(
   response: Response,
   responseType: string,
-  onBodyRead?: () => void,
+  onBodyRead?: (body?: unknown) => void,
 ) {
   if (!response.ok) {
     const text = await response.text();
-    onBodyRead?.();
+    onBodyRead?.(text);
 
     try {
       return JSON.parse(text);

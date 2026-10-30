@@ -4,7 +4,8 @@ import { getBaseToolsConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformOs, getPlatformUni } from '../system';
 import { toast } from '../ui';
-import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
+import { type SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
+import { createSseParser } from '../../shared/network/sse';
 import {
   getResponseResult,
   getResponseValue,
@@ -170,8 +171,17 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * // 流式取消 (在组件销毁或页面关闭时调用)
  * chatTask?.abort();
  */
+export function request<_T = unknown, D extends RequestData = RequestData>(
+  config: RequestConfigBase<D> & { enableChunked: true },
+): Promise<void>;
+export function request<T, D extends RequestData = RequestData>(
+  config: RequestConfigBase<D> & { enableChunked?: false },
+): Promise<T>;
+export function request<T, D extends RequestData = RequestData>(
+  config: RequestConfigBase<D>,
+): Promise<T | void>;
 export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
-  return new Promise<T>((resolve, reject) => {
+  return new Promise<T | void>((resolve, reject) => {
     const {
       url,
       data,
@@ -199,13 +209,14 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     let responseHeader: Record<string, unknown> | undefined;
     let businessCode: unknown;
     let finalized = false;
-    let sseStartMs = Date.now();
-    const captureLog = !!getBaseToolsConfig().log && !enableChunked;
+    const captureLog = !!getBaseToolsConfig().log;
+    let streamAborted = false;
+    let streamParser: SSEParser | undefined;
     // 统一结束请求；状态与是否输出日志无关，日志异常不得阻止 Promise 完成。
     const finish = (info: Omit<RequestLogOptions, 'config'>, result?: T) => {
       if (finalized) return;
       finalized = true;
-      if (info.success) resolve(result as T);
+      if (info.success) resolve(enableChunked ? undefined : (result as T));
       else reject('e' in info ? info.e : info.res);
       runRequestEffect(() =>
         logRequestInfo({
@@ -214,7 +225,6 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
           httpStatus,
           responseHeader,
           businessCode,
-          sseStartMs,
           ...info,
         }),
       );
@@ -245,7 +255,6 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         header: fillHeader,
         method: config.method || 'GET',
       };
-      sseStartMs = Date.now();
       const isCache = !enableChunked && cacheTime && cacheTime > 0;
       const cacheKey = isCache ? JSON.stringify({ url: fillUrl, data: fillData }) : '';
       if (isCache) {
@@ -279,7 +288,12 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
       if (enableChunked && getPlatformUni() === 'web') {
         const controller = new AbortController();
         const sseTask: { parser: SSEParser | undefined | null } = {
-          parser: onMessage ? new SSEParser(onMessage) : undefined,
+          parser: createSseParser(
+            getBaseToolsConfig().log,
+            config.logExtra,
+            onMessage,
+            () => !finalized && !controller.signal.aborted,
+          ),
         };
         const headerListeners = new Set<(result: any) => void>();
         const task: UniApp.RequestTask = {
@@ -314,6 +328,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
             data: fillData,
             header: fillHeader,
           });
+          if (captureLog) httpTimer = startTimer();
           const response = await fetch(streamUrl, {
             method: config.method || 'GET',
             headers,
@@ -322,23 +337,47 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
             credentials: config.withCredentials ? 'include' : 'same-origin',
           });
 
-          const responseHeader: Record<string, string> = {};
+          httpStatus = response.status;
+          responseHeader = {};
           response.headers.forEach((value, key) => {
-            responseHeader[key] = value;
+            responseHeader![key] = value;
           });
           headerListeners.forEach((callback) =>
             callback({ header: responseHeader, statusCode: response.status }),
           );
 
-          if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
-          const res = await handleFetchStreamResponse(response, sseTask);
+          if (!response.ok) {
+            const text = await response.text();
+            httpTimer?.end();
+            let res: unknown = text;
+            try {
+              res = JSON.parse(text);
+            } catch {
+              /* 非 JSON 正文原样保留。 */
+            }
+            const error = new Error(`HTTP Error ${response.status}`);
+            finish({
+              status: 'fail',
+              success: false,
+              res,
+              e: error,
+              failureStage: 'http',
+              failureCode: 'http_failed',
+            });
+            if (showLoading) runRequestEffect(() => uni.hideLoading());
+            if (toastError) runRequestEffect(() => toast(`请求失败: ${error.message}`));
+            return;
+          }
+          await handleFetchStreamResponse(response, sseTask, () => httpTimer?.end());
+          httpTimer?.end();
 
           if (showLoading) runRequestEffect(() => uni.hideLoading());
-          finish({ status: 'success', success: true, res }, res as T);
+          finish({ status: 'success', success: true });
         } catch (e) {
+          httpTimer?.end();
           if (showLoading) runRequestEffect(() => uni.hideLoading());
 
-          const isAbortError = e instanceof DOMException && e.name === 'AbortError';
+          const isAbortError = e instanceof Error && e.name === 'AbortError';
           const error = isAbortError && isTimeout ? new Error('Request Timeout') : e;
 
           if (toastError && (!isAbortError || isTimeout)) {
@@ -350,7 +389,13 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
               ),
             );
           }
-          finish({ status: 'fail', success: false, e: error });
+          finish({
+            status: 'fail',
+            success: false,
+            e: error,
+            failureStage: 'network',
+            failureCode: isAbortError ? (isTimeout ? 'timeout' : 'aborted') : 'network_failed',
+          });
         } finally {
           clearTimeout(timeoutId);
         }
@@ -369,6 +414,19 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
           httpTimer?.end();
           httpStatus = xhr.statusCode;
           if (captureLog) responseHeader = { ...xhr.header };
+          // 先分发尾消息，再结束；尾消息回调也可能同步取消本次连接。
+          if (enableChunked && !streamAborted) streamParser?.flush();
+          if (finalized) return;
+          if (streamAborted) {
+            finish({
+              status: 'fail',
+              success: false,
+              failureStage: 'network',
+              failureCode: 'aborted',
+            });
+            if (showLoading) runRequestEffect(() => uni.hideLoading());
+            return;
+          }
           // 转换失败时保留宿主返回的正文；成功后再替换为转换结果。
           let res = xhr.data;
           let result: unknown;
@@ -379,7 +437,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
           try {
             res = transformResponse ? transformResponse(xhr.data) : xhr.data;
             failureCode = 'response_result_failed';
-            businessCode = enableChunked ? '' : getResponseValue(res, codeKey);
+            businessCode = enableChunked ? undefined : getResponseValue(res, codeKey);
             const scode = enableChunked
               ? ''
               : successKey
@@ -390,7 +448,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
             isRelogin = enableChunked
               ? false
               : reloginCode.includes(businessCode as string | number);
-            result = isSuccess ? getResponseResult(res, resKey) : undefined;
+            result = isSuccess && !enableChunked ? getResponseResult(res, resKey) : undefined;
             if (isSuccess && isCache)
               requestCache.set(cacheKey, { res, expire: Date.now() + cacheTime });
           } catch (e) {
@@ -414,7 +472,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
             {
               status: 'success',
               success: isSuccess,
-              res,
+              ...(!enableChunked ? { res } : {}),
               ...(!isSuccess && {
                 failureStage: 'business' as const,
                 failureCode: isRelogin ? ('login_required' as const) : ('business_failed' as const),
@@ -444,15 +502,33 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
             runRequestEffect(() => toast(`请求失败: ${e.errMsg || JSON.stringify(e)}`));
         },
       });
-      if (onMessage) {
-        const sseTask: { parser: SSEParser | null } = { parser: new SSEParser(onMessage) };
+      if (captureLog && enableChunked) {
+        // 取消或断流时 success 不会触发，提前保存宿主已经提供的握手信息。
+        runRequestEffect(() =>
+          task.onHeadersReceived?.((event) => {
+            if (finalized) return;
+            responseHeader = { ...event.header };
+            const status = (event as { statusCode?: number }).statusCode;
+            if (typeof status === 'number' && status > 0) httpStatus = status;
+          }),
+        );
+      }
+      if (enableChunked || onMessage) {
+        streamParser = createSseParser(
+          enableChunked ? getBaseToolsConfig().log : undefined,
+          config.logExtra,
+          onMessage,
+          () => !finalized && !streamAborted,
+        );
         // @ts-ignore
-        task.onChunkReceived((res: { data: ArrayBuffer }) => sseTask.parser?.receive(res.data));
+        task.onChunkReceived?.((res: { data: ArrayBuffer }) => {
+          if (!finalized && !streamAborted) streamParser?.receive(res.data);
+        });
         const oldAbort = task.abort.bind(task);
         task.abort = () => {
-          sseTask.parser = null;
+          streamAborted = true;
           // @ts-ignore
-          task.offChunkReceived();
+          task.offChunkReceived?.();
           oldAbort();
         };
       }
@@ -482,7 +558,12 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 function logRequestInfo(options: RequestLogOptions) {
   writeRequestLog(getBaseToolsConfig().log, options, (info) => {
     // 保留微信开发工具中复制响应类型的既有便利字段。
-    if (options.status !== 'success' || getPlatformOs() !== 'devtools') return;
+    if (
+      options.config.enableChunked ||
+      options.status !== 'success' ||
+      getPlatformOs() !== 'devtools'
+    )
+      return;
     const result = getResponseResult(options.res, (options.config as RequestLogConfig).resKey);
     if (result && typeof result === 'object') info._res = { text: JSON.stringify(result) };
   });

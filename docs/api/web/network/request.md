@@ -2,6 +2,8 @@
 
 基础请求方法，基于 fetch API 封装，支持流式请求、缓存、请求前转换、响应数据转换等功能。
 
+普通请求返回 `Promise<T>`；`enableChunked:true` 的流式请求返回 `Promise<void>`，消息通过 `onMessage` 交付。正常 EOF 时 resolve，取消、超时和请求异常时 reject；EOF 不代表业务回答完整。`enableChunked` 为动态 boolean 时，返回类型为 `Promise<T | void>`。
+
 ## 示例
 
 ```typescript

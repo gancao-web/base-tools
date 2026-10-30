@@ -33,6 +33,7 @@ export type SSEMessage = {
 
 /** 流式数据消息回调 */
 export type MessageCallback = (msg: SSEMessage) => void;
+export type SSEProtocolInfo = { event?: string; id?: string };
 
 /**
  * 流式数据解析器
@@ -54,7 +55,10 @@ export class SSEParser {
   private eventId?: string;
   private eventRetry?: number;
 
-  constructor(onMessage: MessageCallback) {
+  constructor(
+    onMessage: MessageCallback,
+    private onParsed?: (msg: SSEMessage, protocol: SSEProtocolInfo) => void,
+  ) {
     this.onMessage = onMessage;
     this.decoder =
       typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8') : new PolyfillTextDecoder();
@@ -77,6 +81,8 @@ export class SSEParser {
     if (tail) this.appendText(tail);
 
     this.flushRemainder();
+    // 尾行已经有换行但没有空行时，buffer 为空，事件仍可能待分发。
+    if (this.eventDataLines.length) this.dispatchEvent();
   }
 
   /**
@@ -194,6 +200,14 @@ export class SSEParser {
 
   /** 安全调用 onMessage 回调，捕获并打印错误 */
   private safeOnMessage(msg: SSEMessage) {
+    try {
+      this.onParsed?.(msg, {
+        ...(this.eventType !== undefined ? { event: this.eventType } : {}),
+        ...(this.eventId !== undefined ? { id: this.eventId } : {}),
+      });
+    } catch {
+      // 观察器失败不改变业务回调行为。
+    }
     try {
       this.onMessage(msg);
     } catch (onMessageError) {

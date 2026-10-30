@@ -101,13 +101,14 @@ describe('普通请求统一日志', () => {
     expect(log.mock.calls[0][1]).not.toHaveProperty('networkDurationMs');
   });
 
-  it('沿用 logExtra 覆盖语义，不解释调用方的附加信息', async () => {
+  it('公共结果不被 logExtra 覆盖，仍保留逻辑响应补充', async () => {
     const extra = {
       success: false,
       failureStage: 'response',
       failureCode: 'response_parse_failed',
       businessCode: undefined,
       e: { name: 'SyntaxError', message: 'invalid JSON' },
+      res: { logical: true },
     };
     const log = vi.fn();
     setBaseToolsConfig({ log });
@@ -120,13 +121,14 @@ describe('普通请求统一日志', () => {
     await request({ ...config, logExtra: extra });
     const info = log.mock.calls[0][1];
     expect(info).toMatchObject({
-      success: false,
-      failureStage: 'response',
-      failureCode: 'response_parse_failed',
-      e: { name: 'SyntaxError' },
-      res: { res: 'cipher', str: 'invalid' },
+      success: true,
+      requestType: 'http',
+      res: { logical: true },
     });
-    expect(info.businessCode).toBeUndefined();
+    expect(info.businessCode).toBe(1);
+    expect(info).not.toHaveProperty('failureStage');
+    expect(info).not.toHaveProperty('failureCode');
+    expect(info).not.toHaveProperty('e');
   });
 
   it('Web 转换失败保留原始正文和异常链，提示只使用外层 message', async () => {

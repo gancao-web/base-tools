@@ -1,7 +1,9 @@
 import { enhanceWebApi } from '../async';
 import { getBaseToolsConfig } from '../config';
+import { runRequestEffect } from '../../shared/network/requestLog';
 import {
   hasUploadResponseConfig,
+  createUploadLog,
   resolveUploadToastError,
   transformUploadResponse,
   UploadBusinessError,
@@ -99,7 +101,11 @@ function getErrorMessage(responseText: string, fallback: string) {
   return fallback;
 }
 
-function upload<T = unknown>(option: UploadFileOption, config?: UploadConfig) {
+function upload<T = unknown>(
+  option: UploadFileOption,
+  config: UploadConfig | undefined,
+  capture: ReturnType<typeof createUploadLog>,
+) {
   return new Promise<T>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const { url, file, name = 'file', header, data, timeout = 0, responseType = 'text' } = option;
@@ -110,6 +116,8 @@ function upload<T = unknown>(option: UploadFileOption, config?: UploadConfig) {
       if (responseType === 'json') {
         const parsed = tryParseJson(responseText);
         if (!parsed.success) {
+          capture.state.failureStage = 'response';
+          capture.state.failureCode = 'response_parse_failed';
           fail({ message: '响应不是合法 JSON', status: xhr.status });
           return;
         }
@@ -126,8 +134,12 @@ function upload<T = unknown>(option: UploadFileOption, config?: UploadConfig) {
       onProgressUpdate: (callback) => {
         onProgressUpdate = callback;
       },
-      abort: () => xhr.abort(),
+      abort: () => {
+        cancelled = true;
+        xhr.abort();
+      },
     };
+    let cancelled = false;
     config?.onTaskReady?.(task);
 
     // 监听进度
@@ -144,15 +156,27 @@ function upload<T = unknown>(option: UploadFileOption, config?: UploadConfig) {
     // 监听事件
     xhr.onload = () => {
       const responseText = xhr.responseText || '';
+      capture.response(responseText, xhr.status);
+      runRequestEffect(() => {
+        const responseHeader: Record<string, unknown> = {};
+        (xhr.getAllResponseHeaders?.() || '').trim().split(/[\r\n]+/).forEach((line) => {
+          const index = line.indexOf(':');
+          if (index > 0)
+            responseHeader[line.slice(0, index).trim().toLowerCase()] = line.slice(index + 1).trim();
+        });
+        capture.state.responseHeader = responseHeader;
+      });
       if (xhr.status >= 200 && xhr.status < 300) {
         success(responseText);
       } else {
         const parsed = tryParseJson(responseText);
+        if (parsed.success) capture.state.res = parsed.data;
         // 与 request 一致：非 2xx 的合法 JSON 仍交给业务状态码解析；非 JSON 保持传输错误。
         if (hasUploadResponseConfig(config) && parsed.success) {
           success(responseText);
           return;
         }
+        capture.networkError('http_failed');
         fail({
           message: getErrorMessage(responseText, '上传失败'),
           status: xhr.status,
@@ -160,9 +184,24 @@ function upload<T = unknown>(option: UploadFileOption, config?: UploadConfig) {
         });
       }
     };
-    xhr.onerror = () => fail({ message: '网络错误', status: 0 });
-    xhr.ontimeout = () => fail({ message: '上传超时', status: -1 });
-    xhr.onabort = () => fail({ message: '用户取消', status: -2 });
+    xhr.onerror = () => {
+      capture.networkError('network_failed');
+      fail({ message: '网络错误', status: 0 });
+    };
+    xhr.ontimeout = () => {
+      capture.networkError('timeout');
+      fail({ message: '上传超时', status: -1 });
+    };
+    xhr.onabort = () => {
+      capture.networkError('aborted');
+      fail({ message: '用户取消', status: -2 });
+    };
+
+    // task 在 open/send 前交付；预取消时不得随后继续发送。
+    if (cancelled) {
+      fail({ message: '用户取消', status: -2 });
+      return;
+    }
 
     // 设置请求方法和 URL
     xhr.open('POST', url);
@@ -189,6 +228,7 @@ function upload<T = unknown>(option: UploadFileOption, config?: UploadConfig) {
     formData.append(name, file);
 
     // 发送请求
+    capture.start();
     xhr.send(formData);
   });
 }
@@ -217,9 +257,19 @@ export function uploadFile<T = string>(
   option: UploadFileOption,
   config?: UploadFileConfig<T>,
 ): Promise<T> {
+  const capture = createUploadLog(getBaseToolsConfig().log, {
+    url: option.url, header: option.header, data: option.data, logExtra: config?.logExtra,
+  }, option);
   const uploadApi = async (uploadOption: UploadFileOption, uploadConfig?: UploadConfig) => {
-    const res = await upload(uploadOption, uploadConfig);
-    return transformUploadResponse<T>(res, config);
+    try {
+      const res = await upload(uploadOption, uploadConfig, capture);
+      const result = transformUploadResponse<T>(res, config, capture.state);
+      capture.finish(true);
+      return result;
+    } catch (error) {
+      capture.finish(false, error);
+      throw error;
+    }
   };
 
   const finalConfig = hasUploadResponseConfig(config)
@@ -231,7 +281,9 @@ export function uploadFile<T = string>(
       }
     : config;
 
-  return enhanceWebApi<UploadFileOption, T, UploadError, UploadConfig>(uploadApi, 'uploadFile')(
+  return enhanceWebApi<UploadFileOption, T, UploadError, UploadConfig>(uploadApi, 'uploadFile', {
+    log: false,
+  })(
     option,
     finalConfig,
   ).catch((error) => {
