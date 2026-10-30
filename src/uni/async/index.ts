@@ -1,4 +1,5 @@
-import { cloneDeep } from 'es-toolkit';
+import { createLogSnapshot } from '../../shared/network/logSnapshot';
+import { runRequestEffect } from '../../shared/network/requestLog';
 import { getBaseToolsConfig, toast } from '../index';
 import type { AppLogInfo } from '../index';
 import type { ApiActionConfig, ApiTaskConfig } from '../../shared/network/action';
@@ -23,7 +24,8 @@ export type UniApiConfig<Res = any, Err = any, Task = any> = ApiActionConfig<Res
  * 把 uni api 包装为 Promise 形式
  * @param uniApi uni api
  * @param apiName uni api 名称 (可选, 用于日志输出, 默认'enhanceUniApi')
- * @returns Promise 形式的 uni api (默认提示异常和输出日志,不显示进度条和操作成功: promise(option, {showLoading: false, toastSuccess: false, toastError: true, showLog: true}))
+ * @param options 包装器配置，log 默认 true；false 仅关闭包装器自身的日志。
+ * @returns Promise 形式的 uni api (默认提示异常和输出日志,不显示进度条和操作成功)
  * @example
  * const promise = enhanceUniApi(uni.downloadFile, 'downloadFile');
  * await promise({ url: 'xx' }, {showLoading: '下载中', toastSuccess: '下载成功'});
@@ -31,15 +33,10 @@ export type UniApiConfig<Res = any, Err = any, Task = any> = ApiActionConfig<Res
 export function enhanceUniApi<Option, Res, Err, Task>(
   uniApi: UniApi<Option, Res, Err>,
   apiName?: string,
+  options: { log?: boolean } = {},
 ) {
   return (option?: OmitOption<Option>, config: UniApiConfig<Res, Err, Task> = {}) => {
-    const {
-      showLoading = false,
-      toastSuccess = false,
-      toastError = true,
-      showLog = true,
-      logExtra,
-    } = config;
+    const { showLoading = false, toastSuccess = false, toastError = true, logExtra } = config;
 
     const { log } = getBaseToolsConfig();
     const fname = apiName || 'enhanceUniApi'; // uniApi.name得到的值都是'promiseApi'，不如默认'enhanceUniApi'
@@ -62,7 +59,13 @@ export function enhanceUniApi<Option, Res, Err, Task>(
         hideLoading();
         // 先确定 Promise 状态，避免自定义日志或 toastError 抛错后调用方一直等待。
         reject(e);
-        if (showLog) log?.('error', { name: fname, status: 'fail', option, e, ...logExtra });
+        if (log && options.log !== false)
+          runRequestEffect(() =>
+            log(
+              'error',
+              createLogSnapshot({ name: fname, status: 'fail', option, e, ...logExtra }),
+            ),
+          );
 
         const msg = typeof toastError === 'function' ? toastError(e as Err) : toastError;
         if (msg) {
@@ -76,14 +79,15 @@ export function enhanceUniApi<Option, Res, Err, Task>(
         success(res) {
           hideLoading();
 
-          // 成功回调中的日志或提示处理可能抛出异常，统一按失败处理。
+          // 日志异常已隔离；保留成功提示异常的既有处理方式。
           try {
-            if (showLog) {
-              const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
-              logData.res = cloneDeep(res); // 深拷贝响应数据,避免外部修改对象,造成输出不一致
+            if (log && options.log !== false)
+              runRequestEffect(() => {
+                const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
+                logData.res = res;
 
-              log?.('info', logData);
-            }
+                return log('info', createLogSnapshot(logData));
+              });
 
             const msg = typeof toastSuccess === 'function' ? toastSuccess(res) : toastSuccess;
 

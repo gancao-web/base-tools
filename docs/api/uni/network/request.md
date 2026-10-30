@@ -1,16 +1,30 @@
 # request
 
-基础请求 (返回promise和task对象)。
-
-> 需在入口文件初始化应用配置 `setBaseToolsConfig({ pathLogin, log })`
+基础请求方法，支持流式请求、缓存、请求前转换、响应数据转换等功能。
 
 ## 示例
 
 ```ts
-import { request } from '@base-web-kits/base-tools-uni';
-import type { RequestConfig } from '@base-web-kits/base-tools-uni';
+import { setBaseToolsConfig, request } from '@base-web-kits/base-tools-uni';
+import type { RequestConfig, RequestTask, SSEMessage } from '@base-web-kits/base-tools-uni';
 
-// 封装项目的基础请求
+// 1. 在入口文件完成配置 (登录过期能够触发重新登录,log有日志输出)
+setBaseToolsConfig({
+  pathLogin: PAGE_LOGIN,
+  log(level, data) {
+    if (level === 'error') {
+      sendLog('error', data); // 错误日志
+    } else if (data.name === 'request') {
+      sendLog('request', data); // 请求日志
+    } else {
+      sendLog('xx', data); // 其他日志
+    }
+  },
+});
+
+// 2. 封装项目的基础请求
+const HOST = 'https://api.example.com';
+
 export function requestApi<T>(config: RequestConfig) {
   return request<T>({
     header: { token: 'xx', version: 'xx', tid: 'xx' }, // 会自动过滤空值
@@ -22,31 +36,38 @@ export function requestApi<T>(config: RequestConfig) {
     successCode: [1],
     reloginCode: [-10],
     ...config,
+    url: `${HOST}${config.url}`,
   });
 }
 
-// 1. 基于上面 requestApi 的普通接口
+// 3. 基于上面 requestApi 普通接口请求
+
+type GoodItem = { id: number; name: string };
+
+// 方式一：直接传参
 export function apiGoodList(data: { page: number; size: number }) {
   return requestApi<GoodItem[]>({ url: '/goods/list', data, resKey: 'data.list' });
 }
 
-const goodList = await apiGoodList({ page: 1, size: 10 });
-
-// 2. 参数支持泛型
+// 方式二：参数泛型写法
 export function apiGoodList(config: RequestConfig<{ page: number; size: number }>) {
-  return requestApi<GoodItem[]>({ url: '/goods/list', resKey: 'data.list', ...config });
+  return requestApi<GoodItem[]>({
+    url: '/goods/list',
+    resKey: 'data.list',
+    ...config,
+  });
 }
 
+// 调用
 const goodList = await apiGoodList({ data: { page: 1, size: 10 } });
 
-// 3. 基于上面 requestApi 的流式接口
+// 4. 基于上面 requestApi 流式请求 (SSE)
 export function apiChatStream(config: RequestConfig<ChatData>) {
   return requestApi({
     ...config,
     url: '/sse/chatStream',
     resKey: false,
     showLoading: false,
-    responseType: 'arraybuffer', // 流式响应类型
     enableChunked: true, // 开启分块传输
   });
 }
@@ -54,8 +75,8 @@ export function apiChatStream(config: RequestConfig<ChatData>) {
 // 发送的消息类型
 type ChatData = { content: string; conversationId: number };
 
-// 初始化请求对象
-let chatTask: RequestTask;
+// 可选：需要取消或提前结束时保存任务；只接收消息可省略 onTaskReady。
+let chatTask: RequestTask | undefined;
 const onTaskReady = (task: RequestTask) => {
   chatTask = task;
 };
@@ -63,8 +84,10 @@ const onTaskReady = (task: RequestTask) => {
 // 流式监听
 const onMessage = (msg: SSEMessage) => {
   console.log(msg);
-  // 流式传输结束
-  // if (msg.type === 'DONE') { }
+  // 消息处理代码抛错时，工具会自动终止流并向上传递异常。
+  // 可选：当确认业务结束、希望提前关闭连接时，可调用 chatTask?.complete()。
+  // 可选：当确认业务失败时、希望提前关闭连接时，可调用 chatTask?.fail(error, businessCode)。
+  // 不调用也可以，默认等服务端关闭连接即可。
 
   // 思考中
   // if (msg.type === 'thinking') { }
@@ -95,17 +118,21 @@ chatTask?.abort();
 - `transformResponse?: (data: any) => any` - 响应数据的转换, 如解密操作
 - `showLoading?: boolean | string` - 是否显示进度条，默认 `true`，支持字符串自定义文案
 - `toastError?: boolean` - 是否提示接口异常，默认 `true`
-- `showLog?: boolean` - 是否输出日志，默认 `true`
 - `cacheTime?: number` - 缓存时间，默认 `0` 不缓存 (单位毫秒)
 - `logExtra?: Record<string, unknown>` - 额外输出的日志数据
+- `onTaskReady?: (task: RequestTask) => void` - 可选；普通和流式请求使用同一任务类型，支持取消及流式控制
+- `onMessage?: MessageCallback` - 接收解析后的 SSE 消息
+- `responseType?: 'text' | 'arraybuffer'` - 原生请求在 `enableChunked: true` 且未指定时，自动使用 `'arraybuffer'`；显式配置优先，普通请求沿用宿主默认值。H5 流式路径直接读取 Fetch 字节流，无需配置此项。
 
 ## 返回值
 
-`Promise<T>`
+`RequestTask` 保留 `UniApp.RequestTask` 的原生能力，并提供 `complete()`、`fail(error, businessCode?)` 以控制流式请求。普通请求调用这两个方法时无效果。
+
+统一返回 `Promise<T>`，默认 `T = unknown`，不根据 `enableChunked` 区分返回类型。普通请求的 `T` 由调用方声明；接口可能返回 `null` 时，应将其包含在 `T` 中。流式内容通过 `onMessage` 交付，工具不自动累积消息，正常完成时兑现值为 `undefined`；调用方只等待结束、处理失败，不读取结果，也不需要指定 `T`。即使为流式请求指定了 `T`，工具也不会生成该类型的结果。普通和流式请求统一使用 `RequestTask`。
 
 ## 请求日志（2.0.0）
 
-继续通过 `setBaseToolsConfig({ log })` 接收请求结束日志，单次调用使用 `showLog` 控制。普通 HTTP 调用在业务结果判断及结果提取完成后输出一次结束日志；日志和 UI 回调的同步异常、异步拒绝不覆盖已确定的请求结果。
+继续通过 `setBaseToolsConfig({ log })` 接收请求结束日志，成功和失败均记录，不再提供单次调用关闭日志的开关。普通 HTTP 调用在业务结果判断及结果提取完成后输出一次结束日志；日志和 UI 回调的同步异常、异步拒绝不覆盖已确定的请求结果。
 
 ### 字段含义
 
@@ -161,7 +188,7 @@ await requestApi({ url: '/items', logExtra });
 // completedAtMs 在结束日志组装时读取，而不是在创建对象时读取。
 ```
 
-避免在请求完成前提前展开或序列化 logExtra；showLog: false 或未配置 log 时，工具库不读取这些 getter。调用方覆盖 success、失败分类等默认字段时，需要自行保证含义一致。
+避免在请求完成前提前展开或序列化 logExtra；未配置 log 时，工具库不读取这些 getter。调用方覆盖 success、失败分类等默认字段时，需要自行保证含义一致。
 
 ## 版本
 
@@ -169,13 +196,13 @@ await requestApi({ url: '/items', logExtra });
 
 网络计时字段统一增加 `network` 前缀，耗时字段明确使用毫秒单位；以下旧字段不再由工具库生成，日志接收方需同步调整：
 
-| 旧字段 | 2.0.0 字段 |
-| --- | --- |
-| startTime | networkStartTime |
-| endTime | networkEndTime |
+| 旧字段      | 2.0.0 字段         |
+| ----------- | ------------------ |
+| startTime   | networkStartTime   |
+| endTime     | networkEndTime     |
 | startTimeMs | networkStartTimeMs |
-| endTimeMs | networkEndTimeMs |
-| duration | networkDurationMs |
+| endTimeMs   | networkEndTimeMs   |
+| duration    | networkDurationMs  |
 
 同时，日志中的 Error 及其 cause 新增保留字符串或数字 `code`。请求调用方式及 `logExtra` 扩展方式保持不变。
 

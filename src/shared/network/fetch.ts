@@ -9,7 +9,10 @@ export type FetchRequestHeader = Record<string, string | number | boolean | null
  * - undefined: 未初始化
  * - null: 已取消
  */
-export type SseTask = { parser: SSEParser | undefined | null };
+export type SseTask = {
+  parser: SSEParser | undefined | null;
+  onResponseError?: (error: unknown) => void;
+};
 
 /** 过滤 undefined，保留 null、空字符串、false 和 0 等有效参数。 */
 export function filterRequestData(data: Record<string, any>) {
@@ -73,38 +76,83 @@ export function createFetchRequest(options: {
 export async function handleFetchStreamResponse(
   response: Response,
   sseTask: SseTask,
-): Promise<'Stream Finished'> {
-  if (!response.body) throw new Error('Response body is null');
-
-  const reader = response.body.getReader();
-  while (true) {
-    const { done, value } = await reader.read();
-
-    if (sseTask.parser === null) {
-      await reader.cancel();
-      throw new DOMException('Body stream was aborted', 'AbortError');
+  onBodyRead?: () => void,
+  signal?: AbortSignal,
+): Promise<void> {
+  const parse = (effect: () => void) => {
+    try { effect(); } catch (error) {
+      sseTask.onResponseError?.(error);
+      throw error;
     }
-    if (done) break;
-    // slice 避免 byteOffset/byteLength 不覆盖底层 ArrayBuffer 时把无关字节交给解析器。
-    if (value) {
-      const chunk = value.slice();
-      sseTask.parser?.receive(chunk.buffer);
-    }
+  };
+  if (!response.body) {
+    const error = new Error('Response body is null');
+    sseTask.onResponseError?.(error);
+    throw error;
   }
 
-  sseTask.parser?.flush();
-  return 'Stream Finished';
+  const reader = response.body.getReader();
+
+  const checkAborted = async () => {
+    if (sseTask.parser !== null) return;
+    try {
+      await reader.cancel();
+    } catch {
+      // 关闭错误不覆盖已确认的取消结果
+    }
+    throw new DOMException('Body stream was aborted', 'AbortError');
+  };
+
+  try {
+    while (true) {
+      await checkAborted();
+      const { done, value } = await reader.read();
+      await checkAborted();
+      if (done) break;
+      // slice 避免 byteOffset/byteLength 不覆盖底层 ArrayBuffer 时把无关字节交给解析器。
+      if (value) {
+        const chunk = value.slice();
+        parse(() => sseTask.parser?.receive(chunk.buffer));
+      }
+    }
+
+    onBodyRead?.();
+    parse(() => sseTask.parser?.flush());
+    if (sseTask.parser) {
+      const pending = sseTask.parser.waitForCallbacks();
+      if (!signal) await pending;
+      else await new Promise<void>((resolve, reject) => {
+        const abort = () => {
+          signal.removeEventListener('abort', abort);
+          reject(signal.reason || new DOMException('Body stream was aborted', 'AbortError'));
+        };
+        signal.addEventListener('abort', abort, { once: true });
+        pending.then(() => {
+          signal.removeEventListener('abort', abort);
+          resolve();
+        }, (error) => {
+          signal.removeEventListener('abort', abort);
+          reject(error);
+        });
+        if (signal.aborted) abort();
+      });
+    }
+    // 尾消息业务回调也可能取消；不能在取消之后仍记 EOF 成功。
+    await checkAborted();
+  } finally {
+    reader.releaseLock();
+  }
 }
 
 /** 按指定响应类型读取 Fetch 响应，并兼容 HTTP 异常中的 JSON 业务响应。 */
 export async function parseFetchResponse(
   response: Response,
   responseType: string,
-  onBodyRead?: () => void,
+  onBodyRead?: (body?: unknown) => void,
 ) {
   if (!response.ok) {
     const text = await response.text();
-    onBodyRead?.();
+    onBodyRead?.(text);
 
     try {
       return JSON.parse(text);

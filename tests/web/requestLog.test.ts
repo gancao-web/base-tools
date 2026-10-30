@@ -75,9 +75,6 @@ describe('普通请求统一日志', () => {
     });
     expect(Object.getOwnPropertySymbols(log.mock.calls[0][1])).toHaveLength(0);
     expect(reads).toBe(1);
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{"status":1,"data":"ok"}')));
-    await request({ ...config, showLog: false, logExtra: extra });
-    expect(reads).toBe(1);
   });
 
   it('准备失败以原异常 reject，无传输时间，失败日志仅一次', async () => {
@@ -104,13 +101,14 @@ describe('普通请求统一日志', () => {
     expect(log.mock.calls[0][1]).not.toHaveProperty('networkDurationMs');
   });
 
-  it('沿用 logExtra 覆盖语义，不解释调用方的附加信息', async () => {
+  it('公共结果不被 logExtra 覆盖，仍保留逻辑响应补充', async () => {
     const extra = {
       success: false,
       failureStage: 'response',
       failureCode: 'response_parse_failed',
       businessCode: undefined,
       e: { name: 'SyntaxError', message: 'invalid JSON' },
+      res: { logical: true },
     };
     const log = vi.fn();
     setBaseToolsConfig({ log });
@@ -123,13 +121,14 @@ describe('普通请求统一日志', () => {
     await request({ ...config, logExtra: extra });
     const info = log.mock.calls[0][1];
     expect(info).toMatchObject({
-      success: false,
-      failureStage: 'response',
-      failureCode: 'response_parse_failed',
-      e: { name: 'SyntaxError' },
-      res: { res: 'cipher', str: 'invalid' },
+      success: true,
+      requestType: 'http',
+      res: { logical: true },
     });
-    expect(info.businessCode).toBeUndefined();
+    expect(info.businessCode).toBe(1);
+    expect(info).not.toHaveProperty('failureStage');
+    expect(info).not.toHaveProperty('failureCode');
+    expect(info).not.toHaveProperty('e');
   });
 
   it('Web 转换失败保留原始正文和异常链，提示只使用外层 message', async () => {
@@ -234,9 +233,5 @@ describe('普通请求统一日志', () => {
     expect(log.mock.calls[1][1]).toMatchObject({ fromCache: true, success: true });
     for (const key of ['httpStatus', 'responseHeader', 'networkDurationMs', 'networkStartTimeMs', 'networkEndTimeMs'])
       expect(log.mock.calls[1][1]).not.toHaveProperty(key);
-    log.mockClear();
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{"status":1,"data":"ok"}')));
-    await request({ ...config, showLog: false });
-    expect(log).not.toHaveBeenCalled();
   });
 });

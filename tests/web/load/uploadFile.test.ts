@@ -51,7 +51,7 @@ describe('web/uploadFile', () => {
           json: JSON.stringify({ id: 1 }),
         },
       },
-      { showLog: false, toastError: false },
+      { toastError: false },
     );
 
     expect(result).toBe('ok');
@@ -99,7 +99,6 @@ describe('web/uploadFile', () => {
           codeKey: 'status.code',
           successCode: ['ok'],
           reloginCode: ['expired'],
-          showLog: false,
           toastError: false,
         },
       ),
@@ -140,7 +139,6 @@ describe('web/uploadFile', () => {
         codeKey: 'code',
         successCode: [0],
         reloginCode: [],
-        showLog: false,
         toastError: false,
       },
     );
@@ -185,7 +183,6 @@ describe('web/uploadFile', () => {
           codeKey: 'status.code',
           successCode: ['ok'],
           reloginCode: ['expired'],
-          showLog: false,
           toastError,
         },
       ),
@@ -231,7 +228,6 @@ describe('web/uploadFile', () => {
           codeKey: 'status.code',
           successCode: ['ok'],
           reloginCode: ['expired'],
-          showLog: false,
         },
       ),
     ).rejects.toEqual(response);
@@ -280,7 +276,6 @@ describe('web/uploadFile', () => {
           successCode: ['ok'],
           reloginCode: ['expired'],
           showLoading: true,
-          showLog: false,
         },
       ),
     ).rejects.toEqual(response);

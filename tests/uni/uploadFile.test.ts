@@ -29,7 +29,6 @@ describe('uni/uploadFile', () => {
           codeKey: 'status.code',
           successCode: ['ok'],
           reloginCode: ['expired'],
-          showLog: false,
           toastError: false,
         },
       ),
@@ -60,7 +59,6 @@ describe('uni/uploadFile', () => {
           codeKey: 'status.code',
           successCode: ['ok'],
           reloginCode: ['expired'],
-          showLog: false,
         },
       ),
     ).rejects.toEqual(response);

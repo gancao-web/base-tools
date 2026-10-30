@@ -2,6 +2,7 @@ import { getBaseToolsConfig, getFileUrl, enhanceUniApi } from '../index';
 import { toLogin } from '../router';
 import {
   hasUploadResponseConfig,
+  createUploadLog,
   resolveUploadToastError,
   transformUploadResponse,
   UploadBusinessError,
@@ -115,35 +116,50 @@ export function uploadFile<T = string>(
   config?: UploadConfig,
 ): Promise<T> {
   const hasResponseConfig = hasUploadResponseConfig(config);
+  const formData = { ...option.data, ...option.formData };
+  const capture = createUploadLog(getBaseToolsConfig().log, {
+    url: option.url, header: option.header, data: formData, logExtra: config?.logExtra,
+  }, option);
 
   const uploadApi = (
     uploadOption: UniApp.UploadFileOption & {
       success?: (response: T) => void;
       fail?: (error: UniApp.GeneralCallbackResult) => void;
     },
-  ) =>
-    uni.uploadFile({
+  ) => {
+    capture.start();
+    return uni.uploadFile({
       ...uploadOption,
       success(response) {
+        capture.response(response.data, response.statusCode,
+          (response as unknown as { header?: Record<string, unknown> }).header);
         try {
-          const data = transformUploadResponse<T>(response.data, config);
+          const data = transformUploadResponse<T>(response.data, config, capture.state);
+          capture.finish(true);
           uploadOption.success?.(data);
         } catch (error) {
+          capture.finish(false, error);
           uploadOption.fail?.(error as UniApp.GeneralCallbackResult);
         }
       },
+      fail(error) {
+        const code = error.errMsg === 'uploadFile:fail timeout' ? 'timeout' :
+          error.errMsg === 'uploadFile:fail abort' ? 'aborted' : 'network_failed';
+        capture.networkError(code);
+        capture.finish(false, error);
+        uploadOption.fail?.(error);
+      },
     });
+  };
 
   return enhanceUniApi<UniApp.UploadFileOption, T, UploadError, UniApp.UploadTask>(
     uploadApi,
     'uploadFile',
+    { log: false },
   )(
     {
       ...option,
-      formData: {
-        ...option.data,
-        ...option.formData,
-      },
+      formData,
     },
     {
       ...config,

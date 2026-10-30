@@ -48,7 +48,6 @@ await saveImagePromise(
     showLoading: '保存中',
     toastSuccess: (res) => '图片已保存到相册',
     toastError: '保存失败，请检查权限',
-    showLog: true,
   },
 );
 
@@ -76,7 +75,6 @@ await enhanceUniApi(uni.downloadFile, 'downloadFile')(
     - `showLoading` - 是否显示加载提示，默认 `false`（支持字符串自定义文本）
     - `toastSuccess` - 操作成功的toast提示，默认 `false`（支持函数返回自定义文本）
     - `toastError` - 是否显示操作失败的详细错误信息，默认 `true`（支持函数判断是否显示）
-    - `showLog` - 是否显示日志，默认 `true`
     - `logExtra` - 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name')
     - `onTaskReady` - 初始化task对象时的回调函数，默认 `undefined`（支持自定义task事件监听）
 

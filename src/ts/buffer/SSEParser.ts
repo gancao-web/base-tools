@@ -33,6 +33,7 @@ export type SSEMessage = {
 
 /** 流式数据消息回调 */
 export type MessageCallback = (msg: SSEMessage) => void;
+export type SSEProtocolInfo = { event?: string; id?: string };
 
 /**
  * 流式数据解析器
@@ -53,8 +54,13 @@ export class SSEParser {
   private eventType?: string;
   private eventId?: string;
   private eventRetry?: number;
+  private pendingCallbacks = new Set<Promise<void>>();
 
-  constructor(onMessage: MessageCallback) {
+  constructor(
+    onMessage: MessageCallback,
+    private onParsed?: (msg: SSEMessage, protocol: SSEProtocolInfo) => void,
+    private onMessageError?: (error: unknown) => void,
+  ) {
     this.onMessage = onMessage;
     this.decoder =
       typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8') : new PolyfillTextDecoder();
@@ -69,6 +75,11 @@ export class SSEParser {
     this.appendText(text);
   }
 
+  /** 等待已交付的异步消息处理；请求封装在 EOF 后调用。 */
+  async waitForCallbacks() {
+    await Promise.all(this.pendingCallbacks);
+  }
+
   /**
    * 刷新解码器残留数据并处理尾部未换行的内容
    */
@@ -77,6 +88,8 @@ export class SSEParser {
     if (tail) this.appendText(tail);
 
     this.flushRemainder();
+    // 尾行已经有换行但没有空行时，buffer 为空，事件仍可能待分发。
+    if (this.eventDataLines.length) this.dispatchEvent();
   }
 
   /**
@@ -192,12 +205,37 @@ export class SSEParser {
     this.resetEvent();
   }
 
-  /** 安全调用 onMessage 回调，捕获并打印错误 */
+  /** 隔离消息回调异常，交由请求封装处理；独立使用时打印。 */
   private safeOnMessage(msg: SSEMessage) {
     try {
-      this.onMessage(msg);
+      this.onParsed?.(msg, {
+        ...(this.eventType !== undefined ? { event: this.eventType } : {}),
+        ...(this.eventId !== undefined ? { id: this.eventId } : {}),
+      });
+    } catch {
+      // 观察器失败不改变业务回调行为。
+    }
+    try {
+      const result: unknown = this.onMessage(msg);
+      if (result && typeof (result as PromiseLike<unknown>).then === 'function') {
+        const handled = Promise.resolve(result).then(() => {}, (error) => this.reportCallbackError(error));
+        // 独立使用解析器时保持打印后继续；请求封装注册错误处理后才追踪回调。
+        if (this.onMessageError) {
+          const pending = handled.then(() => { this.pendingCallbacks.delete(pending); });
+          this.pendingCallbacks.add(pending);
+        }
+      }
     } catch (onMessageError) {
-      console.error('SSEParser onMessage error:', onMessageError);
+      this.reportCallbackError(onMessageError);
+    }
+  }
+
+  private reportCallbackError(error: unknown) {
+    try {
+      if (this.onMessageError) this.onMessageError(error);
+      else console.error('SSEParser onMessage error:', error);
+    } catch {
+      // 错误处理器的异常不能形成新的未处理 Promise 拒绝。
     }
   }
 

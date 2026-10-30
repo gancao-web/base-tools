@@ -1,7 +1,11 @@
 import { isPlainObject } from 'es-toolkit';
 import { startTimer, type Timer } from '../../ts/time';
 import { getBaseToolsConfig } from '../config';
-import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
+import { type MessageCallback } from '../../ts/buffer/SSEParser';
+import {
+  createSseParser, getSseResponseFailure, isSseResponseHeader,
+  type SseTaskControl,
+} from '../../shared/network/sse';
 import {
   createFetchRequest,
   filterRequestData,
@@ -118,10 +122,7 @@ export type RequestConfigBase<D extends RequestData = RequestData> = RequestResp
     /** 是否显示进度条: 支持字符串,自定义文本 (默认true) */
     showLoading?: boolean | string;
 
-    /** 是否输出日志 (默认true) */
-    showLog?: boolean;
-
-    /** 成功和失败时,额外输出的日志数据 (可覆盖内部log参数,如'name') */
+    /** 日志附带信息：url 整值覆盖；header/data/res 局部合并；method 和公共结果字段不可覆盖。 */
     logExtra?: Record<string, unknown>;
 
     /**
@@ -145,11 +146,14 @@ export type RequestConfigBase<D extends RequestData = RequestData> = RequestResp
     onMessage?: MessageCallback;
   };
 
-/** 请求任务对象 (用于取消请求) */
+/** 流式控制能力。 */
+export type SseRequestTask = SseTaskControl;
+
+/** 请求任务对象，支持取消请求和流式控制。 */
 export type RequestTask = {
   /** 取消请求 */
   abort: () => void;
-};
+} & SseRequestTask;
 
 /** 日志请求 */
 type RequestLogConfig = {
@@ -158,7 +162,6 @@ type RequestLogConfig = {
   header?: unknown;
   method?: RequestMethod;
   logExtra?: Record<string, unknown>;
-  showLog?: boolean;
   enableChunked?: boolean;
   resKey?: RequestConfigBase['resKey'];
 };
@@ -168,6 +171,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
 
 /**
  * 基础请求 (返回 Promise 和 Task 对象)
+ * 统一返回 Promise<T>，默认 T = unknown。流式消息通过 onMessage 交付，正常结束值为 undefined，不读取 Promise 结果。
  * 基于 fetch API 封装，支持流式请求
  * @param config 请求配置
  * @example
@@ -200,6 +204,7 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  *      successCode: [1],
  *      reloginCode: [-10],
  *      ...config,
+ *      url: `${HOST}${config.url}`,
  *    });
  * }
  *
@@ -224,7 +229,6 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  *     url: '/sse/chatStream',
  *     resKey: false,
  *     showLoading: false,
- *     responseType: 'arraybuffer', // 流式响应类型
  *     enableChunked: true, // 开启分块传输
  *   });
  * }
@@ -250,7 +254,9 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
  * // 流式取消 (在组件销毁或页面关闭时调用)
  * chatTask?.abort();
  */
-export function request<T, D extends RequestData = RequestData>(config: RequestConfigBase<D>) {
+export function request<T = unknown, D extends RequestData = RequestData>(
+  config: RequestConfigBase<D>,
+): Promise<T> {
   const {
     url,
     data,
@@ -275,8 +281,10 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     onMessage,
   } = config;
   const controller = new AbortController();
-  const sseTask: SseTask = { parser: onMessage ? new SSEParser(onMessage) : undefined };
+  const sseTask: SseTask = { parser: undefined };
   const task: RequestTask = {
+    complete: () => {},
+    fail: () => {},
     abort: () => {
       sseTask.parser = null;
       controller.abort();
@@ -285,7 +293,7 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
 
   return new Promise<T>((resolve, reject) => {
     const appConfig = getBaseToolsConfig();
-    const captureLog = config.showLog !== false && !!appConfig.log && !enableChunked;
+    const captureLog = !!appConfig.log;
     let logConfig: RequestLogConfig = config;
     let httpTimer: Timer | undefined;
     let httpStatus: number | undefined;
@@ -297,23 +305,56 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
     let hasResponseBody = false;
     let fromCache = false;
     let logged = false;
+    let streamReady = false;
     let isTimeout = false;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    let sseStartMs = Date.now();
     const finish = (info: Omit<RequestLogOptions, 'config'>) => {
       if (logged) return;
       logged = true;
+      if (timeoutId) clearTimeout(timeoutId);
       logRequestInfo({
         config: logConfig,
         httpTimer,
         httpStatus,
         responseHeader,
         businessCode,
-        sseStartMs,
         fromCache,
         ...info,
       });
     };
+    const stopStream = (info: Omit<RequestLogOptions, 'config'>) => {
+      if (!enableChunked || !streamReady || logged || controller.signal.aborted) return;
+      httpTimer?.end();
+      // 先确定终态，再关闭传输；底层 AbortError 不得推翻已确认的业务结果。
+      finish(info);
+      // 流式请求只等待完成，不提供业务结果；T 由调用方声明。
+      if (info.success) resolve(undefined as T);
+      else reject('e' in info ? info.e : info.res);
+      sseTask.parser = null;
+      controller.abort();
+      if (showLoading) runRequestEffect(() => appConfig.hideLoading?.());
+    };
+    task.complete = () => stopStream({ status: 'success', success: true, closeReason: 'caller_completed' });
+    task.fail = (e, code) => stopStream({
+      status: 'fail', success: false, closeReason: 'business_error',
+      failureStage: 'business', failureCode: 'business_failed', businessCode: code,
+      ...(e !== undefined ? { e } : {}),
+    });
+    if (enableChunked || onMessage)
+      sseTask.parser = createSseParser(
+        enableChunked ? appConfig.log : undefined,
+        config.logExtra,
+        onMessage,
+        () => !logged && !controller.signal.aborted,
+        enableChunked ? (e) => stopStream({
+          status: 'fail', success: false, e, closeReason: 'message_handler_error',
+          failureStage: 'response', failureCode: 'sse_message_handler_failed',
+        }) : undefined,
+      );
+    sseTask.onResponseError = (e) => stopStream({
+      status: 'fail', success: false, e, closeReason: 'response_handler_error',
+      failureStage: 'response', failureCode: 'response_parse_failed',
+    });
 
     const execute = async () => {
       try {
@@ -337,6 +378,8 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
               ? filterRequestData(transformed.data as Record<string, any>)
               : transformed.data;
         }
+        if (enableChunked && !Object.keys(fillHeader).some((key) => key.toLowerCase() === 'accept'))
+          fillHeader.Accept = 'text/event-stream';
         const fetchRequest = createFetchRequest({
           url: fillUrl,
           method,
@@ -346,7 +389,6 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         fillUrl = fetchRequest.url;
         fillHeader = fetchRequest.headers;
         logConfig = { ...config, data: fillData, header: fillHeader, url: fillUrl, method };
-        sseStartMs = Date.now();
 
         const isCache = !enableChunked && cacheTime && cacheTime > 0;
         const cacheKey = isCache
@@ -395,26 +437,41 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
         if (captureLog) httpTimer = startTimer();
         const response = await fetch(fillUrl, requestInit);
         httpStatus = response.status;
-        if (captureLog) {
+        if (captureLog || enableChunked) {
           responseHeader = {};
           response.headers.forEach((value, key) => {
             responseHeader![key] = value;
           });
         }
 
-        if (enableChunked && response.ok) {
+        if (enableChunked) {
+          if (!response.ok || !isSseResponseHeader(responseHeader)) {
+            const body = await response.text();
+            httpTimer?.end();
+            const { info, relogin, msg } = getSseResponseFailure(body, httpStatus, config);
+            finish(info);
+            reject('e' in info ? info.e : info.res);
+            if (showLoading) runRequestEffect(() => appConfig.hideLoading?.());
+            if (relogin) runRequestEffect(() => appConfig.toLogin?.());
+            else if (toastError && msg) runRequestEffect(() => appConfig.toast?.({ status: 'fail', msg }));
+            return;
+          }
+          streamReady = true;
           if (showLoading) runRequestEffect(() => appConfig.hideLoading?.());
-          const res = await handleFetchStreamResponse(response, sseTask);
-          finish({ status: 'success', success: true, res });
-          resolve(res as T);
+          await handleFetchStreamResponse(response, sseTask, () => httpTimer?.end(), controller.signal);
+          httpTimer?.end();
+          finish({ status: 'success', success: true });
+          resolve(undefined as T);
           return;
         }
 
         // 正文只读一次；读完立即停表，JSON 解析、解密和业务判断不计入传输。
-        const resData = await parseFetchResponse(response, responseType, () => {
+        const resData = await parseFetchResponse(response, responseType, (body) => {
           httpTimer?.end();
           // 正文读取完成前仍属于传输阶段，取消、超时和断流按网络失败记录。
           if (!response.ok) {
+            responseBody = body;
+            hasResponseBody = true;
             failureStage = 'http';
             failureCode = 'http_failed';
           }
@@ -455,9 +512,10 @@ export function request<T, D extends RequestData = RequestData>(config: RequestC
             runRequestEffect(() => appConfig.toast?.({ status: 'fail', msg }));
         }
       } catch (e) {
+        if (logged) return;
         httpTimer?.end();
         const isAbortError = e instanceof Error && e.name === 'AbortError';
-        const error = isAbortError && isTimeout ? new Error('Request Timeout') : e;
+        const error = isAbortError && isTimeout ? new Error('Request Timeout', { cause: e }) : e;
         finish({
           status: 'fail',
           success: false,

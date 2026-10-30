@@ -56,7 +56,7 @@
 
 #### request
 - 来源: `src/uni/network/request.ts`
-- 导出: `request`、`RequestConfig`、`RequestConfigBase`、`RequestData`、`TransformRequestContext`、`TransformRequestResult`
+- 导出: `request`、`RequestConfig`、`RequestConfigBase`、`RequestData`、`RequestTask`、`SseRequestTask`、`TransformRequestContext`、`TransformRequestResult`
 
 ### other
 - 来源: `src/uni/other/index.ts`

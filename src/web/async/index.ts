@@ -1,4 +1,5 @@
-import { cloneDeep } from 'es-toolkit';
+import { createLogSnapshot } from '../../shared/network/logSnapshot';
+import { runRequestEffect } from '../../shared/network/requestLog';
 import { getBaseToolsConfig } from '../index';
 import type { AppLogInfo } from '../index';
 import type { ApiActionConfig } from '../../shared/network/action';
@@ -17,6 +18,7 @@ export type WebApiConfig<Res = any, Err = any> = ApiActionConfig<Res, Err>;
  * 拓展 web api, 使其支持loading,toast,log能力
  * @param webApi web api
  * @param apiName web api 名称 (可选, 用于日志输出, 默认'enhanceWebApi')
+ * @param options 包装器配置，log 默认 true；false 仅关闭包装器自身的日志。
  * @return 注入拓展能力的promise (默认提示异常和输出日志,不显示进度条和操作成功)
  * @example
  * const promise = enhanceWebApi(downloadFile, 'downloadFile');
@@ -25,16 +27,11 @@ export type WebApiConfig<Res = any, Err = any> = ApiActionConfig<Res, Err>;
 export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
   webApi: WebApi<Option, Res, Config>,
   apiName?: string,
+  options: { log?: boolean } = {},
 ) {
   return (option: Option, config?: WebApiConfig<Res, Err> & Config) => {
     const finalConfig = config || ({} as WebApiConfig<Res, Err> & Config);
-    const {
-      showLoading = false,
-      toastSuccess = false,
-      toastError = true,
-      showLog = true,
-      logExtra,
-    } = finalConfig;
+    const { showLoading = false, toastSuccess = false, toastError = true, logExtra } = finalConfig;
 
     const {
       log,
@@ -62,12 +59,13 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
         .then((res) => {
           hideLoading();
 
-          if (showLog) {
-            const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
-            logData.res = cloneDeep(res); // 深拷贝响应数据,避免外部修改对象,造成输出不一致
+          if (log && options.log !== false)
+            runRequestEffect(() => {
+              const logData: AppLogInfo = { name: fname, status: 'success', option, ...logExtra };
+              logData.res = res;
 
-            log?.('info', logData);
-          }
+              return log('info', createLogSnapshot(logData));
+            });
 
           resolve(res);
 
@@ -76,7 +74,13 @@ export function enhanceWebApi<Option = any, Res = any, Err = any, Config = any>(
         })
         .catch((e) => {
           hideLoading();
-          if (showLog) log?.('error', { name: fname, status: 'fail', option, e, ...logExtra });
+          if (log && options.log !== false)
+            runRequestEffect(() =>
+              log(
+                'error',
+                createLogSnapshot({ name: fname, status: 'fail', option, e, ...logExtra }),
+              ),
+            );
 
           const msg = typeof toastError === 'function' ? toastError(e) : toastError;
           if (msg) {
