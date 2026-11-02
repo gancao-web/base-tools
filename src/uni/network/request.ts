@@ -7,7 +7,9 @@ import { getPlatformUni } from '../system';
 import { toast } from '../ui';
 import { type SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
 import {
-  createSseParser, getSseResponseFailure, isSseResponseHeader,
+  createSseParser,
+  getSseResponseFailure,
+  isSseResponseHeader,
   type SseTaskControl,
 } from '../../shared/network/sse';
 import PolyfillTextDecoder from '../../ts/buffer/PolyfillTextDecoder';
@@ -58,7 +60,10 @@ type RequestResponseConfig = UniRequestOptions &
   ApiResponseConfig &
   ResponseTransformer<UniApp.RequestSuccessCallbackResult['data']>;
 
-/** 自定义请求的配置 (接口字段参数必填) */
+/**
+ * 自定义请求的配置 (接口字段参数必填)
+ * timeout 为 0 时禁用本库的超时定时器；使用 uni.request 时仍受宿主平台的超时限制。
+ */
 export type RequestConfigBase<D extends RequestData = RequestData> = RequestResponseConfig &
   ApiTaskConfig<RequestTask> & {
     /** 请求参数 */
@@ -238,9 +243,10 @@ export function request<T = unknown, D extends RequestData = RequestData>(
     };
     const execute = async () => {
       // 先保存调用方参数，原生和 H5 请求均记录转换前的独立快照。
-      if (captureLog) runRequestEffect(() => {
-        logConfig = { ...config, data: createLogSnapshot(data) };
-      });
+      if (captureLog)
+        runRequestEffect(() => {
+          logConfig = { ...config, data: createLogSnapshot(data) };
+        });
       let fillData = isPlainObject(data) ? filterRequestData(data as Record<string, any>) : data;
       let fillHeader = filterRequestHeader(header);
       let fillUrl = url;
@@ -310,10 +316,15 @@ export function request<T = unknown, D extends RequestData = RequestData>(
           if (showLoading) runRequestEffect(() => uni.hideLoading());
         };
         const sseTask: SseTask = {
-          onResponseError: (e) => stopStream({
-            status: 'fail', success: false, e, closeReason: 'response_handler_error',
-            failureStage: 'response', failureCode: 'response_parse_failed',
-          }),
+          onResponseError: (e) =>
+            stopStream({
+              status: 'fail',
+              success: false,
+              e,
+              closeReason: 'response_handler_error',
+              failureStage: 'response',
+              failureCode: 'response_parse_failed',
+            }),
           parser: createSseParser(
             getBaseToolsConfig().log,
             config.logExtra,
@@ -323,12 +334,18 @@ export function request<T = unknown, D extends RequestData = RequestData>(
         };
         const headerListeners = new Set<(result: any) => void>();
         const task: RequestTask = {
-          complete: () => stopStream({ status: 'success', success: true, closeReason: 'caller_completed' }),
-          fail: (e, code) => stopStream({
-            status: 'fail', success: false, closeReason: 'business_error',
-            failureStage: 'business', failureCode: 'business_failed', businessCode: code,
-            ...(e !== undefined ? { e } : {}),
-          }),
+          complete: () =>
+            stopStream({ status: 'success', success: true, closeReason: 'caller_completed' }),
+          fail: (e, code) =>
+            stopStream({
+              status: 'fail',
+              success: false,
+              closeReason: 'business_error',
+              failureStage: 'business',
+              failureCode: 'business_failed',
+              businessCode: code,
+              ...(e !== undefined ? { e } : {}),
+            }),
           abort() {
             sseTask.parser = null;
             controller.abort();
@@ -344,10 +361,15 @@ export function request<T = unknown, D extends RequestData = RequestData>(
         onTaskReady?.(task);
 
         let isTimeout = false;
-        const timeoutId = setTimeout(() => {
-          isTimeout = true;
-          task.abort();
-        }, config.timeout ?? 60000);
+        // 显式传 0 禁用本库的超时定时器，避免零延时取消请求。
+        const timeout = config.timeout ?? 60000;
+        const timeoutId =
+          timeout === 0
+            ? undefined
+            : setTimeout(() => {
+                isTimeout = true;
+                task.abort();
+              }, timeout);
 
         try {
           const {
@@ -376,9 +398,11 @@ export function request<T = unknown, D extends RequestData = RequestData>(
             responseHeader![key] = value;
           });
           streamReady = response.ok && isSseResponseHeader(responseHeader);
-          headerListeners.forEach((callback) => runRequestEffect(() =>
-            callback({ header: responseHeader, statusCode: response.status }),
-          ));
+          headerListeners.forEach((callback) =>
+            runRequestEffect(() =>
+              callback({ header: responseHeader, statusCode: response.status }),
+            ),
+          );
           if (finalized) return;
 
           if (!response.ok || !isSseResponseHeader(responseHeader)) {
@@ -447,10 +471,15 @@ export function request<T = unknown, D extends RequestData = RequestData>(
         runRequestEffect(() => nativeTask?.abort());
         if (showLoading) runRequestEffect(() => uni.hideLoading());
       };
-      const responseFailed = (e: unknown) => stopStream({
-        status: 'fail', success: false, e, closeReason: 'response_handler_error',
-        failureStage: 'response', failureCode: 'response_parse_failed',
-      });
+      const responseFailed = (e: unknown) =>
+        stopStream({
+          status: 'fail',
+          success: false,
+          e,
+          closeReason: 'response_handler_error',
+          failureStage: 'response',
+          failureCode: 'response_parse_failed',
+        });
       if (captureLog) httpTimer = startTimer();
       const task = uni.request({
         ...nativeConfig,
@@ -574,25 +603,38 @@ export function request<T = unknown, D extends RequestData = RequestData>(
         },
       });
       nativeTask = task;
-      if (enableChunked && !finalized) {
+      // timeout 为 0 仅禁用本库的定时器，传给 uni.request 的配置仍受宿主平台限制。
+      if (enableChunked && !finalized && config.timeout !== 0) {
         // 库的传输超时只覆盖在途连接，EOF 后不等待业务消息处理。
         streamTimeoutId = setTimeout(() => {
           if (finalized) return;
           httpTimer?.end();
           const e = new Error('Request Timeout');
-          finish({ status: 'fail', success: false, e, failureStage: 'network', failureCode: 'timeout' });
+          finish({
+            status: 'fail',
+            success: false,
+            e,
+            failureStage: 'network',
+            failureCode: 'timeout',
+          });
           runRequestEffect(() => nativeTask?.abort());
           if (showLoading) runRequestEffect(() => uni.hideLoading());
           if (toastError) runRequestEffect(() => toast('请求超时'));
         }, config.timeout ?? 60000);
       }
       const requestTask: RequestTask = Object.assign(task, {
-        complete: () => stopStream({ status: 'success', success: true, closeReason: 'caller_completed' }),
-        fail: (e: unknown, code?: string | number) => stopStream({
-          status: 'fail', success: false, closeReason: 'business_error',
-          failureStage: 'business', failureCode: 'business_failed', businessCode: code,
-          ...(e !== undefined ? { e } : {}),
-        }),
+        complete: () =>
+          stopStream({ status: 'success', success: true, closeReason: 'caller_completed' }),
+        fail: (e: unknown, code?: string | number) =>
+          stopStream({
+            status: 'fail',
+            success: false,
+            closeReason: 'business_error',
+            failureStage: 'business',
+            failureCode: 'business_failed',
+            businessCode: code,
+            ...(e !== undefined ? { e } : {}),
+          }),
       });
       if (enableChunked) {
         // 取消或断流时 success 不会触发，提前保存宿主已经提供的握手信息。
@@ -632,7 +674,12 @@ export function request<T = unknown, D extends RequestData = RequestData>(
           streamAborted = true;
           if (enableChunked && transportEnded && !finalized) {
             httpTimer?.end();
-            finish({ status: 'fail', success: false, failureStage: 'network', failureCode: 'aborted' });
+            finish({
+              status: 'fail',
+              success: false,
+              failureStage: 'network',
+              failureCode: 'aborted',
+            });
             if (showLoading) runRequestEffect(() => uni.hideLoading());
           }
           // @ts-ignore
