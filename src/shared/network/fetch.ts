@@ -77,7 +77,6 @@ export async function handleFetchStreamResponse(
   response: Response,
   sseTask: SseTask,
   onBodyRead?: () => void,
-  signal?: AbortSignal,
 ): Promise<void> {
   const parse = (effect: () => void) => {
     try { effect(); } catch (error) {
@@ -118,25 +117,6 @@ export async function handleFetchStreamResponse(
 
     onBodyRead?.();
     parse(() => sseTask.parser?.flush());
-    if (sseTask.parser) {
-      const pending = sseTask.parser.waitForCallbacks();
-      if (!signal) await pending;
-      else await new Promise<void>((resolve, reject) => {
-        const abort = () => {
-          signal.removeEventListener('abort', abort);
-          reject(signal.reason || new DOMException('Body stream was aborted', 'AbortError'));
-        };
-        signal.addEventListener('abort', abort, { once: true });
-        pending.then(() => {
-          signal.removeEventListener('abort', abort);
-          resolve();
-        }, (error) => {
-          signal.removeEventListener('abort', abort);
-          reject(error);
-        });
-        if (signal.aborted) abort();
-      });
-    }
     // 尾消息业务回调也可能取消；不能在取消之后仍记 EOF 成功。
     await checkAborted();
   } finally {

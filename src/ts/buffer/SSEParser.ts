@@ -75,7 +75,7 @@ export class SSEParser {
     this.appendText(text);
   }
 
-  /** 等待已交付的异步消息处理；请求封装在 EOF 后调用。 */
+  /** 独立使用时可等待已交付的异步消息处理；请求封装不将其计入连接生命周期。 */
   async waitForCallbacks() {
     await Promise.all(this.pendingCallbacks);
   }

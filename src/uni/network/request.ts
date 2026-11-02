@@ -217,13 +217,11 @@ export function request<T = unknown, D extends RequestData = RequestData>(
     let streamAborted = false;
     let streamParser: SSEParser | undefined;
     let streamTimeoutId: ReturnType<typeof setTimeout> | undefined;
-    let stopWaitingForCallbacks: (() => void) | undefined;
     // 统一结束请求；状态与是否输出日志无关，日志异常不得阻止 Promise 完成。
     const finish = (info: Omit<RequestLogOptions, 'config'>, result?: T) => {
       if (finalized) return;
       finalized = true;
       clearTimeout(streamTimeoutId);
-      stopWaitingForCallbacks?.();
       // 流式请求只等待完成，不提供业务结果；T 由调用方声明。
       if (info.success) resolve((enableChunked ? undefined : result) as T);
       else reject('e' in info ? info.e : info.res);
@@ -321,10 +319,6 @@ export function request<T = unknown, D extends RequestData = RequestData>(
             config.logExtra,
             onMessage,
             () => !finalized && !controller.signal.aborted,
-            (e) => stopStream({
-              status: 'fail', success: false, e, closeReason: 'message_handler_error',
-              failureStage: 'response', failureCode: 'sse_message_handler_failed',
-            }),
           ),
         };
         const headerListeners = new Set<(result: any) => void>();
@@ -398,7 +392,10 @@ export function request<T = unknown, D extends RequestData = RequestData>(
             return;
           }
           streamReady = true;
-          await handleFetchStreamResponse(response, sseTask, () => httpTimer?.end(), controller.signal);
+          await handleFetchStreamResponse(response, sseTask, () => {
+            httpTimer?.end();
+            clearTimeout(timeoutId);
+          });
           httpTimer?.end();
 
           if (showLoading) runRequestEffect(() => uni.hideLoading());
@@ -450,7 +447,6 @@ export function request<T = unknown, D extends RequestData = RequestData>(
         runRequestEffect(() => nativeTask?.abort());
         if (showLoading) runRequestEffect(() => uni.hideLoading());
       };
-      const callbacksStopped = new Promise<void>((resolve) => { stopWaitingForCallbacks = resolve; });
       const responseFailed = (e: unknown) => stopStream({
         status: 'fail', success: false, e, closeReason: 'response_handler_error',
         failureStage: 'response', failureCode: 'response_parse_failed',
@@ -464,10 +460,11 @@ export function request<T = unknown, D extends RequestData = RequestData>(
         url: fillUrl,
         data: fillData,
         header: fillHeader,
-        success: async (xhr) => {
+        success: (xhr) => {
           if (finalized) return;
           transportEnded = true;
           httpTimer?.end();
+          clearTimeout(streamTimeoutId);
           httpStatus = xhr.statusCode;
           if (captureLog || enableChunked) responseHeader = { ...responseHeader, ...xhr.header };
           if (enableChunked && rejectedStream()) {
@@ -485,7 +482,6 @@ export function request<T = unknown, D extends RequestData = RequestData>(
           if (enableChunked && !streamAborted) {
             try {
               streamParser?.flush();
-              await Promise.race([streamParser?.waitForCallbacks(), callbacksStopped]);
             } catch (e) {
               responseFailed(e);
               return;
@@ -579,7 +575,7 @@ export function request<T = unknown, D extends RequestData = RequestData>(
       });
       nativeTask = task;
       if (enableChunked && !finalized) {
-        // 宿主到 EOF 即停止自身超时；库的计时仍须覆盖尚未完成的消息处理。
+        // 库的传输超时只覆盖在途连接，EOF 后不等待业务消息处理。
         streamTimeoutId = setTimeout(() => {
           if (finalized) return;
           httpTimer?.end();
@@ -616,10 +612,6 @@ export function request<T = unknown, D extends RequestData = RequestData>(
           config.logExtra,
           onMessage,
           () => !finalized && !streamAborted,
-          enableChunked ? (e) => stopStream({
-            status: 'fail', success: false, e, closeReason: 'message_handler_error',
-            failureStage: 'response', failureCode: 'sse_message_handler_failed',
-          }) : undefined,
         );
         // @ts-ignore
         task.onChunkReceived?.((res: { data: ArrayBuffer }) => {

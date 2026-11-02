@@ -11696,7 +11696,7 @@ const onTaskReady = (task: RequestTask) => {
 // 流式监听
 const onMessage = (msg: SSEMessage) => {
   console.log(msg);
-  // 消息处理代码抛错时，工具会自动终止流并向上传递异常。
+  // 消息处理异常只记录错误，不自动断流；需要终止时由项目显式调用 fail。
   // 可选：当确认业务结束、希望提前关闭连接时，可调用 chatTask?.complete()。
   // 可选：当确认业务失败时、希望提前关闭连接时，可调用 chatTask?.fail(error, businessCode)。
   // 不调用也可以，默认等服务端关闭连接即可。
@@ -21534,7 +21534,7 @@ const onTaskReady = (task: RequestTask) => {
 // 流式监听
 const onMessage = (msg: SSEMessage) => {
   console.log(msg);
-  // 消息处理代码抛错时，工具会自动终止流并向上传递异常。
+  // 消息处理异常只记录错误，不自动断流；需要终止时由项目显式调用 fail。
   // 可选：当确认业务结束、希望提前关闭连接时，可调用 chatTask?.complete()。
   // 可选：当确认业务失败时、希望提前关闭连接时，可调用 chatTask?.fail(error, businessCode)。
   // 不调用也可以，默认等服务端关闭连接即可。

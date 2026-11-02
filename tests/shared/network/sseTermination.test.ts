@@ -137,18 +137,32 @@ describe.each<Platform>(['web', 'uni-h5', 'native'])('%s SSE 终态', (platform)
     expect(log.mock.calls[1][1]).toMatchObject({ success: false, closeReason: 'business_error', businessCode: 123, e: error });
   });
 
-  it.each([false, true])('消息处理异常自动终止流并保留原异常，异步=%s', async (asyncCallback) => {
+  it.each([false, true])('消息处理异常只记录错误并继续交付消息，异步=%s', async (asyncCallback) => {
     const { run, log } = setup(platform, 'data: first\n\ndata: second\n\n');
     const error = new Error('callback failed');
+    const onMessage = vi.fn(asyncCallback ? async () => { throw error; } : () => { throw error; });
+    let endReads = 0;
     await expect(run({
-      onMessage: asyncCallback ? async () => { throw error; } : () => { throw error; },
-    })).rejects.toBe(error);
+      onMessage,
+      logExtra: {
+        startContext: { connection: 'callback-error' },
+        get endContext() { endReads++; return { shop: 'end' }; },
+      },
+    })).resolves.toBeUndefined();
+    expect(onMessage).toHaveBeenCalledTimes(2);
     const ends = log.mock.calls.filter((call) => call[1].name === 'request');
     expect(ends).toHaveLength(1);
-    expect(ends[0][1]).toMatchObject({ success: false, closeReason: 'message_handler_error',
-      failureStage: 'response', failureCode: 'sse_message_handler_failed', e: { message: error.message },
+    expect(ends[0][1]).toMatchObject({ success: true, closeReason: 'eof' });
+    const errors = log.mock.calls.filter((call) => call[0] === 'error');
+    expect(errors).toHaveLength(2);
+    expect(errors[0][1]).toMatchObject({
+      name: 'sseMessage', requestType: 'sse', startContext: { connection: 'callback-error' },
+      failureStage: 'response', failureCode: 'sse_message_handler_failed',
+      e: { name: 'Error', message: error.message, stack: error.stack },
     });
-    expect(log.mock.calls.at(-1)?.[1].name).toBe('request');
+    expect(errors[0][1]).not.toHaveProperty('endContext');
+    expect(errors[0][1]).not.toHaveProperty('closeReason');
+    expect(endReads).toBe(1);
   });
 
   it('响应转换异常归属响应处理失败', async () => {
@@ -158,6 +172,21 @@ describe.each<Platform>(['web', 'uni-h5', 'native'])('%s SSE 终态', (platform)
     expect(log.mock.calls.at(-1)?.[1]).toMatchObject({ closeReason: 'response_handler_error',
       failureStage: 'response', failureCode: 'response_transform_failed',
     });
+  });
+
+  it.each([false, true])('消息错误日志输出失败不影响消息和 EOF，异步=%s', async (asyncLogger) => {
+    const { run, log } = setup(platform, 'data: first\n\ndata: tail\n');
+    log.mockImplementation((level) => {
+      if (level !== 'error') return;
+      if (asyncLogger) return Promise.reject(new Error('logger failed'));
+      throw new Error('logger failed');
+    });
+    const onMessage = vi.fn(() => { throw new Error('view failed'); });
+    await expect(run({ onMessage })).resolves.toBeUndefined();
+    expect(onMessage).toHaveBeenCalledTimes(2);
+    const ends = log.mock.calls.filter((call) => call[1].name === 'request');
+    expect(ends).toHaveLength(1);
+    expect(ends[0][1]).toMatchObject({ success: true, closeReason: 'eof' });
   });
 
   it('解析器异常归属响应处理失败', async () => {
@@ -171,53 +200,53 @@ describe.each<Platform>(['web', 'uni-h5', 'native'])('%s SSE 终态', (platform)
     });
   });
 
-  it('EOF 等待异步消息处理，迟到拒绝不会提前生成成功日志', async () => {
+  it('EOF 不等待异步消息，迟到拒绝只记录错误且不改变结束结果', async () => {
     const { run, log } = setup(platform, 'data: first\n\n');
     let fail!: (error: Error) => void;
     const callback = new Promise<void>((_resolve, reject) => { fail = reject; });
     const error = new Error('late failure');
-    const pending = expect(run({ onMessage: () => callback })).rejects.toBe(error);
-    await vi.waitFor(() => expect(log).toHaveBeenCalledOnce());
+    await expect(run({ onMessage: () => callback })).resolves.toBeUndefined();
+    expect(log.mock.calls.at(-1)?.[1]).toMatchObject({ name: 'request', closeReason: 'eof', success: true });
     fail(error);
-    await pending;
-    expect(log).toHaveBeenCalledTimes(2);
-    expect(log.mock.calls[1][1]).toMatchObject({ closeReason: 'message_handler_error', success: false });
+    await vi.waitFor(() => expect(log).toHaveBeenCalledTimes(3));
+    expect(log.mock.calls[2][0]).toBe('error');
+    expect(log.mock.calls[2][1]).toMatchObject({ name: 'sseMessage', failureCode: 'sse_message_handler_failed', e: { message: 'late failure' } });
+    expect(log.mock.calls.filter((call) => call[1].name === 'request')).toHaveLength(1);
   });
 
-  it('EOF 等待异步处理成功，业务处理时间不计入网络耗时', async () => {
+  it('EOF 先结束，后续异步处理成功不追加结束或修改网络耗时', async () => {
     const { run, log } = setup(platform, 'data: first\n\n');
     let tick = 0;
     vi.spyOn(performance, 'now').mockImplementation(() => tick);
     let done!: () => void;
     const callback = new Promise<void>((resolve) => { done = resolve; });
-    const pending = run({ onMessage: () => { tick = 20; return callback; } });
-    await vi.waitFor(() => expect(log).toHaveBeenCalledOnce());
+    await expect(run({ onMessage: () => { tick = 20; return callback; } })).resolves.toBeUndefined();
     tick = 90;
     done();
-    await expect(pending).resolves.toBeUndefined();
+    await callback;
+    expect(log).toHaveBeenCalledTimes(2);
     expect(log.mock.calls.at(-1)?.[1]).toMatchObject({ closeReason: 'eof', success: true, networkDurationMs: 20 });
   });
 
-  it('EOF 等待异步消息期间调用方仍能取消', async () => {
+  it('EOF 后回调仍未完成时，取消不改变已确定的结果', async () => {
     const { run, log } = setup(platform, 'data: first\n\n');
     let task!: RequestTask;
     const callback = new Promise<void>(() => {});
-    const pending = run({ onTaskReady: (value) => { task = value; }, onMessage: () => callback });
-    const result = pending.then(() => 'resolved', () => 'rejected');
-    await vi.waitFor(() => expect(log).toHaveBeenCalledOnce());
+    await expect(run({ onTaskReady: (value) => { task = value; }, onMessage: () => callback })).resolves.toBeUndefined();
     task.abort();
-    expect(await result).toBe('rejected');
-    expect(log.mock.calls.at(-1)?.[1]).toMatchObject({ closeReason: 'caller_aborted', failureCode: 'aborted', success: false });
+    expect(log).toHaveBeenCalledTimes(2);
+    expect(log.mock.calls.at(-1)?.[1]).toMatchObject({ closeReason: 'eof', success: true });
   });
 
-  it('EOF 等待异步消息期间超时仍能终止请求', async () => {
+  it('EOF 清除传输超时，未完成的异步消息不会导致网络超时', async () => {
     vi.useFakeTimers();
     const { run, log } = setup(platform, 'data: first\n\n');
     const callback = new Promise<void>(() => {});
-    const pending = expect(run({ timeout: 10, onMessage: () => callback })).rejects.toThrow('Request Timeout');
+    await expect(run({ timeout: 10, onMessage: () => callback })).resolves.toBeUndefined();
+    expect(vi.getTimerCount()).toBe(0);
     await vi.advanceTimersByTimeAsync(11);
-    await pending;
-    expect(log.mock.calls.at(-1)?.[1]).toMatchObject({ closeReason: 'timeout', failureCode: 'timeout', success: false });
+    expect(log).toHaveBeenCalledTimes(2);
+    expect(log.mock.calls.at(-1)?.[1]).toMatchObject({ closeReason: 'eof', success: true });
   });
 
   it('EOF 已确定结果后，迟到的 fail 或取消不推翻结果', async () => {
