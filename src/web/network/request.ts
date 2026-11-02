@@ -1,5 +1,6 @@
 import { isPlainObject } from 'es-toolkit';
 import { startTimer, type Timer } from '../../ts/time';
+import { createLogSnapshot } from '../../shared/network/logSnapshot';
 import { getBaseToolsConfig } from '../config';
 import { type MessageCallback } from '../../ts/buffer/SSEParser';
 import {
@@ -126,7 +127,7 @@ export type RequestConfigBase<D extends RequestData = RequestData> = RequestResp
     logExtra?: Record<string, unknown>;
 
     /**
-     * 请求前的数据转换, 可用于加密 header、data 或重写 url
+     * 请求前的数据转换, 可用于加密 header、data 或重写 url；日志 data 保存转换前快照。
      * 使用方法签名，使具体 RequestConfig<D> 可以传入默认 RequestConfig 的二次封装
      */
     transformRequest?(
@@ -358,6 +359,10 @@ export function request<T = unknown, D extends RequestData = RequestData>(
 
     const execute = async () => {
       try {
+        // 先保存调用方参数，转换中的原地修改、加密和异步处理不改变日志原文。
+        if (captureLog) runRequestEffect(() => {
+          logConfig = { ...config, data: createLogSnapshot(data) };
+        });
         onTaskReady?.(task);
         let fillData = isPlainObject(data) ? filterRequestData(data) : data;
         let fillHeader = filterRequestHeader(header);
@@ -388,7 +393,7 @@ export function request<T = unknown, D extends RequestData = RequestData>(
         });
         fillUrl = fetchRequest.url;
         fillHeader = fetchRequest.headers;
-        logConfig = { ...config, data: fillData, header: fillHeader, url: fillUrl, method };
+        logConfig = { ...logConfig, header: fillHeader, url: fillUrl, method };
 
         const isCache = !enableChunked && cacheTime && cacheTime > 0;
         const cacheKey = isCache

@@ -180,6 +180,8 @@ import 'whatwg-fetch';
 
 ### 字段含义
 
+`data` 自动保存 `transformRequest` 执行前的独立参数快照；`url/header/method` 记录实际请求值。二次封装应先补齐公共业务参数，再调用 `request`，将加密、编码等传输转换放入 `transformRequest`。转换内部新增或修改的参数不进入 `data` 日志，转换抛错时仍保留转换前快照；缓存键继续使用实际发送参数。
+
 保留 name、status、url、method、data、header、res、e、fromCache 和 logExtra。`res` 通常是执行 transformResponse 后、按 resKey 提取业务结果前的完整正文；若 transformResponse 抛错，则保留传入转换函数的正文（Web 为正文读取与解析后的值，不是 HTTP 原始字节）。`e` 中的 Error 转换为包含 name/message/stack 的普通对象，并递归记录标准 Error.cause；循环的 Error.cause 用 `[Circular error cause]` 截断，非 Error 值保持原值。reject 仍传递原始异常，不使用日志序列化结果。
 
 开启 toastError 且配置 toast 时，普通响应处理异常使用 Error.message 生成“请求失败: 错误信息”提示，不将 cause 或响应正文展示给用户。封装库可抛出 `new Error('响应处理失败', { cause: originalError })`，分别提供用户提示和日志中的原始原因；工具库不根据提示文字或异常类型推断业务专有分类。
@@ -218,7 +220,7 @@ RequestFailureCode 还包含 response_parse_failed，供能够明确识别解析
 
 ### 附加字段与 getter
 
-logExtra 保留覆盖默认日志字段的行为。工具库在结果确定后、复制响应正文及调用 log 之前合并一次；调用方可使用可枚举 getter 延迟生成自己的字段。需要测量封装耗时时，可结合 [startTimer](../../ts/time/startTimer.md) 使用：
+`logExtra.url` 可整值覆盖日志地址；`header` 按名称大小写不敏感浅合并，`data/res` 的普通对象递归合并，数组和其他值整体替换，根值 `undefined` 不覆盖。补丁只作用于日志副本，不改变实际请求、业务返回或缓存；没有实际响应时不凭补丁生成 `res`。`method`、`success`、失败分类等公共结果字段不可覆盖。调用方可使用可枚举 getter 延迟生成自己的附加字段；工具库在结果确定后读取一次。需要测量封装耗时时，可结合 [startTimer](../../ts/time/startTimer.md) 使用：
 
 ```ts
 const logExtra = {
@@ -232,7 +234,7 @@ await requestApi({ url: '/items', logExtra });
 // completedAtMs 在结束日志组装时读取，而不是在创建对象时读取。
 ```
 
-避免在请求完成前提前展开或序列化 logExtra；未配置 log 时，工具库不读取这些 getter。调用方覆盖 success、失败分类等默认字段时，需要自行保证含义一致。
+避免在请求完成前提前展开或序列化 logExtra；未配置 log 时，工具库不读取这些 getter。
 
 ## 版本
 
