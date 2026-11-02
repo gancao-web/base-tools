@@ -13,8 +13,7 @@ export type SseCloseReason =
   | 'network_error'
   | 'http_error'
   | 'business_error'
-  | 'response_handler_error'
-  | 'message_handler_error';
+  | 'response_handler_error';
 export type UploadLogFile = { fieldName: string; name?: string; type?: string; size?: number };
 export type RequestFailureCode =
   | 'request_prepare_failed'
@@ -178,7 +177,7 @@ export function writeRequestLog(
 }
 
 /** 保留标准异常链；普通抛出值沿用原值，循环的 Error.cause 用标记截断。 */
-function serializeRequestError(error: unknown, seen = new Set<Error>()): unknown {
+export function serializeRequestError(error: unknown, seen = new Set<Error>()): unknown {
   if (!(error instanceof Error)) return error;
   if (seen.has(error)) return '[Circular error cause]';
   seen.add(error);

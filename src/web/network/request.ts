@@ -347,10 +347,6 @@ export function request<T = unknown, D extends RequestData = RequestData>(
         config.logExtra,
         onMessage,
         () => !logged && !controller.signal.aborted,
-        enableChunked ? (e) => stopStream({
-          status: 'fail', success: false, e, closeReason: 'message_handler_error',
-          failureStage: 'response', failureCode: 'sse_message_handler_failed',
-        }) : undefined,
       );
     sseTask.onResponseError = (e) => stopStream({
       status: 'fail', success: false, e, closeReason: 'response_handler_error',
@@ -463,7 +459,10 @@ export function request<T = unknown, D extends RequestData = RequestData>(
           }
           streamReady = true;
           if (showLoading) runRequestEffect(() => appConfig.hideLoading?.());
-          await handleFetchStreamResponse(response, sseTask, () => httpTimer?.end(), controller.signal);
+          await handleFetchStreamResponse(response, sseTask, () => {
+            httpTimer?.end();
+            clearTimeout(timeoutId);
+          });
           httpTimer?.end();
           finish({ status: 'success', success: true });
           resolve(undefined as T);

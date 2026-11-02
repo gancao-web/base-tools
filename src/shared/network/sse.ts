@@ -1,14 +1,14 @@
 import { SSEParser, type MessageCallback } from '../../ts/buffer/SSEParser';
 import PolyfillTextDecoder from '../../ts/buffer/PolyfillTextDecoder';
 import { createLogSnapshot } from './logSnapshot';
-import { runRequestEffect, type RequestLogInfo, type RequestLogOptions } from './requestLog';
+import { runRequestEffect, serializeRequestError, type RequestLogInfo, type RequestLogOptions } from './requestLog';
 import { getResponseValue, type ApiResponseConfig, type ResponseTransformer } from './response';
 
-/** 终态由业务确认，不内置任何项目的事件名。普通请求调用时无效果。 */
+/** 流已建立且请求尚未结束时可确认业务终态；EOF 或其他终态后调用无效果。普通请求调用时无效果。 */
 export type SseTaskControl = {
-  /** 确认业务完成，正常停止流；不会根据事件名自动调用。 */
+  /** 确认业务完成，正常停止流；不会根据事件名自动调用，也不等待异步消息处理。 */
   complete: () => void;
-  /** 确认业务失败，以原错误或完整消息结束流，并可提供已取得的业务码。 */
+  /** 确认业务失败，以原错误或完整消息结束流，并可提供业务码；EOF 后不能修改结果。 */
   fail: (error: unknown, businessCode?: string | number) => void;
 };
 
@@ -80,7 +80,6 @@ export function createSseParser(
   extra: Record<string, unknown> | undefined,
   onMessage: MessageCallback | undefined,
   isActive: () => boolean,
-  onMessageError?: (error: unknown) => void,
 ) {
   if (!log && !onMessage) return undefined;
   return new SSEParser(
@@ -103,6 +102,24 @@ export function createSseParser(
         return log('info', createLogSnapshot(info));
       });
     },
-    onMessageError,
+    (error) => {
+      // 只记录消息处理异常；迟到错误不改变结束结果，也不读取结束 getter。
+      runRequestEffect(() => {
+        if (!log) {
+          console.error('SSEParser onMessage error:', error);
+          return;
+        }
+        const info: RequestLogInfo = {
+          name: 'sseMessage',
+          requestType: 'sse',
+          failureStage: 'response',
+          failureCode: 'sse_message_handler_failed',
+          e: serializeRequestError(error),
+        };
+        const startContext = extra?.startContext;
+        if (startContext !== undefined) info.startContext = startContext;
+        return log('error', createLogSnapshot(info));
+      });
+    },
   );
 }
