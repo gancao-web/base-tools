@@ -4,7 +4,9 @@ import { createLogSnapshot } from '../../shared/network/logSnapshot';
 import { getBaseToolsConfig } from '../config';
 import { type MessageCallback } from '../../ts/buffer/SSEParser';
 import {
-  createSseParser, getSseResponseFailure, isSseResponseHeader,
+  createSseParser,
+  getSseResponseFailure,
+  isSseResponseHeader,
   type SseTaskControl,
 } from '../../shared/network/sse';
 import {
@@ -102,7 +104,7 @@ export type RequestConfigBase<D extends RequestData = RequestData> = RequestResp
     /** 请求参数 */
     data?: D;
 
-    /** 超时时间 (毫秒), 默认 60000 */
+    /** 超时时间 (毫秒), 默认 60000；0 表示不设超时。 */
     timeout?: number;
 
     /** 原生 Fetch 配置扩展 */
@@ -335,12 +337,18 @@ export function request<T = unknown, D extends RequestData = RequestData>(
       controller.abort();
       if (showLoading) runRequestEffect(() => appConfig.hideLoading?.());
     };
-    task.complete = () => stopStream({ status: 'success', success: true, closeReason: 'caller_completed' });
-    task.fail = (e, code) => stopStream({
-      status: 'fail', success: false, closeReason: 'business_error',
-      failureStage: 'business', failureCode: 'business_failed', businessCode: code,
-      ...(e !== undefined ? { e } : {}),
-    });
+    task.complete = () =>
+      stopStream({ status: 'success', success: true, closeReason: 'caller_completed' });
+    task.fail = (e, code) =>
+      stopStream({
+        status: 'fail',
+        success: false,
+        closeReason: 'business_error',
+        failureStage: 'business',
+        failureCode: 'business_failed',
+        businessCode: code,
+        ...(e !== undefined ? { e } : {}),
+      });
     if (enableChunked || onMessage)
       sseTask.parser = createSseParser(
         enableChunked ? appConfig.log : undefined,
@@ -348,17 +356,23 @@ export function request<T = unknown, D extends RequestData = RequestData>(
         onMessage,
         () => !logged && !controller.signal.aborted,
       );
-    sseTask.onResponseError = (e) => stopStream({
-      status: 'fail', success: false, e, closeReason: 'response_handler_error',
-      failureStage: 'response', failureCode: 'response_parse_failed',
-    });
+    sseTask.onResponseError = (e) =>
+      stopStream({
+        status: 'fail',
+        success: false,
+        e,
+        closeReason: 'response_handler_error',
+        failureStage: 'response',
+        failureCode: 'response_parse_failed',
+      });
 
     const execute = async () => {
       try {
         // 先保存调用方参数，转换中的原地修改、加密和异步处理不改变日志原文。
-        if (captureLog) runRequestEffect(() => {
-          logConfig = { ...config, data: createLogSnapshot(data) };
-        });
+        if (captureLog)
+          runRequestEffect(() => {
+            logConfig = { ...config, data: createLogSnapshot(data) };
+          });
         onTaskReady?.(task);
         let fillData = isPlainObject(data) ? filterRequestData(data) : data;
         let fillHeader = filterRequestHeader(header);
@@ -422,10 +436,13 @@ export function request<T = unknown, D extends RequestData = RequestData>(
           runRequestEffect(() =>
             appConfig.showLoading?.(typeof showLoading === 'string' ? { title: showLoading } : {}),
           );
-        timeoutId = setTimeout(() => {
-          isTimeout = true;
-          controller.abort();
-        }, timeout);
+        // 显式传 0 禁用本库的超时定时器。
+        if (timeout !== 0) {
+          timeoutId = setTimeout(() => {
+            isTimeout = true;
+            controller.abort();
+          }, timeout);
+        }
         const requestInit: RequestInit = {
           ...fetchOptions,
           method,
@@ -454,7 +471,8 @@ export function request<T = unknown, D extends RequestData = RequestData>(
             reject('e' in info ? info.e : info.res);
             if (showLoading) runRequestEffect(() => appConfig.hideLoading?.());
             if (relogin) runRequestEffect(() => appConfig.toLogin?.());
-            else if (toastError && msg) runRequestEffect(() => appConfig.toast?.({ status: 'fail', msg }));
+            else if (toastError && msg)
+              runRequestEffect(() => appConfig.toast?.({ status: 'fail', msg }));
             return;
           }
           streamReady = true;
