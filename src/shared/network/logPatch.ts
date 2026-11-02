@@ -1,9 +1,5 @@
 import { isPlainObject } from 'es-toolkit';
 
-/** 与上层请求封装共用的内部逻辑报文通道；不进入日志，也不占用调用方补丁字段。 */
-export const requestLogSourceKey = Symbol.for('@base-web-kits/request-log-source');
-export type RequestLogSource = { data?: unknown; res?: unknown; dataPatch?: unknown; resPatch?: unknown };
-
 /** 仅合并普通对象；数组、标量和特殊对象整体替换，不修改任一输入。 */
 export function patchLogValue(source: unknown, patch: unknown): unknown {
   if (patch === undefined) return source;

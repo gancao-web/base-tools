@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { patchLogHeader, patchLogValue, requestLogSourceKey } from '../../../src/shared/network/logPatch';
+import { patchLogHeader, patchLogValue } from '../../../src/shared/network/logPatch';
 import { writeRequestLog } from '../../../src/shared/network/requestLog';
 import { request, setBaseToolsConfig } from '../../../src/web';
 import { request as requestUni, uploadFile, setBaseToolsConfig as setUniConfig } from '../../../src/uni';
@@ -63,16 +63,12 @@ describe('日志局部脱敏', () => {
     expect(Object.hasOwn(merged, '__proto__')).toBe(true);
   });
 
-  it('先取内部完整逻辑报文，再应用调用方补丁；内部通道不进入日志', () => {
+  it('在完整日志原文上应用补丁，输出副本不修改原文', () => {
     const log = vi.fn();
     const original = { phone: 'private', keep: true };
     const originalRes = { code: 0, data: { phone: 'private', name: 'user' } };
-    const extra = { data: original, res: originalRes };
-    Object.defineProperty(extra, requestLogSourceKey, { value: {
-      data: original, dataPatch: { phone: '***' },
-      res: originalRes, resPatch: { data: { phone: '***' } },
-    } });
-    writeRequestLog(log, { config: { data: 'cipher', logExtra: extra }, status: 'success', success: true, res: 'cipher' });
+    const extra = { data: { phone: '***' }, res: { data: { phone: '***' } } };
+    writeRequestLog(log, { config: { data: original, logExtra: extra }, status: 'success', success: true, res: originalRes });
     const info = log.mock.calls[0][1];
     expect(info.data).toEqual({ phone: '***', keep: true });
     expect(info.res).toEqual({ code: 0, data: { phone: '***', name: 'user' } });
@@ -113,6 +109,55 @@ describe('日志局部脱敏', () => {
     expect(log.mock.calls[1][1].fromCache).toBe(true);
     expect(result.phone).toBe('private');
     expect(data.profile.phone).toBe('private');
+  });
+
+  describe.each(['web', 'uni', 'uni-h5'] as const)('%s 转换前参数快照', (platform) => {
+    it.each([false, true])('转换原地修改参数后仍能记录原文并脱敏，准备失败=%s', async (failed) => {
+      const log = vi.fn();
+      setBaseToolsConfig({ log });
+      setUniConfig(createUniConfig({ log }));
+      const nativeRequest = vi.fn((options: UniApp.RequestOptions) => {
+        queueMicrotask(() => options.success?.({ data: { code: 0 }, header: {}, statusCode: 200, cookies: [], errMsg: 'request:ok' }));
+        return { abort() {} };
+      });
+      vi.stubGlobal('uni', {
+        canIUse: () => false,
+        getSystemInfoSync: () => ({ platform: 'ios', uniPlatform: platform === 'uni-h5' ? 'web' : 'mp-weixin' }),
+        request: nativeRequest,
+      });
+      const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(platform === 'uni-h5'
+        ? new Response('data: ok\n\n', { headers: { 'content-type': 'text/event-stream' } })
+        : new Response('{"code":0}')));
+      vi.stubGlobal('fetch', fetchMock);
+      const error = new Error('encrypt failed');
+      const config = {
+        ...responseConfig, url: '/snapshot', method: 'POST' as const,
+        enableChunked: platform === 'uni-h5',
+        data: { profile: { phone: 'private', name: 'before' }, common: true },
+        logExtra: { data: { profile: { phone: '***' } } },
+        transformRequest: async ({ data }: { data?: unknown }) => {
+          (data as { profile: { name: string } }).profile.name = 'after';
+          await Promise.resolve();
+          if (failed) throw error;
+          return { data: 'cipher', header: { token: 'actual' } };
+        },
+      };
+      const pending = platform === 'web' ? request<unknown>(config) : requestUni<unknown>(config);
+      if (failed) await expect(pending).rejects.toBe(error);
+      else await pending;
+      const info = log.mock.calls.at(-1)?.[1];
+      expect(info.data).toEqual({ profile: { phone: '***', name: 'before' }, common: true });
+      expect(config.data.profile.name).toBe('after');
+      if (failed) {
+        expect(info).toMatchObject({ failureStage: 'prepare', success: false });
+        expect(fetchMock).not.toHaveBeenCalled();
+        expect(nativeRequest).not.toHaveBeenCalled();
+      } else {
+        expect(info.header).toMatchObject({ token: 'actual' });
+        const sent = platform === 'uni' ? nativeRequest.mock.calls[0][0].data : fetchMock.mock.calls[0][1].body;
+        expect(sent).toBe('cipher');
+      }
+    });
   });
 
   it('uni 成功与业务失败日志均可脱敏，业务报文不受影响', async () => {

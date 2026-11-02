@@ -1,6 +1,6 @@
 import { dateFormat } from '../../ts/day';
 import { createLogSnapshot } from './logSnapshot';
-import { patchLogHeader, patchLogValue, requestLogSourceKey, type RequestLogSource } from './logPatch';
+import { patchLogHeader, patchLogValue } from './logPatch';
 import type { Timer } from '../../ts/time';
 
 export type RequestFailureStage = 'prepare' | 'network' | 'http' | 'response' | 'business';
@@ -101,7 +101,6 @@ export function writeRequestLog(
     const { config, status, fromCache = false } = options;
     const requestType = options.requestType || (config.enableChunked ? 'sse' : 'http');
     const extra = config.logExtra;
-    const source = extra ? Reflect.get(extra, requestLogSourceKey) as RequestLogSource | undefined : undefined;
     const httpTiming = fromCache ? undefined : options.httpTimer?.end();
     const error = options.e;
     const info: RequestLogInfo = {
@@ -109,7 +108,7 @@ export function writeRequestLog(
       requestType,
       status,
       url: config.url,
-      data: source && Object.prototype.hasOwnProperty.call(source, 'data') ? source.data : config.data,
+      data: config.data,
       method: config.method,
       header: config.header,
       fromCache,
@@ -165,14 +164,10 @@ export function writeRequestLog(
       if (reason) info.closeReason = reason;
     }
     // 没有实际响应时，不用脱敏补丁制造响应；正常 SSE 也不生成汇总正文。
-    if ('res' in options || (source && Object.prototype.hasOwnProperty.call(source, 'res'))) {
-      if (source && Object.prototype.hasOwnProperty.call(source, 'res')) info.res = source.res;
-      else if ('res' in options) info.res = options.res;
-      const patch = source && Object.prototype.hasOwnProperty.call(source, 'resPatch') ? source.resPatch : extra?.res;
-      if (patch !== undefined) info.res = patchLogValue(info.res, patch);
+    if ('res' in options) {
+      info.res = patchLogValue(options.res, extra?.res);
     }
-    const dataPatch = source && Object.prototype.hasOwnProperty.call(source, 'dataPatch') ? source.dataPatch : extra?.data;
-    info.data = patchLogValue(info.data, dataPatch);
+    info.data = patchLogValue(info.data, extra?.data);
     info.header = patchLogHeader(info.header, extra?.header);
     if (info.startContext === undefined) delete info.startContext;
     if (info.endContext === undefined) delete info.endContext;

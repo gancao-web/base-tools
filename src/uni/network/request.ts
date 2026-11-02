@@ -1,5 +1,6 @@
 import { isPlainObject } from 'es-toolkit';
 import { startTimer, type Timer } from '../../ts/time';
+import { createLogSnapshot } from '../../shared/network/logSnapshot';
 import { getBaseToolsConfig } from '../config';
 import { toLogin } from '../router';
 import { getPlatformUni } from '../system';
@@ -76,7 +77,7 @@ export type RequestConfigBase<D extends RequestData = RequestData> = RequestResp
     logExtra?: Record<string, unknown>;
 
     /**
-     * 请求前的数据转换, 可用于加密 header、data 或重写 url
+     * 请求前的数据转换, 可用于加密 header、data 或重写 url；日志 data 保存转换前快照。
      * 使用方法签名，使具体 RequestConfig<D> 可以传入默认 RequestConfig 的二次封装
      */
     transformRequest?(
@@ -238,6 +239,10 @@ export function request<T = unknown, D extends RequestData = RequestData>(
       );
     };
     const execute = async () => {
+      // 先保存调用方参数，原生和 H5 请求均记录转换前的独立快照。
+      if (captureLog) runRequestEffect(() => {
+        logConfig = { ...config, data: createLogSnapshot(data) };
+      });
       let fillData = isPlainObject(data) ? filterRequestData(data as Record<string, any>) : data;
       let fillHeader = filterRequestHeader(header);
       let fillUrl = url;
@@ -259,9 +264,8 @@ export function request<T = unknown, D extends RequestData = RequestData>(
       if (enableChunked && !Object.keys(fillHeader).some((key) => key.toLowerCase() === 'accept'))
         fillHeader.Accept = 'text/event-stream';
       logConfig = {
-        ...config,
+        ...logConfig,
         url: fillUrl,
-        data: fillData,
         header: fillHeader,
         method: config.method || 'GET',
       };
