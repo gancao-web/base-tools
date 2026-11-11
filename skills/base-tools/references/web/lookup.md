@@ -13,7 +13,7 @@
 | 视口尺寸 / 滚动位置 | `getWindowWidth`、`getWindowHeight`、`getWindowScrollTop` | 读取窗口尺寸和滚动信息。 |
 | 元素是否在视口内 | `isInViewport` | 判断 DOM 元素是否进入可视区域。 |
 | 锁定页面滚动 | `lockBodyScroll`、`unlockBodyScroll` | 弹窗、抽屉等场景锁定 body 滚动。 |
-| 请求封装 | `request`、`RequestConfig` | 基于 fetch 的请求封装，支持缓存、loading、toast、日志和 SSE。 |
+| 请求封装 | `request`、`RequestConfig` | 基于 fetch 的请求封装，支持缓存、loading、toast、日志和 SSE；流式请求可选 reconnect 自动恢复及 lastEventId 续传。 |
 | 下载 / 动态加载资源 | `download`、`loadJs`、`loadCss`、`preloadImage` | 文件下载和资源加载。 |
 | 上传文件 | `uploadFile` | 浏览器文件上传封装。 |
 | Cookie | `getCookie`、`setCookie`、`removeCookie` | 读写和删除 Cookie。 |

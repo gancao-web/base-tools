@@ -30,7 +30,10 @@ import {
   type RequestFailureCode,
   type RequestLogOptions,
 } from '../../shared/network/requestLog';
+import { requestReconnectingSse } from '../../shared/network/sseReconnect';
+import { createSseFetchTransport } from '../../shared/network/sseFetchTransport';
 import type { ApiTaskConfig } from '../../shared/network/action';
+import type { SseReconnectConfig } from '../../shared/network/sseReconnectTypes';
 
 export { filterRequestData, filterRequestHeader } from '../../shared/network/fetch';
 
@@ -91,6 +94,7 @@ export type RequestConfig<D extends RequestData = RequestData> = Partial<Request
  * 自定义请求的配置 (接口字段参数必填)
  */
 export type RequestConfigBase<D extends RequestData = RequestData> = RequestResponseConfig &
+  SseReconnectConfig &
   ApiTaskConfig<RequestTask> & {
     /** 接口地址 */
     url: string;
@@ -260,6 +264,30 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
 export function request<T = unknown, D extends RequestData = RequestData>(
   config: RequestConfigBase<D>,
 ): Promise<T> {
+  if (config.enableChunked && config.reconnect) {
+    const app = getBaseToolsConfig();
+    return requestReconnectingSse<T>(config, {
+      async prepare(originalData) {
+        const method = config.method || 'GET';
+        let data = isPlainObject(originalData) ? filterRequestData(originalData) : originalData;
+        let header = filterRequestHeader(config.header);
+        let url = config.url;
+        const result = await config.transformRequest?.({ url, method, header: { ...header }, data: data as D });
+        if (result?.url !== undefined) url = result.url;
+        if (result?.header !== undefined) header = filterRequestHeader(result.header);
+        if (result?.data !== undefined) data = isPlainObject(result.data) ? filterRequestData(result.data) : result.data;
+        return { url, method, data, header };
+      },
+      transport: createSseFetchTransport(config.fetchOptions),
+      onTaskReady: (task) => config.onTaskReady?.(task),
+      responseFailure: (body, status) => getSseResponseFailure(body, status, config),
+      log: app.log,
+      showLoading: () => app.showLoading?.(typeof config.showLoading === 'string' ? { title: config.showLoading } : {}),
+      hideLoading: () => app.hideLoading?.(),
+      toast: (msg) => app.toast?.({ status: 'fail', msg }),
+      toLogin: () => app.toLogin?.(),
+    });
+  }
   const {
     url,
     data,

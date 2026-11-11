@@ -130,7 +130,7 @@ const PACKAGE_SPECS = [
       [
         '请求封装',
         '`request`、`RequestConfig`',
-        '基于 fetch 的请求封装，支持缓存、loading、toast、日志和 SSE。',
+        '基于 fetch 的请求封装，支持缓存、loading、toast、日志和 SSE；流式请求可选 reconnect 自动恢复及 lastEventId 续传。',
       ],
       [
         '下载 / 动态加载资源',
@@ -269,7 +269,7 @@ const PACKAGE_SPECS = [
       [
         '请求封装',
         '`request`、`RequestConfig`',
-        'uni.request 封装，支持缓存、loading、toast、日志和流式响应；项目内可基于 `request` 自行封装 `requestApi`。',
+        'uni.request 封装，支持缓存、loading、toast、日志和流式响应；可选 reconnect 自动恢复及 lastEventId 续传，原生宿主需支持握手信息和分块监听。',
       ],
       ['上传 / 下载文件', '`uploadFile`、`downloadFile`', 'uni 文件上传下载。'],
       [

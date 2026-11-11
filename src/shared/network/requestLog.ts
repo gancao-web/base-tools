@@ -52,6 +52,8 @@ export type RequestLogInfo = {
 };
 
 export type RequestLogOptions = {
+  /** 开启重连时的实际连接尝试总数。 */
+  attemptCount?: number;
   requestType?: RequestType;
   files?: UploadLogFile[];
   closeReason?: SseCloseReason;
@@ -122,6 +124,7 @@ export function writeRequestLog(
         networkEndTime: dateFormat(httpTiming.endMs, fmt),
       });
     info.success = options.success === true;
+    if (options.attemptCount !== undefined) info.attemptCount = options.attemptCount;
     if (typeof options.businessCode === 'string' || typeof options.businessCode === 'number')
       info.businessCode = options.businessCode;
     if (options.httpStatus !== undefined) info.httpStatus = options.httpStatus;
@@ -134,7 +137,7 @@ export function writeRequestLog(
       'responseHeader', 'failureStage', 'failureCode', 'closeReason', 'fromCache', 'files',
       'networkStartTime', 'networkEndTime', 'networkStartTimeMs', 'networkEndTimeMs',
       'networkDurationMs', 'res', 'e',
-      'method', 'data', 'header',
+      'method', 'data', 'header', 'attemptCount',
     ]);
     if (extra) {
       for (const key of Object.keys(extra)) {

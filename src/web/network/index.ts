@@ -1,5 +1,6 @@
 export * from './download';
 export * from './request';
+export type { SseReconnectConfig, SseReconnectOptions, SseReconnectContext, SseState, SseStateChange } from '../../shared/network/sseReconnectTypes';
 export type { SSEMessage, MessageCallback } from '../../ts/buffer/SSEParser';
 export * from './uploadFile';
 export * from './loadFontFace';
