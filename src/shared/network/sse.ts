@@ -4,8 +4,10 @@ import { createLogSnapshot } from './logSnapshot';
 import { runRequestEffect, serializeRequestError, type RequestLogInfo, type RequestLogOptions } from './requestLog';
 import { getResponseValue, type ApiResponseConfig, type ResponseTransformer } from './response';
 
-/** 流已建立且请求尚未结束时可确认业务终态；EOF 或其他终态后调用无效果。普通请求调用时无效果。 */
+/** 流式终态控制；旧模式仅建流后有效，重连模式控制整个逻辑订阅。终态后及普通请求调用无效果。 */
 export type SseTaskControl = {
+  /** 开启重连时提供最后成功确认的协议游标。 */
+  readonly lastEventId?: string;
   /** 确认业务完成，正常停止流；不会根据事件名自动调用，也不等待异步消息处理。 */
   complete: () => void;
   /** 确认业务失败，以原错误或完整消息结束流，并可提供业务码；EOF 后不能修改结果。 */

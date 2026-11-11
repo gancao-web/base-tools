@@ -14,7 +14,7 @@ uni-app 平台能力、端差异或生态 API 先查本包，再补查 `base-too
 | 选择图片 / 视频 / 媒体 | `chooseImage`、`chooseVideo`、`chooseMedia` | 统一媒体选择能力。 |
 | 保存图片到相册 | `saveImageToPhotosAlbum` | 保存网络图片或本地图片到系统相册。 |
 | 打开文件 / 文档 | `openDocument`、`getFileUrl` | 文件 URL 处理和文档预览。 |
-| 请求封装 | `request`、`RequestConfig` | uni.request 封装，支持缓存、loading、toast、日志和流式响应；项目内可基于 `request` 自行封装 `requestApi`。 |
+| 请求封装 | `request`、`RequestConfig` | uni.request 封装，支持缓存、loading、toast、日志和流式响应；可选 reconnect 自动恢复及 lastEventId 续传，原生宿主需支持握手信息和分块监听。 |
 | 上传 / 下载文件 | `uploadFile`、`downloadFile` | uni 文件上传下载。 |
 | 窗口 / 安全区 / 设备信息 | `getWindowInfo`、`getSafeAreaBottom`、`getDeviceInfo`、`getPlatformOs` | 平台和布局适配。 |
 | 扫码 / 复制 | `scanCode`、`copyText` | 系统能力封装。 |

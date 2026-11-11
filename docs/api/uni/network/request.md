@@ -2,6 +2,8 @@
 
 基础请求方法，支持流式请求、缓存、请求前转换、响应数据转换等功能。
 
+SSE 可通过 `reconnect: true` 启用自动恢复，支持 `lastEventId` 和 `onSseStateChange`。配置、原生平台能力要求及队列限制见 [SSE 自动重连](../../../guide/sse-reconnect.md)。默认关闭。
+
 ## 示例
 
 ```ts

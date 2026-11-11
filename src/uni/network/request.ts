@@ -32,7 +32,11 @@ import {
   type RequestFailureCode,
   type RequestLogOptions,
 } from '../../shared/network/requestLog';
+import { requestReconnectingSse } from '../../shared/network/sseReconnect';
+import { createSseFetchTransport } from '../../shared/network/sseFetchTransport';
+import { createUniSseTransport } from './sseTransport';
 import type { ApiTaskConfig } from '../../shared/network/action';
+import type { SseReconnectConfig } from '../../shared/network/sseReconnectTypes';
 
 /** 请求参数 */
 export type RequestData = UniApp.RequestOptions['data'];
@@ -65,6 +69,7 @@ type RequestResponseConfig = UniRequestOptions &
  * timeout 为 0 时禁用本库的超时定时器；使用 uni.request 时仍受宿主平台的超时限制。
  */
 export type RequestConfigBase<D extends RequestData = RequestData> = RequestResponseConfig &
+  SseReconnectConfig &
   ApiTaskConfig<RequestTask> & {
     /** 请求参数 */
     data?: D;
@@ -190,6 +195,39 @@ const requestCache = new Map<string, { res: unknown; expire: number }>();
 export function request<T = unknown, D extends RequestData = RequestData>(
   config: RequestConfigBase<D>,
 ): Promise<T> {
+  if (config.enableChunked && config.reconnect) {
+    const app = getBaseToolsConfig();
+    const native = getPlatformUni() === 'web' ? undefined : createUniSseTransport(config);
+    const headerListeners = new Set<Parameters<UniApp.RequestTask['onHeadersReceived']>[0]>();
+    const taskMethods = native?.taskMethods || {
+      onHeadersReceived(callback: Parameters<UniApp.RequestTask['onHeadersReceived']>[0]) { headerListeners.add(callback); },
+      offHeadersReceived(callback: Parameters<UniApp.RequestTask['offHeadersReceived']>[0]) { headerListeners.delete(callback); },
+    };
+    return requestReconnectingSse<T>(config, {
+      async prepare(originalData) {
+        const method = config.method || 'GET';
+        let data = isPlainObject(originalData) ? filterRequestData(originalData as Record<string, unknown>) : originalData;
+        let header = filterRequestHeader(config.header);
+        let url = config.url;
+        const result = await config.transformRequest?.({ url, method, header: { ...header }, data: data as D });
+        if (result?.url !== undefined) url = result.url;
+        if (result?.header !== undefined) header = filterRequestHeader(result.header);
+        if (result?.data !== undefined) data = isPlainObject(result.data) ? filterRequestData(result.data as Record<string, unknown>) : result.data;
+        return { url, method, data, header };
+      },
+      transport: native?.transport || createSseFetchTransport({ credentials: config.withCredentials ? 'include' : 'same-origin' }),
+      onTaskReady: (task) => config.onTaskReady?.(Object.assign(task, taskMethods) as RequestTask),
+      onResponseHeaders: native ? undefined : (header, statusCode) => {
+        for (const callback of headerListeners) runRequestEffect(() => callback({ header, statusCode }));
+      },
+      responseFailure: (body, status) => getSseResponseFailure(body, status, config),
+      log: app.log,
+      showLoading: () => uni.showLoading(typeof config.showLoading === 'string' ? { title: config.showLoading } : {}),
+      hideLoading: () => uni.hideLoading(),
+      toast: (msg) => toast(msg),
+      toLogin: () => toLogin(),
+    });
+  }
   return new Promise<T>((resolve, reject) => {
     const {
       url,
