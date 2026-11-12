@@ -149,3 +149,17 @@ export default {
   ],
 };
 ```
+
+### 小程序兼容性
+
+`@vitejs/plugin-legacy` 是面向 H5 浏览器的入口与加载机制，不支持小程序。
+
+推荐小程序端统一配置 Babel `preset-env` 和 core-js，覆盖业务代码、工具库及其他参与打包的依赖：
+
+- 语法：对打包后的全部 JS 和分包统一降级，并让最终压缩遵守同一目标环境。
+- API：以 `core-js/es` 为 `useBuiltIns: 'entry'` 的裁剪入口，只保留目标环境缺少的稳定 ES API，不全量引入，也不逐项枚举函数使用了哪些 API。
+- 顺序：补丁必须先于 Vue 和业务依赖执行；不要放进 `createApp()`，并注意 uni 编译器可能在入口前插入 Vue 导入。
+
+参考编译基线为小程序 **Chrome 53 / iOS 10**，H5 **Chrome 80 / iOS 13**。
+
+完整的安装步骤、可复制的 Vite 插件、基线依据及验证方法见 [uni-app 小程序兼容方案](./guide/mini-program-compatibility.md)。
